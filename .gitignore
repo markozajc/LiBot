@@ -1,0 +1,10 @@
+# Maven output
+/target/
+
+# Eclipse
+/.settings/
+/.classpath
+/.project
+
+# JaCoCo coverage
+/libot-coverage.exec
