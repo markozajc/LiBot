@@ -1,4 +1,4 @@
-package libot.commands.search;
+package libot.commands;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static java.lang.String.format;
@@ -7,7 +7,7 @@ import static java.util.Arrays.sort;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.regex.Pattern.compile;
 import static kong.unirest.Unirest.spawnInstance;
-import static libot.commands.search.UrbanDictionaryCommand.Definition.BLANK;
+import static libot.commands.UrbanDictionaryCommand.Definition.BLANK;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.SEARCH;
 import static libot.utils.Utilities.array;

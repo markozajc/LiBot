@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>zajc</groupId>
+		<artifactId>libot</artifactId>
+		<version>5.0.0</version>
+	</parent>
+	<artifactId>libot-module-search</artifactId>
+
+	<dependencies>
+		<!-- Core -->
+		<dependency>
+			<groupId>zajc</groupId>
+			<artifactId>libot-core</artifactId>
+		</dependency>
+
+		<!-- Wilson score calculation -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+	</dependencies>
+</project>

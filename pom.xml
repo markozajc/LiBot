@@ -29,16 +29,17 @@
 
 	<modules>
 		<module>libot-core</module>
+		<module>libot-logging</module>
 		<module>libot-module-administrative</module>
 		<module>libot-module-customization</module>
 		<module>libot-module-games</module>
 		<module>libot-module-informative</module>
 		<module>libot-module-libot</module>
-		<module>libot-module-utilities</module>
 		<module>libot-module-moderation</module>
 		<module>libot-module-money</module>
 		<module>libot-module-music</module>
-		<module>libot-logging</module>
+		<module>libot-module-search</module>
+		<module>libot-module-utilities</module>
 	</modules>
 
 	<build>

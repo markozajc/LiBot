@@ -1,4 +1,4 @@
-package libot.commands.search;
+package libot.commands;
 
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.SEARCH;
