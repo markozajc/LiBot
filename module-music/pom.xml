@@ -33,4 +33,14 @@
 			<url>https://m2.dv8tion.net/releases</url>
 		</repository>
 	</repositories>
+
+	<build>
+		<plugins>
+			<!-- Shader -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>

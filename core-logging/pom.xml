@@ -5,7 +5,7 @@
 		<artifactId>libot</artifactId>
 		<version>5.0.0</version>
 	</parent>
-	<artifactId>libot-logging</artifactId>
+	<artifactId>libot-core-logging</artifactId>
 
 	<dependencies>
 		<!-- Cross-module -->
@@ -18,4 +18,14 @@
 			<artifactId>libot-module-music</artifactId>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Shader -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>

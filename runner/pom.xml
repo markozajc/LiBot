@@ -15,7 +15,7 @@
 		</dependency>
 		<dependency>
 			<groupId>zajc</groupId>
-			<artifactId>libot-logging</artifactId>
+			<artifactId>libot-core-logging</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -69,4 +69,24 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>libot.runner.Main</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

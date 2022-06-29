@@ -29,7 +29,7 @@
 
 	<modules>
 		<module>libot-core</module>
-		<module>libot-logging</module>
+		<module>libot-core-logging</module>
 		<module>libot-module-administrative</module>
 		<module>libot-module-customization</module>
 		<module>libot-module-games</module>
@@ -40,6 +40,7 @@
 		<module>libot-module-music</module>
 		<module>libot-module-search</module>
 		<module>libot-module-utilities</module>
+		<module>libot-runner</module>
 	</modules>
 
 	<build>
@@ -77,48 +78,66 @@
 				</executions>
 			</plugin>
 
-			<!-- Shader -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.3.0</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
 			<!-- Analyzer -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>3.3.0</version>
 			</plugin>
-
-			<!-- Redefined -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.2.0</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.2.0</version>
-			</plugin>
-
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!-- Shader -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.3.0</version>
+					<configuration>
+						<filters>
+							<filter>
+								<artifact>*:*</artifact>
+								<excludes>
+									<exclude>META-INF/*.SF</exclude>
+									<exclude>META-INF/*.DSA</exclude>
+									<exclude>META-INF/*.RSA</exclude>
+								</excludes>
+							</filter>
+						</filters>
+						<createDependencyReducedPom>false</createDependencyReducedPom>
+						<outputFile>${outputLocation}/${project.artifactId}.jar</outputFile>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>shade</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+
+				<!-- Redefined -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.10.1</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<dependencyManagement>
@@ -132,7 +151,43 @@
 			</dependency>
 			<dependency>
 				<groupId>zajc</groupId>
+				<artifactId>libot-core-logging</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
+				<artifactId>libot-module-administrative</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
+				<artifactId>libot-module-customization</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
+				<artifactId>libot-module-games</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
+				<artifactId>libot-module-informative</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
 				<artifactId>libot-module-libot</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
+				<artifactId>libot-module-moderation</artifactId>
 				<version>${project.version}</version>
 				<scope>provided</scope>
 			</dependency>
@@ -145,6 +200,18 @@
 			<dependency>
 				<groupId>zajc</groupId>
 				<artifactId>libot-module-music</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
+				<artifactId>libot-module-search</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>zajc</groupId>
+				<artifactId>libot-module-utilities</artifactId>
 				<version>${project.version}</version>
 				<scope>provided</scope>
 			</dependency>
