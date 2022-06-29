@@ -7,4 +7,7 @@
 /.project
 
 # JaCoCo coverage
-/libot-coverage.exec
+/coverage.exec
+
+# Runtime environment
+/.env
