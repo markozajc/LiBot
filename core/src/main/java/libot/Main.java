@@ -91,8 +91,10 @@ public class Main {
 		LOG.info("Resolving shredder clashes");
 		resolveClashes(shredder);
 
-		LOG.info("Checking resource guilds");
-		checkResourceGuilds(shredder);
+		if (RESOURCE_GUILDS.length != 0) {
+			LOG.info("Checking resource guilds");
+			checkResourceGuilds(shredder);
+		}
 
 		LOG.info("Finished loading");
 		LOG.info("    |_|_ LiBot {}", VERSION);

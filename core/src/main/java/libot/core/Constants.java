@@ -21,6 +21,7 @@ import de.vandermeer.asciithemes.u8.U8_Grids;
 import marcono1234.gson.recordadapter.RecordTypeAdapterFactory;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 
+@SuppressWarnings("null")
 public class Constants {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Constants.class);
@@ -81,9 +82,16 @@ public class Constants {
 		}
 		VERSION = versionString;
 	}
-	@SuppressWarnings("null") @Nonnull
-	public static final long[] RESOURCE_GUILDS = // NOSONAR no need for security
-		stream(getenv(ENV_RESOURCE_GUILDS).split(",")).mapToLong(Long::parseLong).toArray();
+	@Nonnull
+	public static final long[] RESOURCE_GUILDS;
+	static {
+		if (getenv(ENV_RESOURCE_GUILDS) != null) {
+			RESOURCE_GUILDS = stream(getenv(ENV_RESOURCE_GUILDS).split(",")).mapToLong(Long::parseLong).toArray(); // NOSONAR
+			// no need for security
+		} else {
+			RESOURCE_GUILDS = new long[0];
+		}
+	}
 
 	// Tables
 	public static final TA_Grid TABLE_GRID = U8_Grids.borderStrongDoubleLight();

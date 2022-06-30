@@ -1,5 +1,6 @@
 package libot.core;
 
+import static java.lang.System.getenv;
 import static java.util.Arrays.stream;
 import static libot.core.Constants.*;
 import static libot.utils.Utilities.getenvOrThrow;
@@ -12,7 +13,11 @@ public record BotConfiguration(@Nonnull String defaultPrefix, @Nonnull long[] sy
 	@SuppressWarnings("null")
 	public static BotConfiguration fromEnvironment() {
 		var defaultPrefix = getenvOrThrow(ENV_PREFIX);
-		long[] sysadminIds = stream(getenvOrThrow(ENV_SYSADMINS).split(",")).mapToLong(Long::parseLong).toArray();
+		long[] sysadminIds;
+		if (getenv(ENV_SYSADMINS) != null)
+			sysadminIds = stream(getenv(ENV_SYSADMINS).split(",")).mapToLong(Long::parseLong).toArray();
+		else
+			sysadminIds = new long[0];
 		return new BotConfiguration(defaultPrefix, sysadminIds);
 	}
 

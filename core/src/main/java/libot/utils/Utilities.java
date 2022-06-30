@@ -44,7 +44,8 @@ public final class Utilities {
 		var value = getenv(key);
 		if (value == null)
 			throw new IllegalStateException(key + " environment variable is not set");
-		return value;
+		else
+			return value;
 	}
 
 	public static <T> void ifNonNull(@Nullable T value, @Nonnull Consumer<T> consumer) {
