@@ -11,3 +11,6 @@
 
 # Runtime environment
 /.env
+
+# JaCoCo coverage data
+/coverage.exec
