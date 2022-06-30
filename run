@@ -1,3 +1,22 @@
 #!/bin/sh
+if ! [ -f '.env' ]; then
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m An environment file (.env) was not found!'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m It must contain (in key=value pairs):'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - BOT_PREFIX'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - DATA_PATH'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - DATA_TYLE'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - BOT_SYSADMINS'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - RESOURCE_GUILDS'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - SHRED_TOKEN_{shred name}'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m It may also optionally contain:'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - QALCULATE_HELPER_PATH (for *calc)'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - QALCULATE_HOME_PATH (ditto)'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - GOOGLE_TOKENS (for *google)'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - YOUTUBE_PAPISID3 (for youtube age-restricted video playback)'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - YOUTUBE_PSID3 (ditto)'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - MANAGEMENT_PORT (to run a management server)'
+	exit 1;
+fi;
+
 echo '\e[1;30mRunner              \e[0;39m \e[34m[I]\e[0;39m Compiling'
 env $(xargs < '.env') mvn -Dstyle.color=always -q clean compile exec:java -pl 'libot-runner' -am
