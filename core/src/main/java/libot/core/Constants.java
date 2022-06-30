@@ -34,12 +34,11 @@ public class Constants {
 	public static final String ENV_SHRED_TOKEN = "SHRED_TOKEN_";
 	public static final String ENV_GOOGLE_TOKENS = "GOOGLE_TOKENS";
 	public static final String ENV_MANAGEMENT_PORT = "MANAGEMENT_PORT";
-	public static final String ENV_YOUTUBE_PAPISID = "YOUTUBE_PAPISID3";
-	public static final String ENV_YOUTUBE_PSID = "YOUTUBE_PSID3";
+	public static final String ENV_YOUTUBE_EMAIL = "YOUTUBE_EMAIL";
+	public static final String ENV_YOUTUBE_PASSWORD = "YOUTUBE_PASSWORD";
 	public static final String ENV_RESOURCE_GUILDS = "RESOURCE_GUILDS";
 	public static final String ENV_QALCULATE_PATH = "QALCULATE_HELPER_PATH";
 	public static final String ENV_QALCULATE_HOME = "QALCULATE_HOME_PATH";
-	// Make sure to include any dangerous additions into Utilities.DANGEROUS_ENVIRONMENT!
 
 	// Colors
 	public static final Color LITHIUM = new Color(11, 92, 147);

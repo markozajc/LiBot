@@ -2,8 +2,6 @@ package libot.utils;
 
 import static java.lang.Math.log10;
 import static java.lang.System.getenv;
-import static libot.core.Constants.*;
-import static org.apache.commons.lang3.ArrayUtils.contains;
 
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -11,9 +9,6 @@ import java.util.function.Consumer;
 import javax.annotation.*;
 
 public final class Utilities {
-
-	private static final String[] DANGEROUS_ENVIRONMENT =
-		{ ENV_SYSADMINS, ENV_RESOURCE_GUILDS, ENV_YOUTUBE_PSID, ENV_YOUTUBE_PAPISID, ENV_GOOGLE_TOKENS };
 
 	@Nonnull
 	public static String plural(int n) {
@@ -58,10 +53,6 @@ public final class Utilities {
 		var cf = new CompletableFuture<T>();
 		cf.obtrudeException(t);
 		return cf;
-	}
-
-	public static boolean isEnvvarDangerous(@Nonnull String variable) {
-		return contains(DANGEROUS_ENVIRONMENT, variable) || variable.startsWith(ENV_SHRED_TOKEN);
 	}
 
 	private Utilities() {}
