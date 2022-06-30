@@ -8,7 +8,7 @@ public class Main {
 	// libot-core, which the main function calls) is required for execution from within
 	// the IDE itself. Deal with it.
 	public static void main(String[] argv) throws Exception {
-		libot.core.Main.main(argv);
+		libot.Main.main(argv);
 	}
 
 }
