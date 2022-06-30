@@ -1,4 +1,4 @@
-package libot.core;
+package libot;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Runtime.getRuntime;
@@ -20,6 +20,7 @@ import javax.security.auth.login.LoginException;
 
 import org.slf4j.Logger;
 
+import libot.core.BotConfiguration;
 import libot.core.commands.CommandManager;
 import libot.core.data.DataManagerFactory;
 import libot.core.data.providers.ProviderManager;
@@ -80,8 +81,10 @@ public class Main {
 
 		providers.onShredderReady();
 
-		LOG.info("Launching the management server");
-		new ManagementServer(shredder, parseInt(getenv(ENV_MANAGEMENT_PORT))).start();
+		if (getenv(ENV_MANAGEMENT_PORT) != null) {
+			LOG.info("Launching the management server");
+			new ManagementServer(shredder, parseInt(getenv(ENV_MANAGEMENT_PORT))).start();
+		}
 
 		setPresence(shredder);
 
