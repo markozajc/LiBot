@@ -68,7 +68,7 @@ public class GoogleCommand extends Command {
 	static {
 		var keys = getenv(ENV_GOOGLE_TOKENS);
 		if (keys == null || keys.isBlank()) {
-			LOG.warn("No tokens specified. Google-related commands will be unavailable.");
+			LOG.warn("{} is unset or blank. Google-related commands will be unavailable.", ENV_GOOGLE_TOKENS);
 			API_KEYS = new String[] {};
 			CACHE = null;
 
