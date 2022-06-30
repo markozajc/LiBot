@@ -1,71 +1,71 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>zajc</groupId>
+		<groupId>zajc.libot</groupId>
 		<artifactId>libot</artifactId>
 		<version>5.0.0</version>
 	</parent>
-	<artifactId>libot-runner</artifactId>
+	<artifactId>runner</artifactId>
 
 	<dependencies>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-core</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>core</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-core-logging</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>core-logging</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-administrative</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-administrative</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-customization</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-customization</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-games</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-games</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-informative</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-informative</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-libot</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-libot</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-moderation</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-moderation</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-money</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-money</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-music</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-music</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-search</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-search</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>zajc</groupId>
-			<artifactId>libot-module-utilities</artifactId>
+			<groupId>zajc.libot</groupId>
+			<artifactId>module-utilities</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
