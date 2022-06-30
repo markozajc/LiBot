@@ -92,7 +92,7 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 	@Nullable
 	private static AudioTrack resolveAudioTrack(@Nonnull String url) {
 		var lock = new MessageLock<AudioTrack>();
-		AUDIO_PLAYER_MANAGER.loadItem(url, new AudioLoadResultHandler() {
+		APM.loadItem(url, new AudioLoadResultHandler() {
 
 			@Override
 			public void trackLoaded(AudioTrack track) {
@@ -125,7 +125,7 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 		var cdl = new CountDownLatch(urls.length - skip);
 		for (int i = skip; i < urls.length; i++) {
 			int j = i; // lambda shenanigans
-			AUDIO_PLAYER_MANAGER.loadItem(urls[i], new AudioLoadResultHandler() {
+			APM.loadItem(urls[i], new AudioLoadResultHandler() {
 
 				@Override
 				public void trackLoaded(AudioTrack track) {
@@ -169,7 +169,7 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 
 	@Override
 	public void shutdown() {
-		getMusicManagers().forEachKeyValue((guildId, manager) -> {
+		getManagers().forEachKeyValue((guildId, manager) -> {
 			var playing = manager.getPlayingTrack();
 			if (playing == null)
 				return;

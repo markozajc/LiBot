@@ -1,6 +1,6 @@
 package libot.module.music;
 
-import static com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers.registerRemoteSources;
+import static com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry.DEFAULT_REGISTRY;
 import static java.lang.System.getenv;
 import static libot.core.Constants.*;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -12,7 +12,14 @@ import org.eclipse.collections.impl.factory.primitive.LongObjectMaps;
 import org.slf4j.Logger;
 
 import com.sedmelluq.discord.lavaplayer.player.*;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeHttpContextFilter;
+import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -63,37 +70,40 @@ public class GlobalMusicManager {
 
 	}
 
-	private static final MutableLongObjectMap<MusicManager> MUSIC_MANAGERS = LongObjectMaps.mutable.empty();
-	public static final AudioPlayerManager AUDIO_PLAYER_MANAGER;
+	private static final MutableLongObjectMap<MusicManager> MANAGERS = LongObjectMaps.mutable.empty();
+	public static final AudioPlayerManager APM;
 	static {
-		AUDIO_PLAYER_MANAGER = new DefaultAudioPlayerManager();
-		if (getenv(ENV_YOUTUBE_PAPISID) != null && getenv(ENV_YOUTUBE_PSID) != null) {
-			YoutubeHttpContextFilter.setPAPISID(getenv(ENV_YOUTUBE_PAPISID));
-			YoutubeHttpContextFilter.setPSID(getenv(ENV_YOUTUBE_PSID));
-
-		} else {
-			LOG.warn("{} and/or {} are not set, age-restricted video playback will be unavailable", ENV_YOUTUBE_PSID,
-					 ENV_YOUTUBE_PAPISID);
+		APM = new DefaultAudioPlayerManager();
+		if (getenv(ENV_YOUTUBE_EMAIL) == null || getenv(ENV_YOUTUBE_PASSWORD) == null) {
+			LOG.warn("{} and/or {} are not set, age-restricted video playback will be unavailable", ENV_YOUTUBE_EMAIL,
+					 ENV_YOUTUBE_PASSWORD);
 		}
-		registerRemoteSources(AUDIO_PLAYER_MANAGER);
+		APM.registerSourceManager(new YoutubeAudioSourceManager(true, getenv(ENV_YOUTUBE_EMAIL),
+																getenv(ENV_YOUTUBE_PASSWORD)));
+		APM.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
+		APM.registerSourceManager(new BandcampAudioSourceManager());
+		APM.registerSourceManager(new VimeoAudioSourceManager());
+		APM.registerSourceManager(new TwitchStreamAudioSourceManager());
+		APM.registerSourceManager(new BeamAudioSourceManager());
+		APM.registerSourceManager(new GetyarnAudioSourceManager());
+		APM.registerSourceManager(new HttpAudioSourceManager(DEFAULT_REGISTRY));
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public static LongObjectMap<MusicManager> getMusicManagers() {
-		return MUSIC_MANAGERS;
+	public static LongObjectMap<MusicManager> getManagers() {
+		return MANAGERS;
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
 	public static synchronized MusicManager getMusicManager(@Nonnull VoiceChannel vc) {
-		return MUSIC_MANAGERS.getIfAbsentPut(vc.getGuild().getIdLong(),
-											 () -> new MusicManager(AUDIO_PLAYER_MANAGER, vc.getIdLong()));
+		return MANAGERS.getIfAbsentPut(vc.getGuild().getIdLong(), () -> new MusicManager(APM, vc.getIdLong()));
 	}
 
 	@Nullable
 	public static MusicManager getMusicManager(long guildId) {
-		return MUSIC_MANAGERS.get(guildId);
+		return MANAGERS.get(guildId);
 	}
 
 	public static void stopPlayback(@Nonnull VoiceChannel vc) {

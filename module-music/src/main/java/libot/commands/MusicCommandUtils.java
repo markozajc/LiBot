@@ -73,7 +73,7 @@ class MusicCommandUtils {
 	static void playTrack(@Nonnull CommandContext c, @Nonnull String url, @Nonnull MusicManager manager) {
 		var lock = new MessageLock<List<AudioTrack>>();
 
-		AUDIO_PLAYER_MANAGER.loadItem(url, new AudioLoadResultHandlerImpl(c, lock, manager, url));
+		APM.loadItem(url, new AudioLoadResultHandlerImpl(c, lock, manager, url));
 
 		var tracks = lock.receive();
 		if (tracks != null && !tracks.isEmpty())
@@ -85,7 +85,7 @@ class MusicCommandUtils {
 	static List<AudioTrack> youtubeSearch(@Nonnull String query) {
 		var lock = new MessageLock<List<AudioTrack>>();
 
-		AUDIO_PLAYER_MANAGER.loadItem("ytsearch:" + query, new AudioLoadResultHandler() {
+		APM.loadItem("ytsearch:" + query, new AudioLoadResultHandler() {
 
 			@Override
 			public void trackLoaded(AudioTrack track) {
