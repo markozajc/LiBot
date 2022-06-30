@@ -8,24 +8,40 @@
 	<artifactId>core-logging</artifactId>
 
 	<dependencies>
-		<!-- Cross-module -->
 		<dependency>
-			<groupId>zajc.libot</groupId>
-			<artifactId>core</artifactId>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
-			<groupId>zajc.libot</groupId>
-			<artifactId>module-music</artifactId>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>net.dv8tion</groupId>
+			<artifactId>JDA</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.walkyst</groupId>
+			<artifactId>lavaplayer-fork</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
-	<build>
-		<plugins>
-			<!-- Shader -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+	<repositories>
+		<repository>
+			<id>m2-dv8tion</id>
+			<url>https://m2.dv8tion.net/releases</url>
+		</repository>
+
+		<repository>
+			<id>jitpack</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 </project>

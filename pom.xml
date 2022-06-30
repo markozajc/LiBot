@@ -239,6 +239,28 @@
 				<version>4.7.1</version>
 				<scope>provided</scope>
 			</dependency>
+
+			<!-- Misc shared -->
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>1.2.11</version>
+			</dependency>
+			<dependency>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections</artifactId>
+				<version>0.10.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.dv8tion</groupId>
+				<artifactId>JDA</artifactId>
+				<version>4.4.0_352</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.walkyst</groupId>
+				<artifactId>lavaplayer-fork</artifactId>
+				<version>1.3.97.1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
