@@ -14,6 +14,13 @@
 			<artifactId>core</artifactId>
 		</dependency>
 
+		<!-- HTTP -->
+		<dependency>
+			<groupId>com.konghq</groupId>
+			<artifactId>unirest-java</artifactId>
+			<version>3.13.10</version>
+		</dependency>
+
 		<!-- Wilson score calculation -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
