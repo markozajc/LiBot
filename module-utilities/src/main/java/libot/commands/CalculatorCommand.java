@@ -37,32 +37,53 @@ import net.dv8tion.jda.api.entities.*;
 
 public class CalculatorCommand extends Command {
 
+	private static final boolean ENABLED;
 	private static final int TIMEOUT_EVALUATE = 15;
 	private static final int TIMEOUT_UPDATE = 35;
 	private static final Logger LOG = getLogger(CalculatorCommand.class);
 	private static final MutableLong LAST_RATES_UPDATE;
 	private static final long MAX_RATES_DATE = DAYS.toMillis(6);
-	private static final Path DATA_HOME = get(getenv(ENV_QALCULATE_HOME));
-	private static final Path DATA_DIRECTORY = DATA_HOME.resolve(".local/share/qalculate/");
-	private static final Path KILL_SWITCH = DATA_DIRECTORY.resolve("killswitch");
+	private static final Path DATA_HOME;
+	private static final Path DATA_DIRECTORY;
+	@Nullable
+	private static final Path KILL_SWITCH;
 	static {
-		long mtime;
-		try {
-			mtime = Stream.of("btc.json", "eurofxref-daily.xml", "rates.html")
-				.map(DATA_DIRECTORY::resolve)
-				.map((AEFunction<Path, FileTime>) Files::getLastModifiedTime)
-				.mapToLong(FileTime::toMillis)
-				.min()
-				.orElse(0);
-		} catch (Exception e) {
-			if (!(e instanceof NoSuchFileException))
-				LOG.error("Could not determine exchange rates mtime", e);
-			mtime = 0;
-		}
+		ENABLED = getenv(ENV_QALCULATE_PATH) != null;
 
-		if (LOG.isDebugEnabled())
-			LOG.debug("Determined last rates update as {}", ofEpochMilli(mtime));
-		LAST_RATES_UPDATE = new MutableLong(mtime);
+		if (ENABLED && getenv(ENV_QALCULATE_HOME) != null) {
+			DATA_HOME = get(getenv(ENV_QALCULATE_HOME));
+			DATA_DIRECTORY = DATA_HOME.resolve(".local/share/qalculate/");
+			KILL_SWITCH = DATA_DIRECTORY.resolve("killswitch");
+
+			long mtime;
+			try {
+				mtime = Stream.of("btc.json", "eurofxref-daily.xml", "rates.html")
+					.map(DATA_DIRECTORY::resolve)
+					.map((AEFunction<Path, FileTime>) Files::getLastModifiedTime)
+					.mapToLong(FileTime::toMillis)
+					.min()
+					.orElse(0);
+			} catch (Exception e) {
+				if (!(e instanceof NoSuchFileException))
+					LOG.error("Could not determine exchange rates mtime", e);
+				mtime = 0;
+			}
+
+			if (LOG.isDebugEnabled())
+				LOG.debug("Determined last rates update as {}", ofEpochMilli(mtime));
+			LAST_RATES_UPDATE = new MutableLong(mtime);
+		} else {
+			DATA_HOME = null;
+			DATA_DIRECTORY = null;
+			KILL_SWITCH = null;
+			LAST_RATES_UPDATE = null;
+
+			if (ENABLED)
+				LOG.warn("{} is unset. Killswitch and conversion rate updating will be unavailable.",
+						 ENV_QALCULATE_HOME);
+			else
+				LOG.warn("{} is unset. Calculator will be unavailable.", ENV_QALCULATE_PATH);
+		}
 	}
 
 	private static final String EMOJI_INFO = "\u2139";
@@ -93,8 +114,8 @@ public class CalculatorCommand extends Command {
 
 	@Override
 	public void execute(CommandContext c) throws InterruptedException, IOException {
-		if (exists(KILL_SWITCH))
-			throw c.errorf("%s is disabled.", DISABLED, c.getCommandName());
+		if (!ENABLED || KILL_SWITCH != null && exists(KILL_SWITCH))
+			throw c.errorf("%s is unavailable.", DISABLED, c.getCommandName());
 
 		c.typing();
 		String expression = c.params().get(0);
@@ -107,13 +128,7 @@ public class CalculatorCommand extends Command {
 			mode = MODE_NORMAL;
 
 		var messages = new ArrayList<QalcMessage>(5);
-		synchronized (LAST_RATES_UPDATE) {
-			long now = currentTimeMillis();
-			if (now - LAST_RATES_UPDATE.longValue() > MAX_RATES_DATE && updateRates()) {
-				messages.add(new QalcMessage(LEVEL_INFO, "Updated exchange rates."));
-				LAST_RATES_UPDATE.setValue(now);
-			}
-		}
+		checkRates(messages);
 
 		Result result;
 		result = evaluate(c, messages, expression, mode);
@@ -144,6 +159,18 @@ public class CalculatorCommand extends Command {
 			c.reply(m.build());
 		else
 			c.replyraw(m.build()).addFile(resultFile, "result.txt").submit();
+	}
+
+	private static void checkRates(@Nonnull List<QalcMessage> messages) throws IOException, InterruptedException {
+		if (LAST_RATES_UPDATE != null) {
+			synchronized (LAST_RATES_UPDATE) {
+				long now = currentTimeMillis();
+				if (now - LAST_RATES_UPDATE.longValue() > MAX_RATES_DATE && updateRates()) {
+					messages.add(new QalcMessage(LEVEL_INFO, "Updated exchange rates."));
+					LAST_RATES_UPDATE.setValue(now);
+				}
+			}
+		}
 	}
 
 	@Nullable
