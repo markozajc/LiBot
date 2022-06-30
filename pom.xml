@@ -101,6 +101,22 @@
 									<exclude>META-INF/*.SF</exclude>
 									<exclude>META-INF/*.DSA</exclude>
 									<exclude>META-INF/*.RSA</exclude>
+									<exclude>META-INF/LICENSE*</exclude>
+									<exclude>META-INF/MANIFEST.MF</exclude>
+									<exclude>META-INF/NOTICE*</exclude>
+									<exclude>META-INF/DEPENDENCIES</exclude>
+									<exclude>LICENSE*</exclude>
+									<exclude>CHANGELOG*</exclude>
+									<exclude>README*</exclude>
+									<exclude>about.html</exclude>
+									<exclude>.keep</exclude>
+									<exclude>**/module-info.class</exclude>
+								</excludes>
+							</filter>
+							<filter>
+								<artifact>org.codehaus.groovy:groovy</artifact>
+								<excludes>
+									<exclude>META-INF/groovy-release-info.properties</exclude>
 								</excludes>
 							</filter>
 						</filters>
@@ -259,7 +275,18 @@
 			<dependency>
 				<groupId>com.github.walkyst</groupId>
 				<artifactId>lavaplayer-fork</artifactId>
-				<version>1.3.97.1</version>
+				<version>1.3.98.1</version>
+			</dependency>
+			<dependency>
+				<groupId>de.vandermeer</groupId>
+				<artifactId>asciitable</artifactId>
+				<version>0.3.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.antlr</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
