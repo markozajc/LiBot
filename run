@@ -12,8 +12,8 @@ if ! [ -f '.env' ]; then
 	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - QALCULATE_HELPER_PATH (for *calc)'
 	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - QALCULATE_HOME_PATH (ditto)'
 	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - GOOGLE_TOKENS (for *google)'
-	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - YOUTUBE_PAPISID3 (for youtube age-restricted video playback)'
-	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - YOUTUBE_PSID3 (ditto)'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - YOUTUBE_EMAIL (for youtube age-restricted video playback)'
+	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - YOUTUBE_PASSWORD (ditto)'
 	echo '\e[1;30mRunner              \e[0;39m \e[1;31m[E]\e[0;39m - MANAGEMENT_PORT (to run a management server)'
 	exit 1;
 fi;
