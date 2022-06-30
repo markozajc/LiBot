@@ -2,20 +2,24 @@ package libot.module.music;
 
 import static com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers.registerRemoteSources;
 import static java.lang.System.getenv;
+import static libot.core.Constants.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import javax.annotation.*;
 
 import org.eclipse.collections.api.map.primitive.*;
 import org.eclipse.collections.impl.factory.primitive.LongObjectMaps;
+import org.slf4j.Logger;
 
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeHttpContextFilter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-import libot.core.Constants;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
 public class GlobalMusicManager {
+
+	private static final Logger LOG = getLogger(GlobalMusicManager.class);
 
 	public static class MusicManager {
 
@@ -63,8 +67,14 @@ public class GlobalMusicManager {
 	public static final AudioPlayerManager AUDIO_PLAYER_MANAGER;
 	static {
 		AUDIO_PLAYER_MANAGER = new DefaultAudioPlayerManager();
-		YoutubeHttpContextFilter.setPAPISID(getenv(Constants.ENV_YOUTUBE_PAPISID));
-		YoutubeHttpContextFilter.setPSID(getenv(Constants.ENV_YOUTUBE_PSID));
+		if (getenv(ENV_YOUTUBE_PAPISID) != null && getenv(ENV_YOUTUBE_PSID) != null) {
+			YoutubeHttpContextFilter.setPAPISID(getenv(ENV_YOUTUBE_PAPISID));
+			YoutubeHttpContextFilter.setPSID(getenv(ENV_YOUTUBE_PSID));
+
+		} else {
+			LOG.warn("{} and/or {} are not set, age-restricted video playback will be unavailable", ENV_YOUTUBE_PSID,
+					 ENV_YOUTUBE_PAPISID);
+		}
 		registerRemoteSources(AUDIO_PLAYER_MANAGER);
 	}
 
