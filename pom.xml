@@ -12,6 +12,13 @@
 
 	<url>https://libot.eu.org/</url>
 
+	<licenses>
+		<license>
+			<name>The GNU General Public License, Version 3.0</name>
+			<url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+		</license>
+	</licenses>
+
 	<developers>
 		<developer>
 			<name>Marko Zajc</name>
@@ -19,6 +26,12 @@
 			<url>https://zajc.eu.org/</url>
 		</developer>
 	</developers>
+
+	<scm>
+		<url>https://git.zajc.eu.org/libot/authorative.git</url>
+		<connection>scm:git:git://git.zajc.eu.org/libot/authorative.git</connection>
+		<developerConnection>scm:git:ssh://git@zajc.eu.org/srv/git/libot-authorative.git</developerConnection>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -7,6 +7,27 @@
 	</parent>
 	<artifactId>module-music</artifactId>
 
+	<licenses>
+		<license>
+			<name>The GNU General Public License, Version 3.0</name>
+			<url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Marko Zajc</name>
+			<email>marko@zajc.eu.org</email>
+			<url>https://zajc.eu.org/</url>
+		</developer>
+	</developers>
+
+	<scm>
+		<url>https://git.zajc.eu.org/libot/${project.artifactId}.git</url>
+		<connection>scm:git:git://git.zajc.eu.org/libot/${project.artifactId}.git</connection>
+		<developerConnection>scm:git:ssh://git@zajc.eu.org/srv/git/libot-${project.artifactId}.git</developerConnection>
+	</scm>
+
 	<dependencies>
 		<!-- Core -->
 		<dependency>
