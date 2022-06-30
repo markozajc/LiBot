@@ -297,7 +297,7 @@
 				<exclusions>
 					<exclusion>
 						<groupId>org.antlr</groupId>
-						<artifactId>*</artifactId>
+						<artifactId>ST4</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
