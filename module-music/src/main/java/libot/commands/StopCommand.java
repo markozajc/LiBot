@@ -29,7 +29,7 @@ public class StopCommand extends Command {
 			b.append(" & cleared the queue");
 		b.append(".");
 
-		stopPlayback(vc);
+		stopPlayback(c.getGuildIdLong());
 		am.closeAudioConnection();
 
 		c.reply("Playback stopped", b.toString(), SUCCESS);

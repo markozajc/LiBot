@@ -49,7 +49,7 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 
 			var am = vc.getGuild().getAudioManager();
 			var manager = getMusicManager(vc);
-			stopPlayback(vc);
+			stopPlayback(vc.getGuild().getIdLong());
 
 			if (am.getSendingHandler() == null)
 				am.setSendingHandler(manager.getSendHandler());

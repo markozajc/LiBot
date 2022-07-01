@@ -70,7 +70,8 @@ public class GlobalMusicManager {
 
 	}
 
-	private static final MutableLongObjectMap<MusicManager> MANAGERS = LongObjectMaps.mutable.empty();
+	private static final MutableLongObjectMap<MusicManager> MANAGERS =
+		LongObjectMaps.mutable.<MusicManager>empty().asSynchronized();
 	public static final AudioPlayerManager APM;
 	static {
 		APM = new DefaultAudioPlayerManager();
@@ -106,9 +107,9 @@ public class GlobalMusicManager {
 		return MANAGERS.get(guildId);
 	}
 
-	public static void stopPlayback(@Nonnull VoiceChannel vc) {
+	public static void stopPlayback(long guildId) {
 		MusicManager gmm;
-		if ((gmm = getMusicManager(vc.getGuild().getIdLong())) != null) {
+		if ((gmm = MANAGERS.get(guildId)) != null) {
 			gmm.player.stopTrack();
 			gmm.scheduler.clear();
 		}

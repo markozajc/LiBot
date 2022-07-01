@@ -11,9 +11,7 @@ public class MusicStateListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildLeave(GuildLeaveEvent event) {
-		var vc = event.getGuild().getAudioManager().getConnectedChannel();
-		if (vc != null)
-			stopPlayback(vc);
+		stopPlayback(event.getGuild().getIdLong());
 	}
 
 	@Override
@@ -24,7 +22,7 @@ public class MusicStateListener extends ListenerAdapter {
 				am.closeAudioConnection();
 
 			} else if (event.getChannelLeft().getMembers().stream().noneMatch(NO_BOT)) {
-				stopPlayback(event.getChannelLeft());
+				stopPlayback(event.getGuild().getIdLong());
 				am.closeAudioConnection();
 			}
 		}
