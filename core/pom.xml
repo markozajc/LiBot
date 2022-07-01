@@ -130,9 +130,9 @@
 
 		<!-- Extended functions -->
 		<dependency>
-			<groupId>org.eu.zajc</groupId>
+			<groupId>com.github.markozajc</groupId>
 			<artifactId>extended-functions</artifactId>
-			<version>1.2</version>
+			<version>1.0</version>
 		</dependency>
 
 		<!-- Nullability annotations -->
