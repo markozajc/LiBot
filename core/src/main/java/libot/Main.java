@@ -31,7 +31,9 @@ import libot.core.shred.Shredder.Shred;
 import libot.management.ManagementServer;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 
@@ -124,6 +126,14 @@ public class Main {
 				var name = e.getKey().substring(ENV_SHRED_TOKEN.length(), e.getKey().length());
 				try {
 					var jda = builder.setToken(e.getValue()).build();
+					jda.addEventListener(new ListenerAdapter() {
+
+						@Override
+						public void onReady(ReadyEvent event) {
+							LOG.info("{} is online", name);
+						}
+
+					});
 					return new Shred(jda, name);
 				} catch (LoginException le) {
 					LOG.error("Failed to log into shred {}", name);
