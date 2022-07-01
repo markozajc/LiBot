@@ -25,8 +25,9 @@ import java.util.stream.Stream;
 import javax.annotation.*;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.eu.zajc.functions.exceptionable.all.AEFunction;
 import org.slf4j.Logger;
+
+import com.github.markozajc.functions.exceptionable.all.AEFunction;
 
 import libot.core.commands.*;
 import libot.core.commands.exceptions.CommandException;
