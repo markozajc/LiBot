@@ -8,8 +8,8 @@ import static java.util.regex.Pattern.*;
 import static org.apache.commons.lang3.math.NumberUtils.isDigits;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.*;
 import java.util.regex.*;
 
 import javax.annotation.*;
@@ -20,7 +20,7 @@ public class ParseUtils {
 
 	public static record Prefix(@Nonnull String string, long selfId) {}
 
-	private static final Map<Prefix, Pattern> PATTERN_CACHE = new HashMap<>();
+	private static final Map<Prefix, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
 
 	private static final Pattern SPACES = compile("\\s", UNICODE_CHARACTER_CLASS);
 	private static final String FORMAT_REGEX = "^(?:<@!?%d>|%s) *([^\\s]+)(?:\\s(.*))?$";
