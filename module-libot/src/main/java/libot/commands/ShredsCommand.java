@@ -13,7 +13,7 @@ import libot.core.shred.Shredder.Shred;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 
-public class ShredderCommand extends Command {
+public class ShredsCommand extends Command {
 
 	private static final String FORMAT_TABLE = """
 		```
@@ -56,12 +56,12 @@ public class ShredderCommand extends Command {
 
 	@Override
 	public String getName() {
-		return "shredder";
+		return "shreds";
 	}
 
 	@Override
 	public String[] getAliases() {
-		return array("shreds");
+		return array("shredder");
 	}
 
 	@Override
