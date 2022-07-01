@@ -10,7 +10,7 @@ import libot.core.entities.CommandContext;
 public class GetInviteCommand extends Command {
 
 	private static final String FORMAT_INVITE = """
-		To invite LiBot to your guild, click [here](https://libot.eu.org/get/) and follow further instructions!""";
+		To invite LiBot to your guild, click [here](https://libot.eu.org/get) and follow further instructions!""";
 
 	@Override
 	public void execute(CommandContext c) throws Exception {
