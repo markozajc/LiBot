@@ -787,7 +787,7 @@ public class CommandContext {
 
 	public EventUtils getWaiter() {
 		if (!isWaiterInited())
-			this.waiter = new EventUtils(getUser(), getChannel());
+			this.waiter = new EventUtils(getBotContext().ewl(), getUser(), getChannel());
 		return this.waiter;
 	}
 

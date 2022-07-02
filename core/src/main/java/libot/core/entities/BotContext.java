@@ -10,6 +10,7 @@ import libot.core.BotConfiguration;
 import libot.core.commands.CommandManager;
 import libot.core.data.DataManager;
 import libot.core.data.providers.*;
+import libot.core.listeners.EventWaiterListener;
 import libot.core.shred.Shredder;
 
 public class BotContext {
@@ -26,14 +27,18 @@ public class BotContext {
 	private final Shredder shredder;
 	@Nonnull
 	private final ProviderManager providers;
+	@Nonnull
+	private final EventWaiterListener ewl;
 
 	public BotContext(@Nonnull BotConfiguration config, @Nonnull CommandManager commands, @Nonnull DataManager data,
-					  @Nonnull Shredder shredder, @Nonnull ProviderManager providers) {
+					  @Nonnull Shredder shredder, @Nonnull ProviderManager providers,
+					  @Nonnull EventWaiterListener ewl) {
 		this.config = config;
 		this.commands = commands;
 		this.data = data;
 		this.shredder = shredder;
 		this.providers = providers;
+		this.ewl = ewl;
 	}
 
 	@Nonnull
@@ -64,6 +69,11 @@ public class BotContext {
 	@Nonnull
 	public ScheduledExecutorService cron() {
 		return this.cron;
+	}
+
+	@Nonnull
+	public EventWaiterListener ewl() {
+		return this.ewl;
 	}
 
 	@Nonnull

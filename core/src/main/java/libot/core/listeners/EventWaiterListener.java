@@ -1,4 +1,4 @@
-package libot.listeners;
+package libot.core.listeners;
 
 import static java.lang.String.format;
 import static java.lang.Thread.interrupted;
@@ -23,17 +23,18 @@ public class EventWaiterListener implements EventListener {
 	private static final String FORMAT_WRONG_TYPE = "Something went wrong; onEvent() returned %s instead of %s";
 
 	// @formatter:off 💀
-	private static final MutableIntObjectMap<
+	private final MutableIntObjectMap<
 							Triple<
 								Predicate<GenericEvent>,
 								MessageLock<GenericEvent>,
 								Predicate<Void>
 							>
-						> EVENT_WAITERS =
+						> eventWaiters =
 	// @formatter:on
-		IntObjectMaps.mutable.<Triple<Predicate<GenericEvent>, MessageLock<GenericEvent>, Predicate<Void>>>empty()
-			.asSynchronized(); // death
-	private static final AtomicInteger COUNTER = new AtomicInteger();
+		IntObjectMaps.mutable.<Triple<Predicate<GenericEvent>, MessageLock<GenericEvent>, Predicate<Void>>>empty(); // death
+
+	private final AtomicInteger counter = new AtomicInteger();
+	private final Object mutex = new Object();
 
 	/**
 	 * Pauses the current thread and awaits a certain event.<br>
@@ -63,21 +64,25 @@ public class EventWaiterListener implements EventListener {
 	 * @throws InterruptedException
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends GenericEvent> T awaitEvent(@Nonnull Predicate<GenericEvent> predicate,
-														@Nullable Predicate<Void> nullableCleanupPredicate, int timeout,
-														@Nullable TimeUnit timeoutUnit,
-														@Nonnull Class<T> eventClass) throws TimeoutException,
-																					  InterruptedException {
+	public <T extends GenericEvent> T awaitEvent(@Nonnull Predicate<GenericEvent> predicate,
+												 @Nullable Predicate<Void> nullableCleanupPredicate, int timeout,
+												 @Nullable TimeUnit timeoutUnit,
+												 @Nonnull Class<T> eventClass) throws TimeoutException,
+																			   InterruptedException {
 		var cleanupPredicate = nullableCleanupPredicate;
 		if (cleanupPredicate == null)
 			cleanupPredicate = p -> false;
 
 		var lock = new MessageLock<GenericEvent>();
-		int ticket = COUNTER.getAndIncrement();
+		int ticket = this.counter.getAndIncrement();
 		Predicate<GenericEvent> isInstance = eventClass::isInstance;
-		EVENT_WAITERS.put(ticket, new ImmutableTriple<>(isInstance.and(predicate), lock, cleanupPredicate));
+		synchronized (this.mutex) {
+			this.eventWaiters.put(ticket, new ImmutableTriple<>(isInstance.and(predicate), lock, cleanupPredicate));
+		}
 		GenericEvent awaited = lock.receive(timeout, timeoutUnit);
-		EVENT_WAITERS.remove(ticket);
+		synchronized (this.mutex) {
+			this.eventWaiters.remove(ticket);
+		}
 		sanityCheck(eventClass, awaited);
 		return (T) awaited;
 	}
@@ -97,9 +102,11 @@ public class EventWaiterListener implements EventListener {
 
 	@Override
 	public void onEvent(GenericEvent event) {
-		for (var e : EVENT_WAITERS.values()) {
-			if (e.getLeft().test(event))
-				e.getMiddle().send(event);
+		synchronized (this.mutex) {
+			for (var e : this.eventWaiters.values()) {
+				if (e.getLeft().test(event))
+					e.getMiddle().send(event);
+			}
 		}
 	}
 

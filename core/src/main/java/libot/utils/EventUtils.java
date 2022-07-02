@@ -5,7 +5,7 @@ import static libot.core.Constants.*;
 
 import javax.annotation.Nonnull;
 
-import libot.listeners.EventWaiterListener;
+import libot.core.listeners.EventWaiterListener;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.*;
@@ -15,20 +15,22 @@ public class EventUtils {
 	private int timeout;
 	private final User user;
 	private final MessageChannel channel;
+	private final EventWaiterListener ewl;
 
-	public EventUtils(User user, MessageChannel channel) {
+	public EventUtils(EventWaiterListener ewl, User user, MessageChannel channel) {
 		this.user = user;
 		this.channel = channel;
+		this.ewl = ewl;
 	}
 
-	public EventUtils(User user, MessageChannel channel, int timeout) {
-		this(user, channel);
+	public EventUtils(EventWaiterListener ewl, User user, MessageChannel channel, int timeout) {
+		this(ewl, user, channel);
 		this.timeout = timeout;
 	}
 
 	@Nonnull
 	public MessageReaction getReaction(Message message) throws InterruptedException {
-		return EventWaiterListener.awaitEvent(p -> {
+		return this.ewl.awaitEvent(p -> {
 			GenericMessageReactionEvent e = (GenericMessageReactionEvent) p;
 			return e.getUserIdLong() == this.user.getIdLong() && e.getMessageIdLong() == message.getIdLong();
 		}, p -> {
@@ -41,10 +43,10 @@ public class EventUtils {
 		}, this.timeout, SECONDS, GenericMessageReactionEvent.class).getReaction();
 	}
 
-	@SuppressWarnings("null")
 	@Nonnull
+	@SuppressWarnings("null")
 	public Message getMessage(String emoji) throws InterruptedException {
-		GenericMessageReactionEvent event = EventWaiterListener.awaitEvent(p -> {
+		GenericMessageReactionEvent event = this.ewl.awaitEvent(p -> {
 
 			GenericMessageReactionEvent e = (GenericMessageReactionEvent) p;
 
@@ -58,7 +60,7 @@ public class EventUtils {
 
 	@Nonnull
 	public Message awaitMessage(boolean ignoreBlank) throws InterruptedException {
-		return EventWaiterListener.awaitEvent(p -> {
+		return this.ewl.awaitEvent(p -> {
 
 			var e = (MessageReceivedEvent) p;
 
@@ -70,7 +72,7 @@ public class EventUtils {
 	}
 
 	public boolean awaitBoolean(@Nonnull Message question) throws InterruptedException {
-		boolean result = ACCEPT_EMOJI.equals(EventWaiterListener.awaitEvent(p -> {
+		boolean result = ACCEPT_EMOJI.equals(this.ewl.awaitEvent(p -> {
 			MessageReactionAddEvent e = (MessageReactionAddEvent) p;
 			String emote = e.getReactionEmote().getName();
 

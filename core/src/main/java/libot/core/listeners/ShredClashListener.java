@@ -1,4 +1,4 @@
-package libot.listeners;
+package libot.core.listeners;
 
 import javax.annotation.Nonnull;
 

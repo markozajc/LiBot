@@ -1,4 +1,4 @@
-package libot.listeners;
+package libot.core.listeners;
 
 import static org.slf4j.LoggerFactory.getLogger;
 

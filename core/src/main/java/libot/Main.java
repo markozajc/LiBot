@@ -4,6 +4,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.System.getenv;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.stream.Stream.concat;
 import static libot.core.Constants.*;
 import static libot.core.processes.ProcessManager.getProcesses;
 import static libot.utils.ReflectionUtils.scanClasspath;
@@ -14,6 +15,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -25,6 +27,7 @@ import libot.core.commands.CommandManager;
 import libot.core.data.DataManagerFactory;
 import libot.core.data.providers.ProviderManager;
 import libot.core.entities.BotContext;
+import libot.core.listeners.*;
 import libot.core.processes.ProcessManager;
 import libot.core.shred.Shredder;
 import libot.core.shred.Shredder.Shred;
@@ -51,11 +54,14 @@ public class Main {
 			System.exit(1);
 		});
 		LOG.info("Creating shreds");
+		var ewl = new EventWaiterListener();
+
 		var builder =
 			JDABuilder.create(GUILD_MEMBERS, GUILD_EMOJIS, GUILD_VOICE_STATES, GUILD_MESSAGES, GUILD_MESSAGE_REACTIONS)
 				.enableCache(VOICE_STATE, EMOTE, MEMBER_OVERRIDES)
 				.disableCache(ACTIVITY, CLIENT_STATUS, ONLINE_STATUS)
 				.setChunkingFilter(ChunkingFilter.ALL)
+				.addEventListeners(ewl)
 				.setStatus(IDLE);
 
 		var shreds = startShreds(builder);
@@ -68,7 +74,7 @@ public class Main {
 		var providers = ProviderManager.fromClasspath(shredder, data);
 		var config = BotConfiguration.fromEnvironment();
 		var commands = CommandManager.fromClasspath();
-		var bot = new BotContext(config, commands, data, shredder, providers);
+		var bot = new BotContext(config, commands, data, shredder, providers, ewl);
 
 		bot.cron().scheduleWithFixedDelay(providers::storeAll, 2, 2, MINUTES);
 		getRuntime().addShutdownHook(new Thread(() -> stop(bot), "libot-shutdown"));
@@ -147,13 +153,15 @@ public class Main {
 
 	@SuppressWarnings("null")
 	private static void loadEventListeners(@Nonnull Shredder shredder, @Nonnull BotContext bot) {
-		var listeners = scanClasspath(EventListener.class, libot.listeners.Anchor.class, c -> {
-			try {
-				return c.getDeclaredConstructor(BotContext.class).newInstance(bot);
-			} catch (NoSuchMethodException e) {
-				return c.getDeclaredConstructor().newInstance();
-			}
-		}).toArray();
+
+		var listeners = concat(Stream.of(new MessageListener(bot), new ShredClashListener(bot), new EventLogListener()),
+							   scanClasspath(EventListener.class, libot.listeners.Anchor.class, c -> {
+								   try {
+									   return c.getDeclaredConstructor(BotContext.class).newInstance(bot);
+								   } catch (NoSuchMethodException e) {
+									   return c.getDeclaredConstructor().newInstance();
+								   }
+							   }).stream()).toArray();
 		shredder.getShreds().stream().map(Shred::jda).forEach(j -> j.addEventListener(listeners));
 	}
 
