@@ -269,7 +269,7 @@ public class CalculatorCommand extends Command {
 	@Nonnull
 	@SuppressWarnings("null")
 	private static String parseResult(@Nonnull Result r) {
-		if (r.value().indexOf('=') != -1) {
+		if (r.value().indexOf('=') != -1 && r.value().indexOf('≈') != -1) {
 			if (r.approximate())
 				return r.value().replace('=', '≈');
 			else
