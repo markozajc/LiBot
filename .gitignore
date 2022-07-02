@@ -14,3 +14,4 @@
 
 # JaCoCo coverage data
 /coverage.exec
+/stage
