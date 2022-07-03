@@ -793,6 +793,7 @@ public class CommandContext {
 
 	// ===============* confirm *===============
 
+	@SuppressWarnings("null")
 	public boolean confirm(@Nonnull String message) {
 		String useMessage = message;
 		if (!hasChannelPermission(MESSAGE_ADD_REACTION))
@@ -801,12 +802,13 @@ public class CommandContext {
 		// because the stupid user denied/forgot to grant it
 
 		try {
-			return reply(useMessage).thenApply(this::getConfirmation).get();
+			return getConfirmation(reply(useMessage).get());
 		} catch (ExecutionException | InterruptedException e) { // NOSONAR
 			throw asUnchecked(e);
 		}
 	}
 
+	@SuppressWarnings("null")
 	public boolean confirm(@Nonnull MessageEmbed embed) {
 		MessageEmbed useEmbed;
 		if (!canReact()) { // fallback ditto
@@ -823,7 +825,7 @@ public class CommandContext {
 		}
 
 		try {
-			return reply(useEmbed).thenApply(this::getConfirmation).get();
+			return getConfirmation(reply(useEmbed).get());
 		} catch (ExecutionException | InterruptedException e) { // NOSONAR
 			throw asUnchecked(e);
 		}
