@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>zajc.libot</groupId>
 		<artifactId>libot</artifactId>
-		<version>5.0.0-3</version>
+		<version>5.0.0-4</version>
 	</parent>
 	<artifactId>module-administrative</artifactId>
 
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-jsr223</artifactId>
-			<version>3.0.11</version>
+			<version>3.0.12</version>
 		</dependency>
 
 		<!-- Spotbugs annotations -->
