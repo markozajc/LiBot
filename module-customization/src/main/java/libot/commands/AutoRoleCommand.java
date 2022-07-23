@@ -96,7 +96,7 @@ public class AutoRoleCommand extends Command {
 	private static void set(@Nonnull CommandContext c, @Nonnull AutoRoleProvider provider) {
 		var name = c.params().get(0);
 		if ("disable".equalsIgnoreCase(name)) {
-			if (!provider.get(c.getGuildIdLong()).isEmpty()) {
+			if (provider.get(c.getGuildIdLong()).isEmpty()) {
 				c.reply(FORMAT_NOT_SET);
 
 			} else {
