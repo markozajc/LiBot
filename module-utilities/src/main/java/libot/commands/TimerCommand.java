@@ -27,11 +27,12 @@ public class TimerCommand extends Command {
 					  // past timestamps
 			throw c.error(FORMAT_NEGATIVE_DURATION, FAILURE);
 
+		long absTime = currentTimeMillis() + time;
 		var timer =
-			new UserTimer(c.getUserIdLong(), c.params().getOrDefault(1, "Beep, beep."), currentTimeMillis() + time);
+			new UserTimer(c.getUserIdLong(), c.params().getOrDefault(1, "Beep, beep."), absTime);
 		c.provider(TimerProvider.class).register(timer);
 
-		c.replyf(FORMAT_SUCCESS, SUCCESS, formatDurationWords(time, true, true), DATE_TIME_LONG.format(time));
+		c.replyf(FORMAT_SUCCESS, SUCCESS, formatDurationWords(time, true, true), DATE_TIME_LONG.format(absTime));
 	}
 
 	@Override
