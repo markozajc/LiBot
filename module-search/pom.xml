@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>zajc.libot</groupId>
 		<artifactId>libot</artifactId>
-		<version>5.0.0-4</version>
+		<version>5.0.0-5</version>
 	</parent>
 	<artifactId>module-search</artifactId>
 
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.konghq</groupId>
 			<artifactId>unirest-java</artifactId>
-			<version>3.13.10</version>
+			<version>3.13.11</version>
 		</dependency>
 
 		<!-- Wilson score calculation -->
