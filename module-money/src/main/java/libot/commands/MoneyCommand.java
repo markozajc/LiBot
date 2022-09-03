@@ -48,7 +48,7 @@ public class MoneyCommand extends Command {
 	}
 
 	private static long computeReward(long balance) {
-		return max(round(pow(log(balance), 2) * 2), MIN_REWARD);
+		return max(round(pow(log(max(1, balance)), 2) * 2), MIN_REWARD);
 	}
 
 	@Override
