@@ -56,7 +56,7 @@ public class RockPaperScissorsCommand extends BettableGame {
 
 	@Nullable
 	private static Gesture selectGesture(BettableGameContext c, Message resp) {
-		return switch (resp.getContentDisplay()) {
+		return switch (resp.getContentDisplay().toLowerCase()) {
 			case "rock" -> Gesture.ROCK;
 			case "paper" -> Gesture.PAPER;
 			case "scissors" -> Gesture.SCISSORS;
