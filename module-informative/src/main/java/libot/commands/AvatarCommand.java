@@ -1,19 +1,20 @@
-package libot.command;
+package libot.commands;
 
 import static libot.core.Constants.LITHIUM;
-import static libot.core.command.CommandCategory.INFORMATIVE;
-import static libot.util.CommandUtils.findUserOrAuthor;
-import static libot.util.ParseUtils.parseLong;
-import static libot.util.Utilities.array;
+import static libot.core.commands.CommandCategory.INFORMATIVE;
+import static libot.utils.CommandUtils.findUserOrAuthor;
+import static libot.utils.ParseUtils.parseLong;
+import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
 
 import javax.annotation.Nonnull;
 
-import libot.core.command.*;
+import libot.core.commands.*;
 import libot.core.entities.CommandContext;
-import libot.core.extension.EmbedPrebuilder;
+import libot.core.extensions.EmbedPrebuilder;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Message.MentionType;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class AvatarCommand extends Command {
@@ -21,17 +22,18 @@ public class AvatarCommand extends Command {
 	@Override
 	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
-		if (c.getMessage().getMentionedUsers().isEmpty() && c.params().check(1)) {
+		if (c.params().check(0) && !MentionType.USER.getPattern().matcher(c.params().get(0)).matches()) {
 			long id = parseLong(c.params().get(0));
 			var user = c.shredder().getUserById(id);
 			if (user != null) {
 				sendAvatar(c, user);
 			} else {
 				c.jda().retrieveUserById(id).queue(u -> sendAvatar(c, u), e -> {
-					if (e instanceof ErrorResponseException ere && ere.getErrorResponse() == UNKNOWN_USER)
+					if (e instanceof ErrorResponseException ere && ere.getErrorResponse() == UNKNOWN_USER) {
 						c.reply("Couldn't find a user with that ID.");
-					else
+					} else {
 						getDefaultFailure().accept(e);
+					}
 				});
 			}
 
