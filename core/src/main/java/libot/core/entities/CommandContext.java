@@ -793,8 +793,12 @@ public class CommandContext {
 
 	// ===============* confirm *===============
 
-	@SuppressWarnings("null")
 	public boolean confirm(@Nonnull String message) {
+		return confirm(message, false);
+	}
+
+	@SuppressWarnings("null")
+	public boolean confirm(@Nonnull String message, boolean keepPrompt) {
 		String useMessage = message;
 		if (!hasChannelPermission(MESSAGE_ADD_REACTION))
 			useMessage += "\n" + FORMAT_FALLBACK_ASK;
@@ -802,14 +806,18 @@ public class CommandContext {
 		// because the stupid user denied/forgot to grant it
 
 		try {
-			return getConfirmation(reply(useMessage).get());
+			return getConfirmation(reply(useMessage).get(), false);
 		} catch (ExecutionException | InterruptedException e) { // NOSONAR
 			throw asUnchecked(e);
 		}
 	}
 
-	@SuppressWarnings("null")
 	public boolean confirm(@Nonnull MessageEmbed embed) {
+		return confirm(embed, false);
+	}
+	
+	@SuppressWarnings("null")
+	public boolean confirm(@Nonnull MessageEmbed embed, boolean keepPrompt) {
 		MessageEmbed useEmbed;
 		if (!canReact()) { // fallback ditto
 			var eb = new EmbedBuilder(embed);
@@ -825,30 +833,47 @@ public class CommandContext {
 		}
 
 		try {
-			return getConfirmation(reply(useEmbed).get());
+			return getConfirmation(reply(useEmbed).get(), keepPrompt);
 		} catch (ExecutionException | InterruptedException e) { // NOSONAR
 			throw asUnchecked(e);
 		}
 	}
 
 	public boolean confirm(@Nonnull EmbedBuilder builder) {
-		return confirm(builder.build());
+		return confirm(builder.build(), false);
+	}
+
+	public boolean confirm(@Nonnull EmbedBuilder builder, boolean keepPrompt) {
+		return confirm(builder.build(), keepPrompt);
 	}
 
 	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable String footer,
 						   @Nullable Color color) {
+		return confirm(title, message, footer, color, false);
+	}
+
+	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable String footer,
+						   @Nullable Color color, boolean keepPrompt) {
 		EmbedBuilder builder =
 			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
 
-		return confirm(builder.build());
+		return confirm(builder.build(), keepPrompt);
 	}
 
 	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable Color color) {
-		return confirm(title, message, null, color);
+		return confirm(title, message, null, color, false);
+	}
+
+	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable Color color, boolean keepPrompt) {
+		return confirm(title, message, null, color, keepPrompt);
 	}
 
 	public boolean confirm(@Nonnull String message, @Nullable Color color) {
-		return confirm(null, message, null, color);
+		return confirm(null, message, null, color, false);
+	}
+	
+	public boolean confirm(@Nonnull String message, @Nullable Color color, boolean keepPrompt) {
+		return confirm(null, message, null, color, keepPrompt);
 	}
 
 	// ===============* confirmf *===============
@@ -859,18 +884,40 @@ public class CommandContext {
 	}
 
 	@SuppressWarnings("null")
+	public boolean confirmf(@Nonnull String messageFormat, boolean keepPrompt, @Nonnull Object... args) {
+		return confirm(format(messageFormat, args), keepPrompt);
+	}
+
+	@SuppressWarnings("null")
 	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, @Nullable String footer,
 							@Nullable Color color, @Nonnull Object... args) {
 		return confirm(title, format(messageFormat, args), footer, color);
+		
+	}
+
+	@SuppressWarnings("null")
+	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, @Nullable String footer,
+							boolean keepPrompt, @Nullable Color color, @Nonnull Object... args) {
+		return confirm(title, format(messageFormat, args), footer, color, keepPrompt);
 	}
 
 	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, @Nullable Color color,
 							@Nonnull Object... args) {
-		return confirmf(title, messageFormat, null, color, args);
+		return confirmf(title, messageFormat, null, false, color, args);
+	}
+	
+	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, boolean keepPrompt,
+							@Nullable Color color, @Nonnull Object... args) {
+		return confirmf(title, messageFormat, null, keepPrompt, color, args);
 	}
 
 	public boolean confirmf(@Nonnull String messageFormat, @Nullable Color color, @Nonnull Object... args) {
-		return confirmf(null, messageFormat, null, color, args);
+		return confirmf(null, messageFormat, null, false, color, args);
+	}
+
+	public boolean confirmf(@Nonnull String messageFormat, boolean keepPrompt, @Nullable Color color,
+							@Nonnull Object... args) {
+		return confirmf(null, messageFormat, null, keepPrompt, color, args);
 	}
 
 	// ===============* askraw *===============
@@ -1027,13 +1074,13 @@ public class CommandContext {
 
 	// ===============* Internal *===============
 
-	private boolean getConfirmation(@Nonnull Message m) {
+	private boolean getConfirmation(@Nonnull Message m, boolean keepPrompt) {
 		if (canReact()) {
 			m.addReaction(ACCEPT_EMOJI).queue();
 			m.addReaction(DENY_EMOJI).queue();
 		}
 		try {
-			return getWaiter().awaitBoolean(m);
+			return getWaiter().awaitBoolean(m, keepPrompt);
 		} catch (InterruptedException e) { // NOSONAR
 			throw asUnchecked(e);
 		}

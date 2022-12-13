@@ -71,7 +71,7 @@ public class EventUtils {
 		}, null, this.timeout, SECONDS, MessageReceivedEvent.class).getMessage();
 	}
 
-	public boolean awaitBoolean(@Nonnull Message question) throws InterruptedException {
+	public boolean awaitBoolean(@Nonnull Message question, boolean keepPrompt) throws InterruptedException {
 		boolean result = ACCEPT_EMOJI.equals(this.ewl.awaitEvent(p -> {
 			MessageReactionAddEvent e = (MessageReactionAddEvent) p;
 			String emote = e.getReactionEmote().getName();
@@ -89,7 +89,8 @@ public class EventUtils {
 
 		}, this.timeout, SECONDS, MessageReactionAddEvent.class).getReactionEmote().getName());
 
-		question.delete().queue();
+		if(!keepPrompt)
+			question.delete().queue();
 		return result;
 	}
 
