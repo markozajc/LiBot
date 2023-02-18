@@ -35,8 +35,7 @@ public class GoogleCommand extends Command {
 
 	public static record SearchResult(String title, String url, boolean blank) {
 
-		@Nonnull
-		public static final SearchResult BLANK_RESULT = new SearchResult(null, null, true);
+		@Nonnull public static final SearchResult BLANK_RESULT = new SearchResult(null, null, true);
 
 	}
 

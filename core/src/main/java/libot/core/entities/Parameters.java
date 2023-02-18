@@ -7,8 +7,7 @@ import libot.utils.ParseUtils;
 
 public class Parameters {
 
-	@Nonnull
-	private final String[] parameters;
+	@Nonnull private final String[] parameters;
 
 	public Parameters(@Nonnull String[] parameters) {
 		this.parameters = parameters;

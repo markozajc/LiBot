@@ -7,8 +7,7 @@ import libot.module.money.BettableGame.GameResult;
 
 public class GameEndedException extends CommandException {
 
-	@Nonnull
-	private final GameResult result;
+	@Nonnull private final GameResult result;
 
 	public GameEndedException(@Nonnull GameResult result, boolean registerRatelimit) {
 		super(null, registerRatelimit);

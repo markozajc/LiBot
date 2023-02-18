@@ -18,8 +18,7 @@ public class PollListener extends ListenerAdapter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PollListener.class);
 
-	@Nonnull
-	private final BotContext bot;
+	@Nonnull private final BotContext bot;
 
 	public PollListener(@Nonnull BotContext bot) {
 		this.bot = bot;

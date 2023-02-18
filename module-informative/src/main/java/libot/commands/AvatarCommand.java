@@ -13,8 +13,8 @@ import javax.annotation.Nonnull;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Message.MentionType;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class AvatarCommand extends Command {

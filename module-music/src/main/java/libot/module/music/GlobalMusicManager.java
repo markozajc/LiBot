@@ -30,10 +30,8 @@ public class GlobalMusicManager {
 
 	public static class MusicManager {
 
-		@Nonnull
-		private final AudioPlayer player;
-		@Nonnull
-		private final TrackScheduler scheduler;
+		@Nonnull private final AudioPlayer player;
+		@Nonnull private final TrackScheduler scheduler;
 		private final long vchannelId;
 
 		@SuppressWarnings("null")

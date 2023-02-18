@@ -19,14 +19,10 @@ public abstract class Provider<T> {
 	private static final Logger LOG = getLogger(Provider.class);
 
 	protected T data;
-	@Nonnull
-	private final Type type;
-	@Nonnull
-	private final DataManager dataManager;
-	@Nonnull
-	private final Shredder shredder;
-	@Nonnull
-	private final String dataKey;
+	@Nonnull private final Type type;
+	@Nonnull private final DataManager dataManager;
+	@Nonnull private final Shredder shredder;
+	@Nonnull private final String dataKey;
 
 	@SuppressWarnings("null")
 	protected Provider(@Nonnull Shredder shredder, @Nonnull DataManager dataManager, @Nonnull TypeToken<T> typeToken,

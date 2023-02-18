@@ -52,8 +52,7 @@ public class UnoCommand extends BettableGame {
 
 	private static class DiscordUnoGame extends UnoControlledGame {
 
-		@Nonnull
-		private final StringBuilder feed;
+		@Nonnull private final StringBuilder feed;
 
 		public DiscordUnoGame(@Nonnull BettableGameContext c, @Nonnull StringBuilder feed) {
 			super(new DiscordPlayer(c, feed), new UnoStrategicPlayer("LiBot"), UnoStandardDeck.getDeck(), 7,
@@ -70,16 +69,11 @@ public class UnoCommand extends BettableGame {
 
 	private static class DiscordPlayer extends UnoPlayer {
 
-		@Nonnull
-		private final BettableGameContext c;
-		@Nonnull
-		private final EmbedPrebuilder e;
-		@Nonnull
-		private final StringBuilder feed;
-		@Nonnull
-		private final StringBuilder status = new StringBuilder();
-		@Nonnull
-		private final StringBuilder actions = new StringBuilder();
+		@Nonnull private final BettableGameContext c;
+		@Nonnull private final EmbedPrebuilder e;
+		@Nonnull private final StringBuilder feed;
+		@Nonnull private final StringBuilder status = new StringBuilder();
+		@Nonnull private final StringBuilder actions = new StringBuilder();
 
 		public DiscordPlayer(@Nonnull BettableGameContext c, @Nonnull StringBuilder feed) {
 			super(c.getEffectiveName());
@@ -217,7 +211,8 @@ public class UnoCommand extends BettableGame {
 
 		@Override
 		public boolean shouldPlayDrawnCard(UnoGame game, UnoCard drawnCard, UnoPlayer next) {
-			return this.c.confirmf(true, FORMAT_PLAYER_CONFIRM_PLACE_DRAWN, LITHIUM, getEmoteWithName(this.c, drawnCard));
+			return this.c.confirmf(true, FORMAT_PLAYER_CONFIRM_PLACE_DRAWN, LITHIUM,
+								   getEmoteWithName(this.c, drawnCard));
 		}
 
 		@SuppressWarnings("null")

@@ -13,10 +13,8 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 
 	public static class GreeterConfiguration {
 
-		@Nullable
-		private String welcomeMessage;
-		@Nullable
-		private String goodbyeMessage;
+		@Nullable private String welcomeMessage;
+		@Nullable private String goodbyeMessage;
 		private long channelId;
 
 		public long getChannelId() {

@@ -89,7 +89,7 @@ public class EventUtils {
 
 		}, this.timeout, SECONDS, MessageReactionAddEvent.class).getReactionEmote().getName());
 
-		if(!keepPrompt)
+		if (!keepPrompt)
 			question.delete().queue();
 		return result;
 	}

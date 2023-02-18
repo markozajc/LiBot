@@ -15,8 +15,7 @@ import libot.core.data.DataManager;
 
 public class FileDataManager implements DataManager {
 
-	@Nonnull
-	private final Path root;
+	@Nonnull private final Path root;
 
 	@SuppressWarnings("null")
 	public FileDataManager() throws IOException {

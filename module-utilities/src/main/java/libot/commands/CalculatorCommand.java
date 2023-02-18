@@ -46,8 +46,7 @@ public class CalculatorCommand extends Command {
 	private static final long MAX_RATES_DATE = DAYS.toMillis(6);
 	private static final Path DATA_HOME;
 	private static final Path DATA_DIRECTORY;
-	@Nullable
-	private static final Path KILL_SWITCH;
+	@Nullable private static final Path KILL_SWITCH;
 	static {
 		ENABLED = getenv(ENV_QALCULATE_PATH) != null;
 

@@ -22,10 +22,8 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	public static final int QUEUE_MAX_SIZE = 200;
 
-	@Nonnull
-	private final AudioPlayer player;
-	@Nonnull
-	private Queue<AudioTrack> queue;
+	@Nonnull private final AudioPlayer player;
+	@Nonnull private Queue<AudioTrack> queue;
 	private boolean loop;
 	private final transient AtomicInteger counter = new AtomicInteger();
 	private final transient MutableIntObjectMap<Consumer<FriendlyException>> exceptionListeners =

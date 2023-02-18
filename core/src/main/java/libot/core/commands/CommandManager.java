@@ -15,8 +15,7 @@ public class CommandManager implements Iterable<Command> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CommandManager.class);
 
-	@Nonnull
-	private final Set<Command> commands;
+	@Nonnull private final Set<Command> commands;
 
 	@Nonnull
 	public static CommandManager fromClasspath() {

@@ -7,8 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 
 public class CommandException extends RuntimeException {
 
-	@Nullable
-	private final transient Message errorMessage;
+	@Nullable private final transient Message errorMessage;
 	private final boolean registerRatelimit;
 
 	public CommandException(@Nullable MessageBuilder builder, boolean registerRatelimit) {

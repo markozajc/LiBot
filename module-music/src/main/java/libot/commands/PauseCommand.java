@@ -12,10 +12,8 @@ import libot.core.entities.CommandContext;
 
 public class PauseCommand extends Command {
 
-	@Nonnull
-	public static final String FORMAT_RESUMED = "\u25B6 Playback resumed";
-	@Nonnull
-	public static final String FORMAT_PAUSED = "\u23F8 Playback paused";
+	@Nonnull public static final String FORMAT_RESUMED = "\u25B6 Playback resumed";
+	@Nonnull public static final String FORMAT_PAUSED = "\u23F8 Playback paused";
 
 	@Override
 	public void execute(CommandContext c) {

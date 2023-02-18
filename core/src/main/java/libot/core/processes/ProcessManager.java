@@ -33,8 +33,7 @@ public class ProcessManager {
 		private final long userId;
 		private final long channelId;
 		private final long guildId;
-		@Nonnull
-		private final Command command;
+		@Nonnull private final Command command;
 		private Object data;
 
 		public CommandProcess(@Nonnull CommandContext c, int pid) {

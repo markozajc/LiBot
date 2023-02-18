@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
 
-	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+	<statusListener
+		class="ch.qos.logback.core.status.NopStatusListener" />
 
-	<conversionRule conversionWord="lhighlight" converterClass="libot.core.logging.LevelHighlight" />
+	<conversionRule conversionWord="lhighlight"
+		converterClass="libot.core.logging.LevelHighlight" />
 
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
 		<filter class="libot.core.logging.LogFilter" />
 		<encoder>
 			<pattern>%gray(%-20.-20logger{0}) %lhighlight([%.-1level]) %m%n</pattern>

@@ -65,12 +65,9 @@ final class ModerationCommandUtils {
 		KICK(Member::kick, KICK_MEMBERS, "kicked out of"),
 		BAN((t, r) -> t.ban(0, r), BAN_MEMBERS, "banned from");
 
-		@Nonnull
-		private final BiFunction<Member, String, RestAction<Void>> action;
-		@Nonnull
-		private final Permission permission;
-		@Nonnull
-		private final String verb;
+		@Nonnull private final BiFunction<Member, String, RestAction<Void>> action;
+		@Nonnull private final Permission permission;
+		@Nonnull private final String verb;
 
 		ModAction(@Nonnull BiFunction<Member, String, RestAction<Void>> action, @Nonnull Permission permission,
 				  @Nonnull String verb) {

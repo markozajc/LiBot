@@ -81,8 +81,7 @@ public class Constants {
 		}
 		VERSION = versionString;
 	}
-	@Nonnull
-	public static final long[] RESOURCE_GUILDS;
+	@Nonnull public static final long[] RESOURCE_GUILDS;
 	static {
 		if (getenv(ENV_RESOURCE_GUILDS) != null) {
 			RESOURCE_GUILDS = stream(getenv(ENV_RESOURCE_GUILDS).split(",")).mapToLong(Long::parseLong).toArray(); // NOSONAR

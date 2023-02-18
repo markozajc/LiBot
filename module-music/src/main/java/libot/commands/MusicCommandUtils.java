@@ -164,14 +164,10 @@ class MusicCommandUtils {
 
 	private static class AudioLoadResultHandlerImpl implements AudioLoadResultHandler {
 
-		@Nonnull
-		private final CommandContext c;
-		@Nonnull
-		private final MessageLock<List<AudioTrack>> lock;
-		@Nonnull
-		private final MusicManager manager;
-		@Nonnull
-		private final String url;
+		@Nonnull private final CommandContext c;
+		@Nonnull private final MessageLock<List<AudioTrack>> lock;
+		@Nonnull private final MusicManager manager;
+		@Nonnull private final String url;
 
 		public AudioLoadResultHandlerImpl(@Nonnull CommandContext c, @Nonnull MessageLock<List<AudioTrack>> lock,
 										  @Nonnull MusicManager manager, @Nonnull String url) {

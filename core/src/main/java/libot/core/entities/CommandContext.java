@@ -42,21 +42,14 @@ public class CommandContext {
 
 	private static final String FORMAT_FALLBACK_ASK = format("React with %s or %s", ACCEPT_EMOJI, DENY_EMOJI);
 
-	@Nonnull
-	private static final CanceledException CANCELED = new CanceledException();
+	@Nonnull private static final CanceledException CANCELED = new CanceledException();
 
-	@Nonnull
-	private final GuildMessageReceivedEvent event;
-	@Nullable
-	private Message reference;
-	@Nonnull
-	private final Parameters parameters;
-	@Nonnull
-	private final Command command;
-	@Nonnull
-	private final BotContext botContext;
-	@Nullable
-	private EventUtils waiter;
+	@Nonnull private final GuildMessageReceivedEvent event;
+	@Nullable private Message reference;
+	@Nonnull private final Parameters parameters;
+	@Nonnull private final Command command;
+	@Nonnull private final BotContext botContext;
+	@Nullable private EventUtils waiter;
 
 	public CommandContext(@Nonnull GuildMessageReceivedEvent event, @Nonnull Command command,
 						  @Nonnull BotContext botContext, @Nonnull Prefix prefix) {
@@ -852,8 +845,8 @@ public class CommandContext {
 		return confirm(false, title, message, footer, color);
 	}
 
-	public boolean confirm(boolean keepPrompt, @Nullable String title, @Nonnull String message,
-						   @Nullable String footer, @Nullable Color color) {
+	public boolean confirm(boolean keepPrompt, @Nullable String title, @Nonnull String message, @Nullable String footer,
+						   @Nullable Color color) {
 		EmbedBuilder builder =
 			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
 

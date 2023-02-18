@@ -34,10 +34,8 @@ public class Shredder {
 
 	}
 
-	@Nonnull
-	private final List<Shred> shreds;
-	@Nonnull
-	private final Map<String, String> emojiCache = new ConcurrentHashMap<>();
+	@Nonnull private final List<Shred> shreds;
+	@Nonnull private final Map<String, String> emojiCache = new ConcurrentHashMap<>();
 
 	public Shredder(@Nonnull List<Shred> shreds) {
 		this.shreds = shreds;
@@ -49,7 +47,7 @@ public class Shredder {
 
 	public long getGuildCount() {
 		return this.shreds.stream().map(Shred::jda).map(JDA::getGuildCache).mapToLong(SnowflakeCacheView::size).sum()
-			- RESOURCE_GUILDS.length * this.shreds.size();
+			   - RESOURCE_GUILDS.length * this.shreds.size();
 	}
 
 	public Stream<User> getJoinedUserCache() {

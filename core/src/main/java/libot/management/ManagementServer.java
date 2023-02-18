@@ -24,8 +24,7 @@ public class ManagementServer {
 	private static final Logger LOG = LoggerFactory.getLogger(ManagementServer.class);
 	private static final AtomicInteger THREAD_NAME_COUNTER = new AtomicInteger();
 
-	@Nonnull
-	private final Shredder shredder;
+	@Nonnull private final Shredder shredder;
 	private final int port;
 
 	public ManagementServer(@Nonnull Shredder shredder, int port) {

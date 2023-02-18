@@ -15,20 +15,13 @@ import libot.core.shred.Shredder;
 
 public class BotContext {
 
-	@Nonnull @SuppressWarnings("null")
-	private final ScheduledExecutorService cron = newScheduledThreadPool(1);
-	@Nonnull
-	private final BotConfiguration config;
-	@Nonnull
-	private final CommandManager commands;
-	@Nonnull
-	private final DataManager data;
-	@Nonnull
-	private final Shredder shredder;
-	@Nonnull
-	private final ProviderManager providers;
-	@Nonnull
-	private final EventWaiterListener ewl;
+	@Nonnull @SuppressWarnings("null") private final ScheduledExecutorService cron = newScheduledThreadPool(1);
+	@Nonnull private final BotConfiguration config;
+	@Nonnull private final CommandManager commands;
+	@Nonnull private final DataManager data;
+	@Nonnull private final Shredder shredder;
+	@Nonnull private final ProviderManager providers;
+	@Nonnull private final EventWaiterListener ewl;
 
 	public BotContext(@Nonnull BotConfiguration config, @Nonnull CommandManager commands, @Nonnull DataManager data,
 					  @Nonnull Shredder shredder, @Nonnull ProviderManager providers,

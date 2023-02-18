@@ -167,8 +167,7 @@ public class PollCommand extends Command {
 				UNKNOWN;
 			}
 
-			@Nonnull
-			private final Reason reason;
+			@Nonnull private final Reason reason;
 
 			public PollException(@Nonnull Reason reason) {
 				this.reason = reason;

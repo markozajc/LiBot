@@ -9,8 +9,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class AutoRoleListener extends ListenerAdapter {
 
-	@Nonnull
-	private final BotContext bot;
+	@Nonnull private final BotContext bot;
 
 	public AutoRoleListener(@Nonnull BotContext bot) {
 		this.bot = bot;

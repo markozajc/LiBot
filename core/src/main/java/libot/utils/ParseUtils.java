@@ -114,7 +114,7 @@ public class ParseUtils {
 			ldt = ldt.plusDays(1);
 		}
 		return ldt.withHour(time[0]).withMinute(time[1]).withSecond(time[2]).toInstant(UTC).toEpochMilli()
-			- currentTimeMillis();
+			   - currentTimeMillis();
 	}
 
 	public static long parseRelativeTime(String input) {
