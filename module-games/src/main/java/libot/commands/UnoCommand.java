@@ -217,7 +217,7 @@ public class UnoCommand extends BettableGame {
 
 		@Override
 		public boolean shouldPlayDrawnCard(UnoGame game, UnoCard drawnCard, UnoPlayer next) {
-			return this.c.confirmf(FORMAT_PLAYER_CONFIRM_PLACE_DRAWN, LITHIUM, getEmoteWithName(this.c, drawnCard));
+			return this.c.confirmf(true, FORMAT_PLAYER_CONFIRM_PLACE_DRAWN, LITHIUM, getEmoteWithName(this.c, drawnCard));
 		}
 
 		@SuppressWarnings("null")

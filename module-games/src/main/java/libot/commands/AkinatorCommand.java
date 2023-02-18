@@ -278,7 +278,7 @@ public class AkinatorCommand extends Command {
 		if (image != null)
 			e.setImage(image.toString());
 
-		return c.confirm(e);
+		return c.confirm(true, e);
 	}
 
 	private static void finish(@Nonnull CommandContext c, boolean win) {

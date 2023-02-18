@@ -512,7 +512,7 @@ public class PollCommand extends Command {
 			.addField("Will mention everyone on start?", mentionEveryone ? "Yes" : "No", true)
 			.addField("Will the results be disclosed publicly?", discloseResultsPublicly ? "Yes" : "No", true);
 
-		if (c.confirm(b)) {
+		if (c.confirm(true, b)) {
 			if (time < currentTimeMillis())
 				throw c.error(FORMAT_POLL_EXPIRED, FAILURE);
 
@@ -525,11 +525,11 @@ public class PollCommand extends Command {
 	private static boolean shouldMentionEveryone(@Nonnull CommandContext c, @Nonnull TextChannel target) {
 		boolean botherAsking = c.getMember().hasPermission(target, MESSAGE_MENTION_EVERYONE)
 			&& c.getSelfMember().hasPermission(target, MESSAGE_MENTION_EVERYONE);
-		return botherAsking && c.confirm(FORMAT_SET_MENTION_EVERYONE, LITHIUM);
+		return botherAsking && c.confirm(true, FORMAT_SET_MENTION_EVERYONE, LITHIUM);
 	}
 
 	private static boolean shouldDiscloseResultsPublicly(@Nonnull CommandContext c, @Nonnull TextChannel target) {
-		return c.confirmf(FORMAT_SET_PUBLIC, LITHIUM, target.getAsMention());
+		return c.confirmf(true, FORMAT_SET_PUBLIC, LITHIUM, target.getAsMention());
 	}
 
 	@SuppressWarnings("null")
@@ -537,7 +537,7 @@ public class PollCommand extends Command {
 		var message = FORMAT_SET_MULTIPLE_CHOICES;
 		if (!c.getSelfMember().hasPermission(target, MESSAGE_MANAGE))
 			message += format(FORMAT_MULTIPLE_CHOICES_PERMISSION_NOTE, target.getAsMention());
-		return c.confirm(message, LITHIUM);
+		return c.confirm(true, message, LITHIUM);
 	}
 
 	private static long getTime(@Nonnull CommandContext c) {

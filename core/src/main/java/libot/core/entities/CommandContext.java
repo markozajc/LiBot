@@ -794,11 +794,11 @@ public class CommandContext {
 	// ===============* confirm *===============
 
 	public boolean confirm(@Nonnull String message) {
-		return confirm(message, false);
+		return confirm(false, message);
 	}
 
 	@SuppressWarnings("null")
-	public boolean confirm(@Nonnull String message, boolean keepPrompt) {
+	public boolean confirm(boolean keepPrompt, @Nonnull String message) {
 		String useMessage = message;
 		if (!hasChannelPermission(MESSAGE_ADD_REACTION))
 			useMessage += "\n" + FORMAT_FALLBACK_ASK;
@@ -806,18 +806,18 @@ public class CommandContext {
 		// because the stupid user denied/forgot to grant it
 
 		try {
-			return getConfirmation(reply(useMessage).get(), false);
+			return getConfirmation(reply(useMessage).get(), keepPrompt);
 		} catch (ExecutionException | InterruptedException e) { // NOSONAR
 			throw asUnchecked(e);
 		}
 	}
 
 	public boolean confirm(@Nonnull MessageEmbed embed) {
-		return confirm(embed, false);
+		return confirm(false, embed);
 	}
-	
+
 	@SuppressWarnings("null")
-	public boolean confirm(@Nonnull MessageEmbed embed, boolean keepPrompt) {
+	public boolean confirm(boolean keepPrompt, @Nonnull MessageEmbed embed) {
 		MessageEmbed useEmbed;
 		if (!canReact()) { // fallback ditto
 			var eb = new EmbedBuilder(embed);
@@ -840,40 +840,40 @@ public class CommandContext {
 	}
 
 	public boolean confirm(@Nonnull EmbedBuilder builder) {
-		return confirm(builder.build(), false);
+		return confirm(false, builder.build());
 	}
 
-	public boolean confirm(@Nonnull EmbedBuilder builder, boolean keepPrompt) {
-		return confirm(builder.build(), keepPrompt);
+	public boolean confirm(boolean keepPrompt, @Nonnull EmbedBuilder builder) {
+		return confirm(keepPrompt, builder.build());
 	}
 
 	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable String footer,
 						   @Nullable Color color) {
-		return confirm(title, message, footer, color, false);
+		return confirm(false, title, message, footer, color);
 	}
 
-	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable String footer,
-						   @Nullable Color color, boolean keepPrompt) {
+	public boolean confirm(boolean keepPrompt, @Nullable String title, @Nonnull String message,
+						   @Nullable String footer, @Nullable Color color) {
 		EmbedBuilder builder =
 			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
 
-		return confirm(builder.build(), keepPrompt);
+		return confirm(keepPrompt, builder.build());
 	}
 
 	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable Color color) {
-		return confirm(title, message, null, color, false);
+		return confirm(false, title, message, null, color);
 	}
 
-	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable Color color, boolean keepPrompt) {
-		return confirm(title, message, null, color, keepPrompt);
+	public boolean confirm(boolean keepPrompt, @Nullable String title, @Nonnull String message, @Nullable Color color) {
+		return confirm(keepPrompt, title, message, null, color);
 	}
 
 	public boolean confirm(@Nonnull String message, @Nullable Color color) {
-		return confirm(null, message, null, color, false);
+		return confirm(false, null, message, null, color);
 	}
-	
-	public boolean confirm(@Nonnull String message, @Nullable Color color, boolean keepPrompt) {
-		return confirm(null, message, null, color, keepPrompt);
+
+	public boolean confirm(boolean keepPrompt, @Nonnull String message, @Nullable Color color) {
+		return confirm(keepPrompt, null, message, null, color);
 	}
 
 	// ===============* confirmf *===============
@@ -884,40 +884,40 @@ public class CommandContext {
 	}
 
 	@SuppressWarnings("null")
-	public boolean confirmf(@Nonnull String messageFormat, boolean keepPrompt, @Nonnull Object... args) {
-		return confirm(format(messageFormat, args), keepPrompt);
+	public boolean confirmf(boolean keepPrompt, @Nonnull String messageFormat, @Nonnull Object... args) {
+		return confirm(keepPrompt, format(messageFormat, args));
 	}
 
 	@SuppressWarnings("null")
 	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, @Nullable String footer,
 							@Nullable Color color, @Nonnull Object... args) {
 		return confirm(title, format(messageFormat, args), footer, color);
-		
+
 	}
 
 	@SuppressWarnings("null")
-	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, @Nullable String footer,
-							boolean keepPrompt, @Nullable Color color, @Nonnull Object... args) {
-		return confirm(title, format(messageFormat, args), footer, color, keepPrompt);
+	public boolean confirmf(boolean keepPrompt, @Nullable String title, @Nonnull String messageFormat,
+							@Nullable String footer, @Nullable Color color, @Nonnull Object... args) {
+		return confirm(keepPrompt, title, format(messageFormat, args), footer, color);
 	}
 
 	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, @Nullable Color color,
 							@Nonnull Object... args) {
-		return confirmf(title, messageFormat, null, false, color, args);
+		return confirmf(false, title, messageFormat, null, color, args);
 	}
-	
-	public boolean confirmf(@Nullable String title, @Nonnull String messageFormat, boolean keepPrompt,
+
+	public boolean confirmf(boolean keepPrompt, @Nullable String title, @Nonnull String messageFormat,
 							@Nullable Color color, @Nonnull Object... args) {
-		return confirmf(title, messageFormat, null, keepPrompt, color, args);
+		return confirmf(keepPrompt, title, messageFormat, null, color, args);
 	}
 
 	public boolean confirmf(@Nonnull String messageFormat, @Nullable Color color, @Nonnull Object... args) {
-		return confirmf(null, messageFormat, null, false, color, args);
+		return confirmf(false, null, messageFormat, null, color, args);
 	}
 
-	public boolean confirmf(@Nonnull String messageFormat, boolean keepPrompt, @Nullable Color color,
+	public boolean confirmf(boolean keepPrompt, @Nonnull String messageFormat, @Nullable Color color,
 							@Nonnull Object... args) {
-		return confirmf(null, messageFormat, null, keepPrompt, color, args);
+		return confirmf(keepPrompt, null, messageFormat, null, color, args);
 	}
 
 	// ===============* askraw *===============
