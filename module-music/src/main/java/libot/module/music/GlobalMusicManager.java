@@ -68,6 +68,10 @@ public class GlobalMusicManager {
 			return getPlayer().getPlayingTrack();
 		}
 
+		public boolean isPlayingTrack() {
+			return getPlayingTrack() != null;
+		}
+
 	}
 
 	private static final MutableLongObjectMap<MusicManager> MANAGERS =

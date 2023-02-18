@@ -6,8 +6,6 @@ import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.LIBOT;
 import static libot.utils.Utilities.array;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import libot.core.commands.*;
@@ -46,12 +44,7 @@ public class AboutCommand extends Command {
 	}
 
 	private static void appendStatistics(@Nonnull CommandContext c, @Nonnull EmbedPrebuilder b) {
-		long playing = GlobalMusicManager.getManagers()
-			.values()
-			.stream()
-			.map(MusicManager::getPlayingTrack)
-			.filter(Objects::nonNull)
-			.count();
+		long playing = GlobalMusicManager.getManagers().values().stream().filter(MusicManager::isPlayingTrack).count();
 		b.addFieldf("Statistics", FORMAT_STATISTICS, c.shredder().getGuildCount(), ProcessManager.getCount(), playing,
 					playing == 1 ? "" : "s", true);
 	}
