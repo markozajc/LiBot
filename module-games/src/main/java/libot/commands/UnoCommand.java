@@ -55,8 +55,8 @@ public class UnoCommand extends BettableGame {
 		@Nonnull private final StringBuilder feed;
 
 		public DiscordUnoGame(@Nonnull BettableGameContext c, @Nonnull StringBuilder feed) {
-			super(new DiscordPlayer(c, feed), new UnoStrategicPlayer("LiBot"), UnoStandardDeck.getDeck(), 7,
-				  UnoOfficialRules.getPack(PROGRESSIVE));
+			super(UnoStandardDeck.getDeck(), 7, UnoOfficialRules.getPack(PROGRESSIVE), new DiscordPlayer(c, feed),
+				  new UnoStrategicPlayer("LiBot"));
 			this.feed = feed;
 		}
 
@@ -87,10 +87,10 @@ public class UnoCommand extends BettableGame {
 
 		@Override
 		@SuppressWarnings("null")
-		public UnoCard playCard(UnoGame game, UnoPlayer next) {
+		public UnoCard playCard(UnoGame game) {
 			var possible = combinedPlacementAnalysis(game.getTopCard(), this.getHand().getCards(), game.getRules(),
 													 this.getHand());
-			reportChooseAction(game, next);
+			reportChooseAction(game, game.getNextPlayer());
 			return inputAction(possible);
 		}
 
@@ -210,7 +210,7 @@ public class UnoCommand extends BettableGame {
 		}
 
 		@Override
-		public boolean shouldPlayDrawnCard(UnoGame game, UnoCard drawnCard, UnoPlayer next) {
+		public boolean shouldPlayDrawnCard(UnoGame game, UnoCard drawnCard) {
 			return this.c.confirmf(true, FORMAT_PLAYER_CONFIRM_PLACE_DRAWN, LITHIUM,
 								   getEmoteWithName(this.c, drawnCard));
 		}

@@ -1,9 +1,8 @@
 package libot.commands;
 
-import static com.markozajc.akiwrapper.Akiwrapper.Answer.*;
-import static com.markozajc.akiwrapper.core.entities.Server.GuessType.CHARACTER;
-import static com.markozajc.akiwrapper.core.entities.Server.Language.ENGLISH;
-import static java.lang.Double.compare;
+import static com.github.markozajc.akiwrapper.Akiwrapper.Answer.*;
+import static com.github.markozajc.akiwrapper.core.entities.Server.GuessType.CHARACTER;
+import static com.github.markozajc.akiwrapper.core.entities.Server.Language.ENGLISH;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.joining;
@@ -20,11 +19,11 @@ import javax.annotation.*;
 import org.eclipse.collections.api.set.primitive.*;
 import org.eclipse.collections.impl.factory.primitive.LongSets;
 
-import com.markozajc.akiwrapper.*;
-import com.markozajc.akiwrapper.Akiwrapper.Answer;
-import com.markozajc.akiwrapper.core.entities.*;
-import com.markozajc.akiwrapper.core.entities.Server.Language;
-import com.markozajc.akiwrapper.core.exceptions.*;
+import com.github.markozajc.akiwrapper.*;
+import com.github.markozajc.akiwrapper.Akiwrapper.Answer;
+import com.github.markozajc.akiwrapper.core.entities.*;
+import com.github.markozajc.akiwrapper.core.entities.Server.Language;
+import com.github.markozajc.akiwrapper.core.exceptions.*;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
@@ -87,7 +86,7 @@ public class AkinatorCommand extends Command {
 		double progression = 0;
 		try {
 			var rejected = LongSets.mutable.empty();
-			for (var q = aw.getCurrentQuestion(); q != null; q = aw.getCurrentQuestion()) {
+			for (var q = aw.getQuestion(); q != null; q = aw.getQuestion()) {
 				askQuestion(c, aw, q, startTimestamp, lastTimestamp, rejected, oldProgress, progression);
 				oldProgress = progression;
 				progression = q.getProgression();
@@ -172,7 +171,7 @@ public class AkinatorCommand extends Command {
 
 			} else {
 				c.typing();
-				aw.answerCurrentQuestion(answer);
+				aw.answer(answer);
 				answered = true;
 			}
 		}
@@ -231,7 +230,7 @@ public class AkinatorCommand extends Command {
 		boolean anyQuestionRejected = false;
 		for (var g : aw.getGuessesAboveProbability(GUESS_THRESHOLD)
 			.stream()
-			.sorted((g1, g2) -> compare(g2.getProbability(), g1.getProbability()))
+			.sorted((g1, g2) -> Double.compare(g2.getProbability(), g1.getProbability()))
 			.toList()) {
 			if (!rejected.contains(g.getIdLong())) {
 				if (reviewGuess(c, g)) {

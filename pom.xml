@@ -5,7 +5,7 @@
 
 	<groupId>zajc.libot</groupId>
 	<artifactId>libot</artifactId>
-	<version>5.0.2</version>
+	<version>5.0.2-1</version>
 	<packaging>pom</packaging>
 
 	<name>LiBot</name>
@@ -152,7 +152,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.6.0</version>
+					<version>3.0.0</version>
 					<configuration>
 						<mainClass>none</mainClass>
 						<skip>true</skip>
@@ -290,7 +290,7 @@
 			<dependency>
 				<groupId>com.github.walkyst</groupId>
 				<artifactId>lavaplayer-fork</artifactId>
-				<version>1.3.99.1</version>
+				<version>1.3.99.2</version>
 			</dependency>
 			<dependency>
 				<groupId>de.vandermeer</groupId>

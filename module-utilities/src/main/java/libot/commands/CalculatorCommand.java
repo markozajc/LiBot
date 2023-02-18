@@ -27,7 +27,7 @@ import javax.annotation.*;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 
-import com.github.markozajc.functions.exceptionable.all.AEFunction;
+import com.github.markozajc.ef.function.except.all.AEFunction;
 
 import libot.core.commands.*;
 import libot.core.commands.exceptions.CommandException;

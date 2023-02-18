@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 
-import com.github.markozajc.functions.exceptionable.EFunction;
+import com.github.markozajc.ef.function.except.EFunction;
 
 public class ReflectionUtils {
 
