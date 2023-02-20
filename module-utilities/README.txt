@@ -9,6 +9,7 @@ Module data:
 	
 	Listeners --------------------------
 	- PollListener
+	- CalculatorRateUpdaterListener
 	
 	Commands ---------------------------
 	- CalculatorCommand

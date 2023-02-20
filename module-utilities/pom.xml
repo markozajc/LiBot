@@ -31,6 +31,7 @@
 	</scm>
 
 	<dependencies>
+
 		<!-- Cross-module -->
 		<dependency>
 			<groupId>zajc.libot</groupId>
@@ -47,12 +48,13 @@
 			<artifactId>chatter-bot-api</artifactId>
 			<version>2.0.1</version>
 		</dependency>
-
+		
 		<!-- Annotations -->
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
 		</dependency>
+
 	</dependencies>
 
 	<build>
