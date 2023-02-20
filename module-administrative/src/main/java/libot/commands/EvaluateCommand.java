@@ -16,6 +16,7 @@ import javax.script.*;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.slf4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
@@ -76,6 +77,7 @@ public class EvaluateCommand extends Command {
 	}
 
 	@SuppressWarnings("null")
+	@SuppressFBWarnings(value="SCRIPT_ENGINE_INJECTION", justification="access is restricted")
 	public static synchronized EvalResult eval(@Nonnull CommandContext c) throws ScriptException {
 		var stdout = new StringWriter();
 		var stderr = new StringWriter();

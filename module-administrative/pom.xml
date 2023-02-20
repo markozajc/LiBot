@@ -44,7 +44,7 @@
 			<version>3.0.15</version>
 		</dependency>
 
-		<!-- Spotbugs annotations -->
+		<!-- Annotations -->
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
