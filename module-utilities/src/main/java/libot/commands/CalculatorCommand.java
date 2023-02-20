@@ -5,8 +5,7 @@ import static java.lang.System.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Paths.get;
-import static java.time.Instant.ofEpochMilli;
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
@@ -17,18 +16,14 @@ import static org.apache.commons.lang3.ArrayUtils.indexOf;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.FileTime;
+import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Stream;
 
 import javax.annotation.*;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 
-import com.github.markozajc.ef.function.except.all.AEFunction;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import libot.core.commands.*;
 import libot.core.commands.exceptions.CommandException;
 import libot.core.entities.CommandContext;
@@ -38,14 +33,11 @@ import net.dv8tion.jda.api.entities.*;
 
 public class CalculatorCommand extends Command {
 
-	private static final boolean ENABLED;
-	private static final int TIMEOUT_EVALUATE = 15;
-	private static final int TIMEOUT_UPDATE = 35;
-	private static final Logger LOG = getLogger(CalculatorCommand.class);
-	private static final MutableLong LAST_RATES_UPDATE;
-	private static final long MAX_RATES_DATE = DAYS.toMillis(6);
-	private static final Path DATA_HOME;
+	public static final boolean ENABLED;
 	private static final Path DATA_DIRECTORY;
+	private static final int TIMEOUT_EVALUATE = 15;
+	private static final Logger LOG = getLogger(CalculatorCommand.class);
+	private static final Path DATA_HOME;
 	@Nullable private static final Path KILL_SWITCH;
 	static {
 		ENABLED = getenv(ENV_QALCULATE_PATH) != null;
@@ -55,28 +47,10 @@ public class CalculatorCommand extends Command {
 			DATA_DIRECTORY = DATA_HOME.resolve(".local/share/qalculate/");
 			KILL_SWITCH = DATA_DIRECTORY.resolve("killswitch");
 
-			long mtime;
-			try {
-				mtime = Stream.of("btc.json", "eurofxref-daily.xml", "rates.html")
-					.map(DATA_DIRECTORY::resolve)
-					.map((AEFunction<Path, FileTime>) Files::getLastModifiedTime)
-					.mapToLong(FileTime::toMillis)
-					.min()
-					.orElse(0);
-			} catch (Exception e) {
-				if (!(e instanceof NoSuchFileException))
-					LOG.error("Could not determine exchange rates mtime", e);
-				mtime = 0;
-			}
-
-			if (LOG.isDebugEnabled())
-				LOG.debug("Determined last rates update as {}", ofEpochMilli(mtime));
-			LAST_RATES_UPDATE = new MutableLong(mtime);
 		} else {
 			DATA_HOME = null;
 			DATA_DIRECTORY = null;
 			KILL_SWITCH = null;
-			LAST_RATES_UPDATE = null;
 
 			if (ENABLED)
 				LOG.warn("{} is unset. Killswitch and conversion rate updating will be unavailable.",
@@ -128,10 +102,7 @@ public class CalculatorCommand extends Command {
 			mode = MODE_NORMAL;
 
 		var messages = new ArrayList<QalcMessage>(5);
-		checkRates(messages);
-
-		Result result;
-		result = evaluate(c, messages, expression, mode);
+		var result = evaluate(c, messages, expression, mode);
 
 		var m = new MessageBuilder();
 
@@ -159,18 +130,6 @@ public class CalculatorCommand extends Command {
 			c.reply(m.build());
 		else
 			c.replyraw(m.build()).addFile(resultFile, "result.txt").submit();
-	}
-
-	private static void checkRates(@Nonnull List<QalcMessage> messages) throws IOException, InterruptedException {
-		if (LAST_RATES_UPDATE != null) {
-			synchronized (LAST_RATES_UPDATE) {
-				long now = currentTimeMillis();
-				if (now - LAST_RATES_UPDATE.longValue() > MAX_RATES_DATE && updateRates()) {
-					messages.add(new QalcMessage(LEVEL_INFO, "Updated exchange rates."));
-					LAST_RATES_UPDATE.setValue(now);
-				}
-			}
-		}
 	}
 
 	@Nullable
@@ -209,7 +168,7 @@ public class CalculatorCommand extends Command {
 	@SuppressWarnings("null")
 	private static byte[] runCalculatorProcess(@Nonnull CommandContext c, @Nonnull String expression,
 											   @Nonnull String mode) throws IOException, InterruptedException {
-		var p = exec(getenv(ENV_QALCULATE_PATH), expression.substring(mode.length()), mode);
+		var p = executeQalculate(expression.substring(mode.length()), mode);
 
 		if (!p.waitFor(TIMEOUT_EVALUATE, SECONDS) || p.exitValue() == EXIT_TIMEOUT) {
 			if (p.isAlive())
@@ -235,28 +194,14 @@ public class CalculatorCommand extends Command {
 		}
 	}
 
-	private static boolean updateRates() throws IOException, InterruptedException {
-		var p = exec(getenv(ENV_QALCULATE_PATH), "update");
-
-		if (!p.waitFor(TIMEOUT_UPDATE, SECONDS)) {
-			if (p.isAlive())
-				p.destroyForcibly();
-
-			LOG.warn("Updating exchange rates timed out");
-			return false;
-		}
-
-		if (p.exitValue() != 0) {
-			LOG.warn("Updating rates caused non-zero exit {}", p.exitValue());
-			return false;
-		}
-
-		return true;
-	}
-
 	@Nonnull
 	@SuppressWarnings("null")
-	private static Process exec(@Nonnull String... command) throws IOException {
+	@SuppressFBWarnings(value = "COMMAND_INJECTION", justification = "input is filtered")
+	public static Process executeQalculate(@Nonnull String... params) throws IOException {
+		var command = new String[1 + params.length];
+		command[0] = getenv(ENV_QALCULATE_PATH);
+		arraycopy(params, 0, command, 1, params.length);
+
 		var b = new ProcessBuilder(command);
 		b.environment().clear();
 		b.environment().put("HOME", getenv(ENV_QALCULATE_HOME));
