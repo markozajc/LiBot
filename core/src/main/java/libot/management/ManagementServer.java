@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.*;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import libot.core.shred.Shredder;
 import libot.core.shred.Shredder.Shred;
 
@@ -32,6 +33,7 @@ public class ManagementServer {
 		this.port = port;
 	}
 
+	@SuppressFBWarnings(value = "UNENCRYPTED_SERVER_SOCKET", justification = "for local transport only")
 	public void start() throws IOException {
 		@SuppressWarnings("resource")
 		var server = new ServerSocket(this.port);
