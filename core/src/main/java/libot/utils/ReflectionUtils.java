@@ -1,6 +1,6 @@
 package libot.utils;
 
-import static java.lang.reflect.Modifier.isAbstract;
+import static java.lang.reflect.Modifier.*;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.reflections.scanners.Scanners.SubTypes;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -38,6 +38,7 @@ public class ReflectionUtils {
 		return reflections.get(SubTypes.of(supertype).asClass())
 			.stream()
 			.filter(c -> !isAbstract(c.getModifiers()))
+			.filter(c -> !isInterface(c.getModifiers()))
 			.map(c -> {
 				try {
 					return instantizer.applyChecked((Class<? extends T>) c);

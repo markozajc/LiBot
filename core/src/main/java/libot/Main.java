@@ -31,6 +31,7 @@ import libot.core.listeners.*;
 import libot.core.processes.ProcessManager;
 import libot.core.shred.Shredder;
 import libot.core.shred.Shredder.Shred;
+import libot.listeners.BotEventListener;
 import libot.management.ManagementServer;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
@@ -104,13 +105,16 @@ public class Main {
 			checkResourceGuilds(shredder);
 		}
 
+		LOG.info("Invoking post-startup listeners");
+		scanClasspath(BotEventListener.class, libot.listeners.Anchor.class).forEach(l -> l.onStartup(bot));
+
 		LOG.info("Finished loading");
 		LOG.info("    |_|_ LiBot {}", VERSION);
 		LOG.info("  |_|_|_ {} shreds running", shredder.getShreds().size());
 		LOG.info("    |_   {} guilds visible", shredder.getGuildCount());
+
 	}
 
-	@SuppressWarnings("null")
 	public static void stop(@Nonnull BotContext bot) {
 		LOG.info("Shutting down providers");
 		bot.providers().shutdownAll();
@@ -153,7 +157,6 @@ public class Main {
 
 	@SuppressWarnings("null")
 	private static void loadEventListeners(@Nonnull Shredder shredder, @Nonnull BotContext bot) {
-
 		var listeners = concat(Stream.of(new MessageListener(bot), new ShredClashListener(bot), new EventLogListener()),
 							   scanClasspath(EventListener.class, libot.listeners.Anchor.class, c -> {
 								   try {
