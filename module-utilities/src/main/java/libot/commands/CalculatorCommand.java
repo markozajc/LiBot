@@ -327,7 +327,7 @@ public class CalculatorCommand extends Command {
 			[constants](https://qalculate.github.io/manual/qalculate-definitions-variables.html). \
 			Begin your expression with `%s` for high precision mode, or `%s` for exact evaluation mode.
 			Powered by [Qalculate!](https://qalculate.github.io/)
-			_Note: Qalculate! input is single-line. Newlines are ignored if multi-line input is provided._
+			_Note: Qalculate! input is multi-line. You can specify variable assignments (x := y) on separate lines._
 			""".formatted(MODE_HIGH_PRECISION, MODE_EXACT);
 	}
 
