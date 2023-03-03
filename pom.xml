@@ -5,7 +5,7 @@
 
 	<groupId>zajc.libot</groupId>
 	<artifactId>libot</artifactId>
-	<version>5.0.3</version>
+	<version>5.0.3-2</version>
 	<packaging>pom</packaging>
 
 	<name>LiBot</name>
