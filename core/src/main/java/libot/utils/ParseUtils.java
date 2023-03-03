@@ -108,9 +108,9 @@ public class ParseUtils {
 			return -1;
 		}
 
-		var ldt = LocalDateTime.now();
-		if (ldt.getHour() > time[0] || ldt.getHour() == time[0] && ldt.getMinute() < time[1]
-			|| ldt.getHour() == time[0] && ldt.getMinute() == time[1] && ldt.getSecond() < time[2]) {
+		var ldt = LocalDateTime.now(UTC);
+		if (ldt.getHour() > time[0] || ldt.getHour() == time[0] && ldt.getMinute() > time[1]
+			|| ldt.getHour() == time[0] && ldt.getMinute() == time[1] && ldt.getSecond() > time[2]) {
 			ldt = ldt.plusDays(1);
 		}
 		return ldt.withHour(time[0]).withMinute(time[1]).withSecond(time[2]).toInstant(UTC).toEpochMilli()
