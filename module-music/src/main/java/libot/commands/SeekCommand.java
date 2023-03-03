@@ -14,8 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
-import com.sedmelluq.discord.lavaplayer.container.ogg.OggContainerProbe;
-import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import libot.core.commands.*;
@@ -39,8 +37,6 @@ public class SeekCommand extends Command {
 		 `1      ` seek to the first second
 		 (seeking to the beginning might cause certain tracks to stop playing*p)
 		""";
-	private static final String OGG_NOT_SEEKABLE =
-		" because it's in Ogg format, and it's not possible to seek Ogg streams due to the way Ogg works";
 	private static final String FORMAT_CANT_SEEK = """
 		It is not possible to seek the current track%s.""";
 
@@ -56,9 +52,7 @@ public class SeekCommand extends Command {
 
 		if (!track.isSeekable()) {
 			String reason = "";
-			if (isOgg(track))
-				reason = OGG_NOT_SEEKABLE;
-			else if (track.getInfo().isStream)
+			if (track.getInfo().isStream)
 				reason = " because it's a stream";
 
 			throw c.errorf(FORMAT_CANT_SEEK, DISABLED, reason);
@@ -114,11 +108,6 @@ public class SeekCommand extends Command {
 		} catch (NumberFormatException e) {
 			return -1;
 		}
-	}
-
-	private static boolean isOgg(@Nonnull AudioTrack track) {
-		return track instanceof HttpAudioTrack httpTrack
-			&& httpTrack.getContainerTrackFactory().probe instanceof OggContainerProbe;
 	}
 
 	@Override
