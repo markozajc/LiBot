@@ -28,6 +28,7 @@ public class SeekCommand extends Command {
 		The position must be specified in a relative or absolute format, for example:
 		Relative:
 		 `+1s    ` seek forward one second
+		 `+1     ` ditto
 		 `-10m   ` seek backwards ten minutes
 		 `+1h    ` seek forward one hour
 		Absolute:
@@ -36,6 +37,7 @@ public class SeekCommand extends Command {
 		 `1 0    ` ditto
 		 `0      ` seek to the beginning
 		 `1      ` seek to the first second
+		 (seeking to the beginning might cause certain tracks to stop playing*p)
 		""";
 	private static final String OGG_NOT_SEEKABLE =
 		" because it's in Ogg format, and it's not possible to seek Ogg streams due to the way Ogg works";
