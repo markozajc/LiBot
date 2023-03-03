@@ -83,15 +83,16 @@ public class ParseUtils {
 	}
 
 	public static long parseTime(String input) {
-		long time = parseClock(input);
-
-		if (time < 0)
+		long time;
+		if (input.contains(":"))
+			time = parseClock(input);
+		else
 			time = parseRelativeTime(input);
 
 		if (time < 0)
 			throw new TimeParseException();
 		else
-			return time; // because parseRelativeTime is relative
+			return time;
 	}
 
 	private static long parseClock(String input) {
@@ -138,11 +139,16 @@ public class ParseUtils {
 			};
 			if (append)
 				continue;
-			if (unit == null || durationBuffer.length() == 0)
+			if (unit == null || durationBuffer.length() == 0) // not a number and not a unit
 				return -1;
 			duration += unit.toMillis(Long.parseLong(durationBuffer.toString()));
 			durationBuffer.setLength(0);
 		}
+
+		if (durationBuffer.length() != 0)
+			duration += SECONDS.toMillis(Long.parseLong(durationBuffer.toString())); // any number without unit is
+																					 // treated as seconds
+
 		return duration;
 	}
 
