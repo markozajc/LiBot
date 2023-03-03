@@ -143,8 +143,10 @@ public class TrackScheduler extends AudioEventAdapter {
 		Object data = track.getUserData();
 		if (data != null) {
 			int ticket = (int) data;
-			this.exceptionListeners.put(ticket, this.playListeners.get(ticket).get());
-			this.playListeners.remove(ticket);
+			if (this.playListeners.containsKey(ticket)) {
+				this.exceptionListeners.put(ticket, this.playListeners.get(ticket).get());
+				this.playListeners.remove(ticket);
+			}
 		}
 	}
 
