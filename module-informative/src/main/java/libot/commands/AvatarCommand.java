@@ -43,9 +43,10 @@ public class AvatarCommand extends Command {
 	}
 
 	private static void sendAvatar(@Nonnull CommandContext c, @Nonnull User user) {
+		var url = user.getEffectiveAvatarUrl() + "?size=4096";
 		var e = new EmbedPrebuilder(LITHIUM);
-		e.setImage(user.getEffectiveAvatarUrl());
-		e.setDescriptionf("[Download](%s)", user.getEffectiveAvatarUrl());
+		e.setImage(url);
+		e.setDescriptionf("[Download](%s)", url);
 		c.reply(e);
 	}
 
