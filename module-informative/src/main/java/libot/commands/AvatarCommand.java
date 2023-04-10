@@ -1,5 +1,6 @@
 package libot.commands;
 
+import static javax.imageio.ImageIO.*;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.core.commands.exceptions.ExceptionHandler.reportException;
@@ -9,7 +10,11 @@ import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
 
+import java.io.*;
+
 import javax.annotation.Nonnull;
+
+import org.slf4j.*;
 
 import kong.unirest.*;
 import libot.core.commands.*;
@@ -20,6 +25,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class AvatarCommand extends Command {
+
+	private static final Logger LOG = LoggerFactory.getLogger(AvatarCommand.class);
 
 	@Override
 	@SuppressWarnings("null")
@@ -63,12 +70,39 @@ public class AvatarCommand extends Command {
 		sendAvatar(c, url, b.getBody());
 	}
 
+	@SuppressWarnings("null")
 	private static void sendAvatar(@Nonnull CommandContext c, @Nonnull String url, @Nonnull byte[] data) {
 		var extension = url.substring(url.lastIndexOf('.') + 1);
 		var e = new EmbedPrebuilder(LITHIUM);
-		e.setDescriptionf("[View original (%d KiB)](%s?size=4096)", data.length / 1024, url)
-			.setImage("attachment://avatar." + extension);
+		e.setImage("attachment://avatar." + extension);
+		e.setDescriptionf("[View original](%s?size=4096) (%d KiB%s)", url, data.length / 1024,
+						  getImageResolutionString(data, extension));
 		c.getChannel().sendFile(data, "avatar." + extension).setEmbeds(e.build()).queue();
+	}
+
+	@Nonnull
+	private static String getImageResolutionString(@Nonnull byte[] data, @Nonnull String extension) {
+		var resolution = getImageDimension(data, extension);
+		return resolution == -1 ? "" : ", " + resolution + " × " + resolution + " pixels";
+	}
+
+	private static int getImageDimension(@Nonnull byte[] data, @Nonnull String extension) {
+		var readers = getImageReadersBySuffix(extension);
+		while (readers.hasNext()) {
+			var reader = readers.next();
+			try (var is = createImageInputStream(new ByteArrayInputStream(data))) {
+				reader.setInput(is);
+				return reader.getWidth(reader.getMinIndex());
+
+			} catch (IOException e) {
+				LOG.warn("Failed to decode the image resolution for {}", extension);
+				LOG.warn("", e);
+
+			} finally {
+				reader.dispose();
+			}
+		}
+		return -1;
 	}
 
 	@Override
