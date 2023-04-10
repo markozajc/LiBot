@@ -12,6 +12,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 
 import libot.core.commands.exceptions.runtime.*;
@@ -40,21 +42,12 @@ public class ExceptionHandler {
 		try {
 			boolean handled = handleThrowable(c, unpacked);
 			if (!handled) {
-				int maxTraceLength = Message.MAX_CONTENT_LENGTH - c.getCommandName().length() - 26;
-				var report = """
-					Failed to execute %s:```
-					%s```""".formatted(c.getCommandName(), abbreviate(getStackTrace(unpacked), maxTraceLength));
-
-				c.messageSysadmins(p -> p.sendMessage(report));
-
-				LOG.error("Unhandled exception in {}", c.getCommandName());
-				LOG.error("", unpacked);
+				reportException(c, t);
 
 				if (c.canTalk())
 					c.replyf("// FAILURE //", """
 						LiBot ran into an unknown error. If the issue persists, please report it via `%sfeedback`.""",
 							 FAILURE, c.getEffectivePrefix());
-
 			} else {
 				LOG.debug("Automatically handled an exception in {}", c.getCommandName());
 			}
@@ -64,6 +57,19 @@ public class ExceptionHandler {
 		} catch (Exception e) {
 			LOG.error("Got an exception while handling an error", e);
 		}
+	}
+
+	@SuppressWarnings("null")
+	public static void reportException(@Nonnull CommandContext c, @Nonnull Throwable throwable) {
+		int maxTraceLength = Message.MAX_CONTENT_LENGTH - c.getCommandName().length() - 26;
+		var report = """
+			Failed to execute %s:```
+			%s```""".formatted(c.getCommandName(), abbreviate(getStackTrace(throwable), maxTraceLength));
+
+		c.messageSysadmins(p -> p.sendMessage(report));
+
+		LOG.error("Unhandled exception in {}", c.getCommandName());
+		LOG.error("", throwable);
 	}
 
 	public static class ThrowableHandler {
