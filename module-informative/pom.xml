@@ -36,6 +36,12 @@
 			<groupId>zajc.libot</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
+		
+		<!-- HTTP -->
+		<dependency>
+			<groupId>com.konghq</groupId>
+			<artifactId>unirest-java</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
