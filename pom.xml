@@ -30,9 +30,9 @@
 	</developers>
 
 	<scm>
-		<url>https://git.zajc.eu.org/libot/authorative.git</url>
-		<connection>scm:git:git://git.zajc.eu.org/libot/authorative.git</connection>
-		<developerConnection>scm:git:ssh://git@zajc.eu.org/srv/git/libot-authorative.git</developerConnection>
+		<url>https://git.zajc.eu.org/libot/authoritative.git</url>
+		<connection>scm:git:git://git.zajc.eu.org/libot/authoritative.git</connection>
+		<developerConnection>scm:git:ssh://git@zajc.eu.org/srv/git/libot-authoritative.git</developerConnection>
 	</scm>
 
 	<properties>

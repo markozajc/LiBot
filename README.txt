@@ -16,7 +16,7 @@ Building LiBot --------------
     Building:
        Building LiBot should be rather easy:
        
-          $ git clone git://git.zajc.eu.org/libot/authorative.git libot
+          $ git clone git://git.zajc.eu.org/libot/authoritative.git libot
           $ cd libot
           $ git submodule update --init
           $ mvn clean package -DoutputLocation=/output/path
