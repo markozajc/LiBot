@@ -280,7 +280,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.4.6</version>
+				<version>1.4.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.reflections</groupId>
@@ -295,7 +295,7 @@
 			<dependency>
 				<groupId>com.github.walkyst</groupId>
 				<artifactId>lavaplayer-fork</artifactId>
-				<version>1.4.0</version>
+				<version>1.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>de.vandermeer</groupId>

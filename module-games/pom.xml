@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>com.github.markozajc</groupId>
 			<artifactId>akiwrapper</artifactId>
-			<version>1.5.2</version>
+			<version>1.5.2-2</version>
 		</dependency>
 
 		<!-- Uno support -->
