@@ -118,12 +118,6 @@
 			<version>2.10.1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.github.Marcono1234</groupId>
-			<artifactId>gson-record-type-adapter-factory</artifactId>
-			<version>0.3.0</version>
-		</dependency>
-
 		<!-- ASCII tables -->
 		<dependency>
 			<groupId>de.vandermeer</groupId>
@@ -152,11 +146,6 @@
 		<repository>
 			<id>m2-dv8tion</id>
 			<url>https://m2.dv8tion.net/releases</url>
-		</repository>
-
-		<repository>
-			<id>jitpack</id>
-			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
 

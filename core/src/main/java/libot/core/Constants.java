@@ -14,12 +14,11 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
 
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.asciithemes.TA_Grid;
 import de.vandermeer.asciithemes.u8.U8_Grids;
-import marcono1234.gson.recordadapter.RecordTypeAdapterFactory;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 
 @SuppressWarnings("null")
@@ -68,8 +67,7 @@ public class Constants {
 	// Miscellaneous
 	public static final ErrorHandler PRIVATE_MESSAGE_ERROR_HANDLER = new ErrorHandler().ignore(UNKNOWN_USER);
 	public static final File PROPERTIES_DIRECTORY = new File("config");
-	public static final Gson GSON =
-		new GsonBuilder().registerTypeAdapterFactory(RecordTypeAdapterFactory.DEFAULT).create();
+	public static final Gson GSON = new Gson();
 	public static final Consumer<Throwable> EMPTY_FAIL_CONSUMER = e -> {};
 	public static final String VERSION;
 	static {
