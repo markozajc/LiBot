@@ -127,9 +127,9 @@ public class CalculatorCommand extends Command {
 		if (m.isEmpty() && resultFile != null)
 			c.reply("No output", DISABLED);
 		else if (resultFile == null)
-			c.reply(m.build());
+			c.reply(m);
 		else
-			c.replyraw(m.build()).addFile(resultFile, "result.txt").submit();
+			c.replyraw(m).addFile(resultFile, "result.txt").submit();
 	}
 
 	@Nullable

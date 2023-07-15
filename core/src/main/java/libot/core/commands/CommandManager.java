@@ -3,17 +3,18 @@ package libot.core.commands;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static libot.utils.ReflectionUtils.scanClasspath;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.*;
 
 import javax.annotation.*;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.*;
+import org.slf4j.Logger;
 
 public class CommandManager implements Iterable<Command> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CommandManager.class);
+	private static final Logger LOG = getLogger(CommandManager.class);
 
 	@Nonnull private final Set<Command> commands;
 

@@ -9,12 +9,13 @@ import static libot.utils.ParseUtils.parseLong;
 import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.*;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
 
 import kong.unirest.*;
 import libot.core.commands.*;
@@ -26,7 +27,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class AvatarCommand extends Command {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AvatarCommand.class);
+	private static final Logger LOG = getLogger(AvatarCommand.class);
 
 	@Override
 	@SuppressWarnings("null")

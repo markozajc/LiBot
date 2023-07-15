@@ -6,6 +6,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.VERSION;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.net.*;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import libot.core.shred.Shredder;
@@ -22,7 +23,7 @@ import libot.core.shred.Shredder.Shred;
 
 public class ManagementServer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ManagementServer.class);
+	private static final Logger LOG = getLogger(ManagementServer.class);
 	private static final AtomicInteger THREAD_NAME_COUNTER = new AtomicInteger();
 
 	@Nonnull private final Shredder shredder;

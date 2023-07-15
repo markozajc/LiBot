@@ -4,6 +4,7 @@ import static java.lang.System.getenv;
 import static java.util.Arrays.stream;
 import static libot.utils.ResourceUtils.resourceAsString;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.awt.Color;
 import java.io.*;
@@ -11,7 +12,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
 
 import com.google.gson.*;
 
@@ -24,7 +25,7 @@ import net.dv8tion.jda.api.exceptions.ErrorHandler;
 @SuppressWarnings("null")
 public class Constants {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Constants.class);
+	private static final Logger LOG = getLogger(Constants.class);
 
 	// Environment
 	public static final String ENV_DATA_TYPE = "DATA_TYPE";

@@ -1,10 +1,11 @@
 package libot.listeners;
 
 import static net.dv8tion.jda.api.Permission.MESSAGE_MANAGE;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
 
 import libot.core.entities.BotContext;
 import libot.core.shred.Shredder.Shred;
@@ -16,7 +17,7 @@ import net.dv8tion.jda.api.requests.RestAction;
 
 public class PollListener extends ListenerAdapter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(PollListener.class);
+	private static final Logger LOG = getLogger(PollListener.class);
 
 	@Nonnull private final BotContext bot;
 
