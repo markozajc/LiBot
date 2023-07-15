@@ -85,7 +85,7 @@ public class ChatbotCommand extends Command {
 
 		c.replyf("You're connected!", """
 			You can now start chatting with %s. Say hi!
-			Also, if you want Chomsky to ignore a message, prefix it with `#` (eg. `# this message is \
+			Also, if you want Chomsky to ignore a message, prefix it with `=` (eg. `= this message is \
 			ignored`).""", "Type in EXIT to quit", SUCCESS, NAME);
 
 		while (true) {
@@ -94,8 +94,8 @@ public class ChatbotCommand extends Command {
 				m.addReaction(ACCEPT_EMOJI).queue();
 				break;
 
-			} else if (!m.getContentRaw().startsWith("#")) {
-				c.replyf("%s: %s", NAME, think(session, m.getContentStripped()));
+			} else if (!m.getContentRaw().startsWith("=")) {
+				c.replyf("%s: %s", NAME, think(m.getContentStripped(), session));
 			}
 		}
 	}
