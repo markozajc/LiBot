@@ -58,7 +58,7 @@ public final class FinderUtils {
 	public static List<User> findUsers(@Nonnull CommandContext c, @Nonnull String query) {
 		String text = query.toLowerCase().trim();
 
-		var found = SetUniqueList.setUniqueList(new ArrayList<User>());
+		List<User> found = SetUniqueList.setUniqueList(new ArrayList<>());
 		findUserById(c.shredder(), query).ifPresent(found::add);
 		findUsersFromMentions(c.shredder(), found, text);
 		findUsersFromText(c.shredder(), found, text);
@@ -117,7 +117,7 @@ public final class FinderUtils {
 	public static List<Role> findRoles(@Nonnull CommandContext c, @Nonnull String query) {
 		String text = query.toLowerCase().trim();
 
-		var found = SetUniqueList.setUniqueList(new ArrayList<Role>());
+		List<Role> found = SetUniqueList.setUniqueList(new ArrayList<>());
 		var cache = c.getGuild().getRoleCache();
 		findSnowflakeById(cache, query).ifPresent(found::add);
 		findSnowflakesFromMentions(cache, ROLE, found, text);
@@ -152,7 +152,7 @@ public final class FinderUtils {
 	public static List<Member> findMembers(@Nonnull CommandContext c, @Nonnull String query) {
 		String text = query.toLowerCase().trim();
 
-		var found = SetUniqueList.setUniqueList(new ArrayList<Member>());
+		List<Member> found = SetUniqueList.setUniqueList(new ArrayList<>());
 		var cache = c.getGuild().getMemberCache();
 		findSnowflakeById(cache, query).ifPresent(found::add);
 		findSnowflakesFromMentions(cache, MentionType.USER, found, text);
