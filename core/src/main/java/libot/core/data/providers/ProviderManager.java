@@ -32,9 +32,8 @@ public final class ProviderManager {
 	}
 
 	public void loadAll() {
-		LOG.info("Loading providers");
 		this.providers.values().forEach(p -> {
-			LOG.debug("Loading {}", p.getClass().getSimpleName());
+			LOG.trace("Loading {}", p.getClass().getSimpleName());
 			p.load();
 		});
 	}
@@ -59,6 +58,10 @@ public final class ProviderManager {
 		if (result == null)
 			throw new IllegalStateException(format("Provider of class %s is not registered", clazz.getSimpleName()));
 		return result;
+	}
+
+	public int size() {
+		return this.providers.size();
 	}
 
 }

@@ -71,11 +71,24 @@ public class Main {
 
 		LOG.info("Creating context");
 		var shredder = new Shredder(shreds);
+
+		LOG.info("Creating DataManager");
 		var data = DataManagerFactory.fromEnvironment();
+		LOG.info("Using {} for storage", data.getClass().getSimpleName());
+
+		LOG.info("Creating providers");
 		var providers = ProviderManager.fromClasspath(shredder, data);
+		LOG.info("Created {} providers", providers.size());
+
+		LOG.info("Loading configuration");
 		var config = BotConfiguration.fromEnvironment();
+
+		LOG.info("Creating commands");
 		var commands = CommandManager.fromClasspath();
+		LOG.info("Created {} commands", commands.size());
+
 		var bot = new BotContext(config, commands, data, shredder, providers, ewl);
+		LOG.info("Context created, finalizing startup");
 
 		bot.cron().scheduleWithFixedDelay(providers::storeAll, 2, 2, MINUTES);
 		getRuntime().addShutdownHook(new Thread(() -> stop(bot), "libot-shutdown"));
@@ -83,7 +96,7 @@ public class Main {
 		LOG.info("Loading providers");
 		providers.loadAll();
 
-		LOG.info("Loading event listeners");
+		LOG.info("Creating event listeners");
 		loadEventListeners(shredder, bot);
 
 		shredder.awaitComplete();

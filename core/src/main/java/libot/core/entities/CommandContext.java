@@ -465,6 +465,11 @@ public class CommandContext {
 	}
 
 	@Nonnull
+	public CompletableFuture<Message> reply(@Nonnull MessageBuilder builder) {
+		return reply(builder.build());
+	}
+
+	@Nonnull
 	public CompletableFuture<Message> reply(@Nonnull String message) {
 		if (canTalk())
 			return replyMessage(getChannel().sendMessage(message)).submit();
@@ -514,6 +519,11 @@ public class CommandContext {
 	@Nonnull
 	public MessageAction replyraw(@Nonnull Message message) {
 		return replyMessage(getChannel().sendMessage(message));
+	}
+
+	@Nonnull
+	public MessageAction replyraw(@Nonnull MessageBuilder builder) {
+		return replyraw(builder.build());
 	}
 
 	// ===============* replyf *===============

@@ -20,7 +20,6 @@ public class CommandManager implements Iterable<Command> {
 	@Nonnull
 	public static CommandManager fromClasspath() {
 		var commands = scanClasspath(Command.class, libot.commands.Anchor.class);
-		LOG.info("Loaded {} commands", commands.size());
 		return new CommandManager(commands);
 	}
 
@@ -61,6 +60,10 @@ public class CommandManager implements Iterable<Command> {
 	@Override
 	public Iterator<Command> iterator() {
 		return this.commands.iterator();
+	}
+
+	public int size() {
+		return this.commands.size();
 	}
 
 }
