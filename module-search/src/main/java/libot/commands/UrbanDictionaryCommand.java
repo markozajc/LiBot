@@ -84,13 +84,12 @@ public class UrbanDictionaryCommand extends Command {
 			var def = DEFINITION_CACHE.get(term, () -> getDefinition(term));
 			if (def.empty())
 				throw c.errorf("Looks like UrbanDictionary can't define '%s'.", DISABLED, escape(c.params().get(0)));
-			var b =
-				new EmbedPrebuilder(LITHIUM).addFieldf(true, "Votes", FORMAT_VOTES, def.thumbs_up(), def.thumbs_down())
-					.setAuthorf(FORMAT_AUTHOR, def.author())
-					.setDescriptionf(FORMAT_DESCRIPTION, def.definition())
-					.setTitle(format(FORMAT_TITLE, def.word()),
-							  format(WEBSITE_URL, URLEncoder.encode(c.params().get(0), UTF_8)))
-					.addField("Usage example", def.example(), true);
+			var b = new EmbedPrebuilder(LITHIUM).setAuthorf(FORMAT_AUTHOR, def.author())
+				.setDescriptionf(FORMAT_DESCRIPTION, def.definition())
+				.setTitle(format(FORMAT_TITLE, def.word()),
+						  format(WEBSITE_URL, URLEncoder.encode(c.params().get(0), UTF_8)))
+				.addField("Usage example", def.example(), true)
+				.addField("Votes", FORMAT_VOTES.formatted(def.thumbs_up(), def.thumbs_down()), true);
 
 			c.reply(b);
 		} catch (ExecutionException e) {
@@ -147,15 +146,18 @@ public class UrbanDictionaryCommand extends Command {
 			else if (d2.thumbs_down() != 0 && d1.thumbs_down() == 0)
 				return 1;
 
-			var wilson1 = WILSON.createInterval(d1.thumbs_up() + d1.thumbs_down(), d1.thumbs_up(), .95F);
-			var wilson2 = WILSON.createInterval(d2.thumbs_up() + d2.thumbs_down(), d2.thumbs_up(), .95F);
-
-			double score1 = (wilson1.getUpperBound() + wilson1.getLowerBound()) / 2;
-			double score2 = (wilson2.getUpperBound() + wilson2.getLowerBound()) / 2;
-
-			return Double.compare(score2, score1);
+			return Double.compare(calculateScore(d2), calculateScore(d1));
 		});
 		return definitions[0];
+	}
+
+	private static double calculateScore(Definition def) {
+		int totalScore = def.thumbs_up() + def.thumbs_down();
+		if (totalScore == 0)
+			return 0;
+
+		var wilson1 = WILSON.createInterval(totalScore, def.thumbs_up(), .95F);
+		return (wilson1.getUpperBound() + wilson1.getLowerBound()) / 2;
 	}
 
 	@Override
