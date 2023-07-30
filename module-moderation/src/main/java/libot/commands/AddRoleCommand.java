@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.Permission;
 public class AddRoleCommand extends Command {
 
 	@Override
+	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
 		var tuple = getRoleMemberTuple(c);
 		c.getGuild().addRoleToMember(tuple.target(), tuple.role()).queue();
