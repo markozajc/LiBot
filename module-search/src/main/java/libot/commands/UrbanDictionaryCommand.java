@@ -3,7 +3,6 @@ package libot.commands;
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.sort;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.regex.Pattern.compile;
 import static kong.unirest.Unirest.spawnInstance;
@@ -21,8 +20,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.*;
 
-import org.apache.commons.math3.stat.interval.WilsonScoreInterval;
-
 import com.google.common.cache.Cache;
 
 import kong.unirest.*;
@@ -32,12 +29,10 @@ import libot.core.extensions.EmbedPrebuilder;
 
 public class UrbanDictionaryCommand extends Command {
 
-	private static final WilsonScoreInterval WILSON = new WilsonScoreInterval();
-
 	static record Definition(String definition, int thumbs_up, String author, String word, String example,
-							 int thumbs_down, boolean empty) {
+							 int thumbs_down) {
 
-		public static final Definition BLANK = new Definition(null, 0, null, null, null, 0, true);
+		public static final Definition BLANK = new Definition(null, 0, null, null, null, 0);
 
 		@SuppressWarnings("null")
 		public String definition() {
@@ -82,8 +77,10 @@ public class UrbanDictionaryCommand extends Command {
 		try {
 			var term = TERMS_CACHE.get(c.params().get(0).toLowerCase(), () -> getTerm(c.params()));
 			var def = DEFINITION_CACHE.get(term, () -> getDefinition(term));
-			if (def.empty())
+
+			if (def.definition() == null)
 				throw c.errorf("Looks like UrbanDictionary can't define '%s'.", DISABLED, escape(c.params().get(0)));
+
 			var b = new EmbedPrebuilder(LITHIUM).setAuthorf(FORMAT_AUTHOR, def.author())
 				.setDescriptionf(FORMAT_DESCRIPTION, def.definition())
 				.setTitle(format(FORMAT_TITLE, def.word()),
@@ -127,37 +124,10 @@ public class UrbanDictionaryCommand extends Command {
 		if (response.isEmpty())
 			return BLANK;
 
-		var definitions = new Definition[response.length()];
-		for (int i = 0; i < response.length(); i++) {
-			var json = response.getJSONObject(i);
-			definitions[i] =
-				new Definition(json.getString("definition"), json.getInt("thumbs_up"), json.getString("author"),
-							   json.getString("word"), json.getString("example"), json.getInt("thumbs_down"), false);
-		}
+		var json = response.getJSONObject(0);
 
-		String finalTerm = term; // lambda shenanigans
-		sort(definitions, (d1, d2) -> {
-			boolean d1Match = finalTerm.equals(d1.word());
-			boolean d2Match = finalTerm.equals(d2.word());
-			if (!d1Match && d2Match)
-				return 1;
-			else if (d1Match && !d2Match || d2.thumbs_down() == 0 && d1.thumbs_down() != 0)
-				return -1;
-			else if (d2.thumbs_down() != 0 && d1.thumbs_down() == 0)
-				return 1;
-
-			return Double.compare(calculateScore(d2), calculateScore(d1));
-		});
-		return definitions[0];
-	}
-
-	private static double calculateScore(Definition def) {
-		int totalScore = def.thumbs_up() + def.thumbs_down();
-		if (totalScore == 0)
-			return 0;
-
-		var wilson1 = WILSON.createInterval(totalScore, def.thumbs_up(), .95F);
-		return (wilson1.getUpperBound() + wilson1.getLowerBound()) / 2;
+		return new Definition(json.getString("definition"), json.getInt("thumbs_up"), json.getString("author"),
+							  json.getString("word"), json.getString("example"), json.getInt("thumbs_down"));
 	}
 
 	@Override
