@@ -16,9 +16,6 @@ import java.util.*;
 
 import javax.annotation.*;
 
-import org.eclipse.collections.api.set.primitive.*;
-import org.eclipse.collections.impl.factory.primitive.LongSets;
-
 import com.github.markozajc.akiwrapper.*;
 import com.github.markozajc.akiwrapper.Akiwrapper.Answer;
 import com.github.markozajc.akiwrapper.core.entities.*;
@@ -32,9 +29,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 
 public class AkinatorCommand extends Command {
 
-	private static final String TIMEOUT_ERROR = "KO - TIMEOUT";
-	private static final String FORMAT_INTERRUPTED = """
-		Looks like the Akinator server you were playing on has stopped working.""";
+	private static final String TIMEOUT_MESSAGE = "TIMEOUT";
 	private static final String FORMAT_CHEAT_SHEET = """
 
 		Answer with \
@@ -71,40 +66,33 @@ public class AkinatorCommand extends Command {
 
 	private static final String EMOTE_BASE_URL = "https://libot.eu.org/img/akitudes/%s.webp";
 
-	private static final double GUESS_THRESHOLD = 0.85D;
-
 	@Override
-	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
 		c.typing();
 		var lang = selectLanguage(c);
 		var aw = constructAkiwrapper(c, lang);
 		long startTimestamp = currentTimeMillis();
 		long lastTimestamp = currentTimeMillis();
-		boolean finished = false;
+
 		double oldProgress = 0;
 		double progression = 0;
+
 		try {
-			var rejected = LongSets.mutable.empty();
 			for (var q = aw.getQuestion(); q != null; q = aw.getQuestion()) {
-				askQuestion(c, aw, q, startTimestamp, lastTimestamp, rejected, oldProgress, progression);
+				askQuestion(c, aw, q, startTimestamp, lastTimestamp, oldProgress, progression);
 				oldProgress = progression;
 				progression = q.getProgression();
-				if (checkGuesses(c, aw, rejected)) {
-					finished = true;
-					break;
-				}
+
+				if (checkGuess(c, aw, false))
+					return;
+
 				lastTimestamp = currentTimeMillis();
 			}
 
-			if (!finished)
-				reviewFinal(c, aw);
+			checkGuess(c, aw, true);
 
-		} catch (ServerUnavailableException e) {
-			throw c.error(FORMAT_INTERRUPTED, DISABLED);
-
-		} catch (StatusException e) {
-			if (TIMEOUT_ERROR.equals(e.getMessage()))
+		} catch (ServerStatusException e) {
+			if (TIMEOUT_MESSAGE.equals(e.getStatus().getMessage()))
 				throw c.error("Session has expired.", DISABLED);
 			else
 				throw e;
@@ -136,14 +124,14 @@ public class AkinatorCommand extends Command {
 				.setLanguage(lang)
 				.setGuessType(CHARACTER)
 				.build();
-		} catch (ServerUnavailableException | ServerNotFoundException e) {
+		} catch (ServerNotFoundException e) {
 			throw c.errorf(FORMAT_SERVERS_DOWN, DISABLED, capitalize(lang.toString().toLowerCase()));
 		}
 	}
 
 	@SuppressWarnings("null")
 	private static void askQuestion(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, @Nonnull Question q,
-									long startTimestamp, long lastTimestamp, LongSet rejected, double oldProgression,
+									long startTimestamp, long lastTimestamp, double oldProgression,
 									double progression) {
 		c.reply(createQuestionEmbed(q, oldProgression, progression));
 		boolean answered = false;
@@ -155,7 +143,7 @@ public class AkinatorCommand extends Command {
 					throw c.exit();
 
 			} else if (ANSWER_DEBUG.equals(response)) {
-				sendDebug(c, aw, startTimestamp, lastTimestamp, rejected, oldProgression, progression);
+				sendDebug(c, aw, startTimestamp, lastTimestamp, oldProgression, progression);
 
 			} else if (contains(ANSWERS_BACK, response)) {
 				if (q.getStep() == 0) {
@@ -179,8 +167,7 @@ public class AkinatorCommand extends Command {
 
 	@SuppressWarnings("null")
 	private static void sendDebug(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, long startTimestamp,
-								  long lastTimestamp, @Nonnull LongSet rejected, double oldProgression,
-								  double progression) {
+								  long lastTimestamp, double oldProgression, double progression) {
 		List<Guess> guesses = null;
 		Exception ex = null;
 		try {
@@ -198,17 +185,11 @@ public class AkinatorCommand extends Command {
 							  progression, guesses == null ? 0 : guesses.size());
 
 		if (guesses != null && !guesses.isEmpty()) {
-			de.addField("Guesses (threshold = %.3f)".formatted(GUESS_THRESHOLD),
+			de.addField("Guesses",
 						guesses.stream()
-							.map(g -> "`%.3f` %s%s [%d]".formatted(g.getProbability(),
-																   rejected.contains(g.getIdLong()) ? "(rejected) "
-																	   : "",
-																   g.getName(), g.getIdLong()))
+							.map(g -> "`%.3f` %s [%d]".formatted(g.getProbability(), g.getName(), g.getIdLong()))
 							.collect(joining("\n")));
 		}
-
-		if (!rejected.isEmpty())
-			de.addField("Rejected guess IDs", rejected.makeString("`", "`, `", "`"));
 
 		c.reply(de);
 	}
@@ -225,46 +206,23 @@ public class AkinatorCommand extends Command {
 		return e;
 	}
 
-	private static boolean checkGuesses(@Nonnull CommandContext c, @Nonnull Akiwrapper aw,
-										@Nonnull MutableLongSet rejected) {
-		boolean anyQuestionRejected = false;
-		for (var g : aw.getGuessesAboveProbability(GUESS_THRESHOLD)
-			.stream()
-			.sorted((g1, g2) -> Double.compare(g2.getProbability(), g1.getProbability()))
-			.toList()) {
-			if (!rejected.contains(g.getIdLong())) {
-				if (reviewGuess(c, g)) {
-					finish(c, true);
-					return true;
+	private static boolean checkGuess(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, boolean exhausted) {
+		var guess = aw.suggestGuess();
+		if (guess != null) {
+			if (reviewGuess(c, guess)) {
+				finish(c, aw, guess);
+				return true;
 
-				} else {
-					anyQuestionRejected = true;
-					rejected.add(g.getIdLong());
+			} else {
+				aw.rejectLastGuess();
+
+				if (exhausted || !c.confirm("Continue?")) {
+					finish(c, aw, null);
+					return true;
 				}
 			}
 		}
-
-		if (anyQuestionRejected && !c.confirm("Continue?")) {
-			finish(c, false);
-			return true;
-
-		} else {
-			return false;
-		}
-	}
-
-	@SuppressWarnings("null")
-	private static void reviewFinal(@Nonnull CommandContext c, @Nonnull Akiwrapper aw) {
-		boolean anyConfirmed = false;
-		for (var guess : aw.getGuesses()) {
-			if (reviewGuess(c, guess)) {
-				finish(c, true);
-				anyConfirmed = true;
-				break;
-			}
-		}
-		if (!anyConfirmed)
-			finish(c, false);
+		return false;
 	}
 
 	private static boolean reviewGuess(@Nonnull CommandContext c, @Nonnull Guess g) {
@@ -280,13 +238,15 @@ public class AkinatorCommand extends Command {
 		return c.confirm(true, e);
 	}
 
-	private static void finish(@Nonnull CommandContext c, boolean win) {
+	private static void finish(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, @Nullable Guess confirmedGuess) {
 		var e = new EmbedBuilder();
-		if (win) {
+		if (confirmedGuess != null) {
+			aw.confirmGuess(confirmedGuess);
 			e.setTitle("Great,");
 			e.setDescription("guessed right one more time.");
 			e.setColor(SUCCESS);
 			e.setThumbnail(EMOTE_BASE_URL.formatted("triomphe"));
+
 		} else {
 			e.setTitle("Bravo,");
 			e.setDescription("you defeated me.");
