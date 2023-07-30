@@ -29,20 +29,10 @@ import libot.core.extensions.EmbedPrebuilder;
 
 public class UrbanDictionaryCommand extends Command {
 
-	static record Definition(String definition, int thumbs_up, String author, String word, String example,
+	static record Definition(String word, String definition, String example, String author, int thumbs_up,
 							 int thumbs_down) {
 
-		public static final Definition BLANK = new Definition(null, 0, null, null, null, 0);
-
-		@SuppressWarnings("null")
-		public String definition() {
-			return abbreviate(parseReferences(this.definition), DESCRIPTION_MAX_LENGTH - 4);
-		}
-
-		@SuppressWarnings("null")
-		public String example() {
-			return abbreviate(parseReferences(this.example), VALUE_MAX_LENGTH);
-		}
+		public static final Definition BLANK = new Definition(null, null, null, null, 0, 0);
 
 	}
 
@@ -118,6 +108,7 @@ public class UrbanDictionaryCommand extends Command {
 	}
 
 	@Nullable
+	@SuppressWarnings("null")
 	private static Definition getDefinition(@Nonnull String term) {
 		var response = Unirest.get(format(API_URL, term)).asJson().getBody().getObject().getJSONArray("list");
 
@@ -126,8 +117,18 @@ public class UrbanDictionaryCommand extends Command {
 
 		var json = response.getJSONObject(0);
 
-		return new Definition(json.getString("definition"), json.getInt("thumbs_up"), json.getString("author"),
-							  json.getString("word"), json.getString("example"), json.getInt("thumbs_down"));
+		var word = escape(json.getString("word"));
+		var definition = cleanText(escape(json.getString("definition"), true), DESCRIPTION_MAX_LENGTH - 4);
+		var example = cleanText(escape(json.getString("example")), VALUE_MAX_LENGTH);
+
+		return new Definition(word, definition, example, json.getString("author"), json.getInt("thumbs_up"),
+							  json.getInt("thumbs_down"));
+	}
+
+	@Nonnull
+	@SuppressWarnings("null")
+	private static String cleanText(@Nonnull String text, int maxLength) {
+		return abbreviate(parseReferences(text.replace("\r", "")), maxLength);
 	}
 
 	@Override
