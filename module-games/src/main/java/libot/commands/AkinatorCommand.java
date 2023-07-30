@@ -79,17 +79,18 @@ public class AkinatorCommand extends Command {
 
 		try {
 			for (var q = aw.getQuestion(); q != null; q = aw.getQuestion()) {
+				if (checkGuess(c, aw, false))
+					return;
+
 				askQuestion(c, aw, q, startTimestamp, lastTimestamp, oldProgress, progression);
 				oldProgress = progression;
 				progression = q.getProgression();
 
-				if (checkGuess(c, aw, false))
-					return;
-
 				lastTimestamp = currentTimeMillis();
 			}
 
-			checkGuess(c, aw, true);
+			if (!checkGuess(c, aw, true))
+				finish(c, aw, null);
 
 		} catch (ServerStatusException e) {
 			if (TIMEOUT_MESSAGE.equals(e.getStatus().getMessage()))
