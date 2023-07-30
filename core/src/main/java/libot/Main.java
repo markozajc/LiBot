@@ -22,6 +22,8 @@ import javax.security.auth.login.LoginException;
 
 import org.slf4j.Logger;
 
+import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
+
 import libot.core.BotConfiguration;
 import libot.core.commands.CommandManager;
 import libot.core.data.DataManagerFactory;
@@ -63,7 +65,8 @@ public class Main {
 				.disableCache(ACTIVITY, CLIENT_STATUS, ONLINE_STATUS)
 				.setChunkingFilter(ChunkingFilter.ALL)
 				.addEventListeners(ewl)
-				.setStatus(IDLE);
+				.setStatus(IDLE)
+				.setAudioSendFactory(new NativeAudioSendFactory());
 
 		var shreds = startShreds(builder);
 		if (shreds.isEmpty())
