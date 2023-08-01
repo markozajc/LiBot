@@ -1,6 +1,7 @@
 LiBot ==========
 
-LiBot (https://libot.eu.org/) is a multi-purpose Discord bot. This is the parent artifact encompassing all other Maven modules.
+LiBot (https://libot.eu.org/) is a multi-purpose Discord bot. This is the
+parent artifact encompassing all other Maven modules.
 
 Get LiBot: . . . . . . . . . . . .  https://libot.eu.org/get
 Or try it out in the support guild: https://discord.gg/asDUrbR
@@ -18,7 +19,6 @@ Building LiBot --------------
        
           $ git clone git://git.zajc.eu.org/libot/authoritative.git libot
           $ cd libot
-          $ git submodule update --init
           $ mvn clean package -DoutputLocation=/output/path
 
        (change /output/path to your preferred output destination) 
