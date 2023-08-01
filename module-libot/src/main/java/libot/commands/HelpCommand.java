@@ -6,7 +6,6 @@ import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.*;
 import static libot.module.ModuleLibotShared.sendUsage;
 import static libot.utils.Utilities.array;
-import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Random;
@@ -82,7 +81,7 @@ public class HelpCommand extends Command {
 		Command cmd = c.getCommands().get(c.params().get(0));
 		if (cmd == null) {
 			int random = new Random(c.params().get(0).hashCode()).nextInt(1000) + 300;
-			throw c.errorf(FORMAT_NONEXISTANT, DISABLED, escape(c.params().get(0), true), random);
+			throw c.errorf(FORMAT_NONEXISTANT, DISABLED, c.params().get(0).replace('`', '\''), random);
 		}
 
 		sendUsage(c, cmd);
