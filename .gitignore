@@ -1,17 +1,15 @@
 # Maven output
-/target/
+**/target/
 
 # Eclipse
-/.settings/
-/.classpath
-/.project
-
-# JaCoCo coverage
-/coverage.exec
-
-# Runtime environment
-/.env
+**/.settings/
+**/.classpath
+**/.project
 
 # JaCoCo coverage data
 /coverage.exec
+
+# Other
+/.env
+/changelog.txt
 /stage
