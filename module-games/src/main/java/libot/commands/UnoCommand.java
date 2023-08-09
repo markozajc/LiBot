@@ -1,9 +1,5 @@
 package libot.commands;
 
-import static com.github.markozajc.juno.cards.UnoCardColor.*;
-import static com.github.markozajc.juno.rules.pack.impl.UnoOfficialRules.UnoHouseRule.PROGRESSIVE;
-import static com.github.markozajc.juno.rules.pack.impl.house.UnoProgressiveRulePack.getConsecutive;
-import static com.github.markozajc.juno.utils.UnoRuleUtils.combinedPlacementAnalysis;
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
@@ -11,17 +7,21 @@ import static libot.core.commands.CommandCategory.GAMES;
 import static libot.module.money.BettableGame.GameResult.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
+import static org.eu.zajc.juno.cards.UnoCardColor.*;
+import static org.eu.zajc.juno.rules.pack.impl.UnoOfficialRules.UnoHouseRule.PROGRESSIVE;
+import static org.eu.zajc.juno.rules.pack.impl.house.UnoProgressiveRulePack.getConsecutive;
+import static org.eu.zajc.juno.utils.UnoRuleUtils.combinedPlacementAnalysis;
 
 import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import com.github.markozajc.juno.cards.*;
-import com.github.markozajc.juno.decks.impl.UnoStandardDeck;
-import com.github.markozajc.juno.game.*;
-import com.github.markozajc.juno.players.UnoPlayer;
-import com.github.markozajc.juno.players.impl.UnoStrategicPlayer;
-import com.github.markozajc.juno.rules.pack.impl.UnoOfficialRules;
+import org.eu.zajc.juno.cards.*;
+import org.eu.zajc.juno.decks.impl.UnoStandardDeck;
+import org.eu.zajc.juno.game.*;
+import org.eu.zajc.juno.players.UnoPlayer;
+import org.eu.zajc.juno.players.impl.UnoStrategicPlayer;
+import org.eu.zajc.juno.rules.pack.impl.UnoOfficialRules;
 
 import libot.core.commands.CommandCategory;
 import libot.core.commands.exceptions.runtime.CanceledException;

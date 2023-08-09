@@ -1,7 +1,7 @@
 package libot.listeners;
 
-import static com.github.markozajc.ef.EHandle.handle;
 import static java.util.concurrent.TimeUnit.*;
+import static org.eu.zajc.ef.EHandle.handle;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;

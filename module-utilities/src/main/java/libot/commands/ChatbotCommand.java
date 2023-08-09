@@ -1,16 +1,15 @@
 package libot.commands;
 
-import static com.github.markozajc.ef.EHandle.handle;
 import static java.util.regex.Pattern.compile;
 import static javax.xml.xpath.XPathConstants.STRING;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static libot.utils.Utilities.array;
 import static org.apache.commons.lang3.tuple.Pair.of;
+import static org.eu.zajc.ef.EHandle.handle;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.regex.*;
 
 import javax.annotation.*;
@@ -47,10 +46,10 @@ public class ChatbotCommand extends Command {
 
 	static {
 		var dbf = DocumentBuilderFactory.newInstance();
-		DOCUMENT_BUILDER = handle((Callable<DocumentBuilder>) dbf::newDocumentBuilder, e -> null).get();
+		DOCUMENT_BUILDER = handle(dbf::newDocumentBuilder, e -> null).get();
 
 		var xp = XPathFactory.newInstance().newXPath();
-		XPATH_EXTRACTOR = handle((Callable<XPathExpression>) () -> xp.compile("//result/that/text()"), e -> null).get();
+		XPATH_EXTRACTOR = handle(() -> xp.compile("//result/that/text()"), e -> null).get();
 
 		// useless data, inner data discarded
 		RESPONSE_PARSERS.add(of(compile("(?s)<object[^>]*>.*?</object>"), "")); // NOSONAR
@@ -158,7 +157,7 @@ public class ChatbotCommand extends Command {
 		for (var parser : RESPONSE_PARSERS)
 			parsedResponse = parser.getKey().matcher(parsedResponse).replaceAll(parser.getValue());
 
-		return StringUtils.capitalize(parsedResponse.trim());
+		return StringUtils.capitalize(parsedResponse.strip());
 	}
 
 	@Nullable

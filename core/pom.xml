@@ -145,9 +145,8 @@
 
 		<!-- Extended functions -->
 		<dependency>
-			<groupId>com.github.markozajc</groupId>
+			<groupId>org.eu.zajc</groupId>
 			<artifactId>extended-functions</artifactId>
-			<version>1.4</version>
 		</dependency>
 
 		<!-- Annotations -->

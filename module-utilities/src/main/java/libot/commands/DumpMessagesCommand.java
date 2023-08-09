@@ -87,7 +87,7 @@ public class DumpMessagesCommand extends Command {
 	}
 
 	private static void dumpContent(@Nonnull StringBuilder b, @Nonnull Message m) {
-		var content = m.getContentDisplay().trim();
+		var content = m.getContentDisplay().strip();
 		if (content.length() > 0)
 			b.append(m.getContentDisplay());
 		if (m.isEdited())

@@ -46,7 +46,7 @@ public class GoogleCommand extends Command {
 
 	private static final String API_FORMAT = """
 		https://www.googleapis.com/customsearch/v1\
-		?cx=018291224751151548851%%3Ajzifriqvl1o\
+		?cx=\
 		&num=1\
 		&safe=%s\
 		&key=%s\

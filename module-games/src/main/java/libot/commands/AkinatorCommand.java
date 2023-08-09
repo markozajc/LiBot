@@ -1,8 +1,5 @@
 package libot.commands;
 
-import static com.github.markozajc.akiwrapper.Akiwrapper.Answer.*;
-import static com.github.markozajc.akiwrapper.core.entities.Server.GuessType.CHARACTER;
-import static com.github.markozajc.akiwrapper.core.entities.Server.Language.ENGLISH;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.joining;
@@ -11,16 +8,19 @@ import static libot.core.commands.CommandCategory.GAMES;
 import static libot.utils.Utilities.array;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 import static org.apache.commons.lang3.StringUtils.capitalize;
+import static org.eu.zajc.akiwrapper.Akiwrapper.Answer.*;
+import static org.eu.zajc.akiwrapper.core.entities.Server.GuessType.CHARACTER;
+import static org.eu.zajc.akiwrapper.core.entities.Server.Language.ENGLISH;
 
 import java.util.*;
 
 import javax.annotation.*;
 
-import com.github.markozajc.akiwrapper.*;
-import com.github.markozajc.akiwrapper.Akiwrapper.Answer;
-import com.github.markozajc.akiwrapper.core.entities.*;
-import com.github.markozajc.akiwrapper.core.entities.Server.Language;
-import com.github.markozajc.akiwrapper.core.exceptions.*;
+import org.eu.zajc.akiwrapper.*;
+import org.eu.zajc.akiwrapper.Akiwrapper.Answer;
+import org.eu.zajc.akiwrapper.core.entities.*;
+import org.eu.zajc.akiwrapper.core.entities.Server.Language;
+import org.eu.zajc.akiwrapper.core.exceptions.*;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;

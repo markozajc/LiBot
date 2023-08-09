@@ -56,7 +56,7 @@ public final class FinderUtils {
 	@Nonnull
 	@SuppressWarnings("null")
 	public static List<User> findUsers(@Nonnull CommandContext c, @Nonnull String query) {
-		String text = query.toLowerCase().trim();
+		String text = query.toLowerCase().strip();
 
 		List<User> found = SetUniqueList.setUniqueList(new ArrayList<>());
 		findUserById(c.shredder(), query).ifPresent(found::add);
@@ -94,8 +94,8 @@ public final class FinderUtils {
 	private static void findUsersFromText(@Nonnull Shredder shredder, @Nonnull List<User> destination,
 										  @Nonnull String query) {
 		shredder.getJoinedUserCache()
-			.filter(u -> getPriority(query, u.getName().toLowerCase().trim()) > 0)
-			.sorted((u1, u2) -> compare(u2.getName().toLowerCase().trim(), u1.getName().toLowerCase().trim(), query))
+			.filter(u -> getPriority(query, u.getName().toLowerCase().strip()) > 0)
+			.sorted((u1, u2) -> compare(u2.getName().toLowerCase().strip(), u1.getName().toLowerCase().strip(), query))
 			.forEachOrdered(destination::add);
 	}
 
@@ -115,7 +115,7 @@ public final class FinderUtils {
 	 */
 	@SuppressWarnings("null")
 	public static List<Role> findRoles(@Nonnull CommandContext c, @Nonnull String query) {
-		String text = query.toLowerCase().trim();
+		String text = query.toLowerCase().strip();
 
 		List<Role> found = SetUniqueList.setUniqueList(new ArrayList<>());
 		var cache = c.getGuild().getRoleCache();
@@ -129,8 +129,8 @@ public final class FinderUtils {
 	@SuppressWarnings("null")
 	private static void findRolesFromText(@Nonnull Stream<Role> roles, @Nonnull List<Role> destination,
 										  @Nonnull String query) {
-		roles.filter(r -> getPriority(query, r.getName().toLowerCase().trim()) > 0)
-			.sorted((r1, r2) -> compare(r2.getName().toLowerCase().trim(), r1.getName().toLowerCase().trim(), query))
+		roles.filter(r -> getPriority(query, r.getName().toLowerCase().strip()) > 0)
+			.sorted((r1, r2) -> compare(r2.getName().toLowerCase().strip(), r1.getName().toLowerCase().strip(), query))
 			.forEachOrdered(destination::add);
 	}
 
@@ -150,7 +150,7 @@ public final class FinderUtils {
 	 */
 	@SuppressWarnings("null")
 	public static List<Member> findMembers(@Nonnull CommandContext c, @Nonnull String query) {
-		String text = query.toLowerCase().trim();
+		String text = query.toLowerCase().strip();
 
 		List<Member> found = SetUniqueList.setUniqueList(new ArrayList<>());
 		var cache = c.getGuild().getMemberCache();
@@ -169,12 +169,12 @@ public final class FinderUtils {
 			int priorityName;
 			String nickname = m.getNickname();
 			if (nickname != null)
-				priorityNick = getPriority(query, nickname.toLowerCase().trim());
-			priorityName = getPriority(query, m.getUser().getName().toLowerCase().trim());
+				priorityNick = getPriority(query, nickname.toLowerCase().strip());
+			priorityName = getPriority(query, m.getUser().getName().toLowerCase().strip());
 			return priorityName > 0 || priorityNick > 0;
 		})
-			.sorted((m1, m2) -> compare(m2.getEffectiveName().toLowerCase().trim(),
-										m1.getEffectiveName().toLowerCase().trim(), query))
+			.sorted((m1, m2) -> compare(m2.getEffectiveName().toLowerCase().strip(),
+										m1.getEffectiveName().toLowerCase().strip(), query))
 			.forEachOrdered(destination::add);
 	}
 
@@ -209,8 +209,8 @@ public final class FinderUtils {
 
 	@SuppressWarnings("null")
 	private static int compare(@Nonnull String name1, @Nonnull String name2, @Nonnull String query) {
-		return Integer.compare(getPriority(query, name1.toLowerCase().trim()),
-							   getPriority(query, name2.toLowerCase().trim()));
+		return Integer.compare(getPriority(query, name1.toLowerCase().strip()),
+							   getPriority(query, name2.toLowerCase().strip()));
 	}
 
 	private static int getPriority(@Nonnull String actual, @Nonnull String expected) {

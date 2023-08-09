@@ -9,10 +9,9 @@ import java.util.*;
 
 import javax.annotation.Nonnull;
 
+import org.eu.zajc.ef.function.except.EFunction;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
-
-import com.github.markozajc.ef.function.except.EFunction;
 
 public class ReflectionUtils {
 

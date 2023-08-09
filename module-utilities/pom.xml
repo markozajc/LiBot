@@ -41,18 +41,24 @@
 			<artifactId>module-libot</artifactId>
 		</dependency>
 
+		<!-- Extended functions -->
+		<dependency>
+			<groupId>org.eu.zajc</groupId>
+			<artifactId>extended-functions</artifactId>
+		</dependency>
+
 		<!-- HTTP -->
 		<dependency>
 			<groupId>com.konghq</groupId>
 			<artifactId>unirest-java</artifactId>
 		</dependency>
-		
+
 		<!-- Annotations -->
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
 		</dependency>
-		
+
 		<!-- Compression -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

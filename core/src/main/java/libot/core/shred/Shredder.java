@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.*;
 
-import com.github.markozajc.ef.consumer.execpt.all.AEConsumer;
+import org.eu.zajc.ef.consumer.execpt.all.AEConsumer;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
