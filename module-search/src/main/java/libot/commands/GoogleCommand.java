@@ -46,11 +46,12 @@ public class GoogleCommand extends Command {
 
 	private static final String API_FORMAT = """
 		https://www.googleapis.com/customsearch/v1\
-		?cx=\
+		?cx=%s\
 		&num=1\
 		&safe=%s\
 		&key=%s\
 		&q=%s""";
+	private static final String ID;
 	private static final String USER_AGENT = """
 		Mozilla/5.0 \
 		(Windows NT 10.0; Win64; rv:83.1) \
@@ -66,14 +67,18 @@ public class GoogleCommand extends Command {
 	private static final Cache<SearchParameters, SearchResult> CACHE;
 	static {
 		var keys = getenv(ENV_GOOGLE_TOKENS);
-		if (keys == null || keys.isBlank()) {
-			LOG.warn("{} is unset or blank. Google-related commands will be unavailable.", ENV_GOOGLE_TOKENS);
+		var id = getenv(ENV_GOOGLE_ID);
+		if (keys == null || keys.isBlank() || id == null || id.isBlank()) {
+			LOG.warn("{} and/or {} is unset. Google-related commands will be unavailable.", ENV_GOOGLE_TOKENS,
+					 ENV_GOOGLE_ID);
 			API_KEYS = new String[] {};
 			CACHE = null;
+			ID = null;
 
 		} else {
 			API_KEYS = keys.split(",");
 			CACHE = newBuilder().maximumSize(API_KEYS.length * 100L).expireAfterWrite(Duration.ofDays(7)).build();
+			ID = id;
 		}
 	}
 
@@ -119,8 +124,8 @@ public class GoogleCommand extends Command {
 	@Nonnull
 	private static SearchResult performApiSearch(@Nonnull SearchParameters params,
 												 @Nonnull String apiKey) throws IOException {
-		var url =
-			format(API_FORMAT, params.safeSearch() ? "high" : "off", apiKey, URLEncoder.encode(params.query(), UTF_8));
+		var url = API_FORMAT.formatted(ID, params.safeSearch() ? "high" : "off", apiKey,
+									   URLEncoder.encode(params.query(), UTF_8));
 		var response = Unirest.get(url).headerReplace("User-Agent", USER_AGENT).asJson();
 		var json = response.getBody().getObject();
 

@@ -33,6 +33,7 @@ public class Constants {
 	public static final String ENV_SYSADMINS = "BOT_SYSADMINS";
 	public static final String ENV_SHRED_TOKEN = "SHRED_TOKEN_";
 	public static final String ENV_GOOGLE_TOKENS = "GOOGLE_TOKENS";
+	public static final String ENV_GOOGLE_ID = "GOOGLE_ID";
 	public static final String ENV_MANAGEMENT_PORT = "MANAGEMENT_PORT";
 	public static final String ENV_YOUTUBE_EMAIL = "YOUTUBE_EMAIL";
 	public static final String ENV_YOUTUBE_PASSWORD = "YOUTUBE_PASSWORD";
