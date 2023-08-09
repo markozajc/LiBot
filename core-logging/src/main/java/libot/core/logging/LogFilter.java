@@ -3,29 +3,48 @@ package libot.core.logging;
 import static ch.qos.logback.classic.Level.*;
 import static ch.qos.logback.core.spi.FilterReply.*;
 
-import org.reflections.Reflections;
-
-import com.sedmelluq.discord.lavaplayer.container.ogg.OggContainerProbe;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAccessTokenTracker;
-import com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor;
-import com.sedmelluq.lava.common.natives.NativeLibraryLoader;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.internal.requests.WebSocketClient;
 
 public class LogFilter extends Filter<ILoggingEvent> {
 
-	private static final String LOG_OGG_CONTAINER_PROBE = OggContainerProbe.class.getName();
-	private static final String LOG_LATE = LocalAudioTrackExecutor.class.getName();
-	private static final String LOG_WS_CLIENT = WebSocketClient.class.getName();
-	private static final String LOG_REFLECTIONS = Reflections.class.getName();
-	private static final String LOG_JDA = JDA.class.getName();
-	private static final String LOG_YATT = YoutubeAccessTokenTracker.class.getName();
-	private static final String LOG_NLL = NativeLibraryLoader.class.getName();
+	// javadoc links are used as a hack to give me a warning if a class name changes
+	// while avoiding runtime dependencies introduced by reflection (using
+	// X.class.getName())
+	// note that these fields are public because eclipse won't check the links'
+	// correctness by default otherwise
+
+	/**
+	 * {@link com.sedmelluq.discord.lavaplayer.container.ogg.OggContainerProbe}
+	 */
+	public static final String LOG_OGG_CONTAINER_PROBE =
+		"com.sedmelluq.discord.lavaplayer.container.ogg.OggContainerProbe";
+	/**
+	 * {@link com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor}
+	 */
+	public static final String LOG_LATE = "com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor";
+	/**
+	 * {@link net.dv8tion.jda.internal.requests.WebSocketClient}
+	 */
+	public static final String LOG_WS_CLIENT = "net.dv8tion.jda.internal.requests.WebSocketClient";
+	/**
+	 * {@link org.reflections.Reflections}
+	 */
+	public static final String LOG_REFLECTIONS = "org.reflections.Reflections";
+	/**
+	 * {@link net.dv8tion.jda.api.JDA}
+	 */
+	public static final String LOG_JDA = "net.dv8tion.jda.api.JDA";
+	/**
+	 * {@link com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAccessTokenTracker}
+	 */
+	public static final String LOG_YATT = "com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAccessTokenTracker";
+	/**
+	 * {@link com.sedmelluq.lava.common.natives.NativeLibraryLoader}
+	 */
+	public static final String LOG_NLL = "com.sedmelluq.lava.common.natives.NativeLibraryLoader";
 
 	private static final String MSG_CHUNK_ERROR = "Encountered exception trying to handle member chunk response";
 	private static final String MSG_CANT_PARSE_OGG = "Failed to collect additional information on OGG stream.";
