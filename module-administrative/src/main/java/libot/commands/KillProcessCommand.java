@@ -1,6 +1,8 @@
 package libot.commands;
 
-import static java.lang.Integer.*;
+import static java.lang.Integer.toUnsignedString;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 import static libot.utils.Utilities.array;
@@ -12,11 +14,12 @@ import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.processes.ProcessManager;
 import libot.core.processes.ProcessManager.CommandProcess;
+import libot.utils.ParseUtils;
 
 public class KillProcessCommand extends Command {
 
 	private static final String FORMAT_NOT_FOUND = """
-		PID %s not found""";
+		PID %d not found""";
 	private static final String FORMAT_TABLE = """
 		```
 		Running processes
@@ -27,22 +30,34 @@ public class KillProcessCommand extends Command {
 	public void execute(CommandContext c) {
 		if (c.params().check(0)) {
 			c.requireSysadmin();
-			killProcess(c);
+			killProcesses(c);
+
 		} else {
 			listProcesses(c);
 		}
 	}
 
-	private static void killProcess(@Nonnull CommandContext c) {
-		int pid = parseUnsignedInt(c.params().get(0));
-		var proc = ProcessManager.getProcess(pid);
-		if (proc == null) {
-			c.replyf(FORMAT_NOT_FOUND, DISABLED, c.params().get(0));
+	@SuppressWarnings("null")
+	private static void killProcesses(@Nonnull CommandContext c) {
+		var missing = stream(c.params().getArray()).mapToInt(ParseUtils::parseInt)
+			.sorted()
+			.distinct()
+			.filter(KillProcessCommand::killProcess)
+			.toArray();
 
-		} else {
-			ProcessManager.interrupt(proc);
+		if (missing.length == 0)
 			c.react(ACCEPT_EMOJI);
-		}
+		else
+			c.reply(stream(missing).mapToObj(FORMAT_NOT_FOUND::formatted).collect(joining("\n")), DISABLED);
+	}
+
+	private static boolean killProcess(int pid) {
+		var proc = ProcessManager.getProcess(pid);
+		if (proc == null)
+			return true;
+
+		ProcessManager.interrupt(proc);
+		return false;
 	}
 
 	private static void listProcesses(@Nonnull CommandContext c) {
@@ -127,6 +142,11 @@ public class KillProcessCommand extends Command {
 
 	@Override
 	public int getMinParameters() {
+		return 0;
+	}
+
+	@Override
+	public int getMaxParameters() {
 		return 0;
 	}
 
