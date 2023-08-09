@@ -24,12 +24,6 @@
 		</developer>
 	</developers>
 
-	<scm>
-		<url>https://git.zajc.eu.org/libot/${project.artifactId}.git</url>
-		<connection>scm:git:git://git.zajc.eu.org/libot/${project.artifactId}.git</connection>
-		<developerConnection>scm:git:ssh://git@zajc.eu.org/srv/git/libot-${project.artifactId}.git</developerConnection>
-	</scm>
-
 	<dependencies>
 		<dependency>
 			<groupId>zajc.libot</groupId>
@@ -74,11 +68,6 @@
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>module-money</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>zajc.libot</groupId>
-			<artifactId>module-music</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

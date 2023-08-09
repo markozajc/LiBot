@@ -24,12 +24,6 @@
 		</developer>
 	</developers>
 
-	<scm>
-		<url>https://git.zajc.eu.org/libot/${project.artifactId}.git</url>
-		<connection>scm:git:git://git.zajc.eu.org/libot/${project.artifactId}.git</connection>
-		<developerConnection>scm:git:ssh://git@zajc.eu.org/srv/git/libot-${project.artifactId}.git</developerConnection>
-	</scm>
-
 	<properties>
 		<maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
 		<buildVersion>${project.version} (${maven.build.timestamp})</buildVersion>
