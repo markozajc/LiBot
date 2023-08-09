@@ -226,13 +226,11 @@ public class ExceptionHandler {
 								b.setTitle("// DISABLED //");
 								if (e.isGlobal()) {
 									b.setDescriptionf("""
-										Command %s is currently globally disabled. \
-										Please try again later.""", c.getCommand().getName());
+										%s has been globally disabled by LiBot developers. Please try again later""",
+													  c.getCommand().getName());
 
 								} else {
-									b.setDescriptionf("""
-										Command %s is currently disabled for this guild. \
-										Please contact a moderator for further information.""",
+									b.setDescriptionf("%s has been disabled by this guild's moderators.",
 													  c.getCommand().getName());
 								}
 								c.reply(b);
@@ -245,17 +243,16 @@ public class ExceptionHandler {
 
 							if (c.canTalk())
 								c.replyf("// ACCESS DENIED //", """
-									You need %s in order to be able to execute this command:
-									%s""", missing.stream().collect(joining("\n", "- ", "")), WARN,
-										 missing.size() == 1 ? "this permission" : "these permissions");
+									This action needs the following permission%s:
+									%s""", WARN, missing.size() == 1 ? "" : "s",
+										 missing.stream().collect(joining("\n", "- ", "")));
 						}
 
 						private static void handleNotDjException(CommandContext c, NotDjException e) {
 							if (c.canTalk())
-								c.replyf("// DJ-ONLY //", """
-									Looks like this guild has set up a DJ role to be <@&%d> and it appears you do not \
-									have that role. This means that you do not have permission to use music \
-									commands.""", WARN, e.getDjRoleId());
+								c.replyf("// DJ-ONLY //",
+										 "Only members of the DJ role (<@&%d>) can perform this action.", WARN,
+										 e.getDjRoleId());
 						}
 
 						private static void handleNotSysadminException(CommandContext c) {
@@ -299,10 +296,11 @@ public class ExceptionHandler {
 
 					private static void handleTimeParseException(CommandContext c) {
 						if (c.canTalk())
-							c.reply("// TIME EXCEPTED //", """
-								LiBot expected a \
-								[timestamp](https://libot.eu.org/doc/commands/parameter-types.html#time), but you \
-								input something else.""", WARN);
+							c.replyf("// TIME EXCEPTED //", """
+								LiBot was expecting a \
+								[timestamp](https://libot.eu.org/doc/commands/parameter-types.html#time), but got \
+								something else. Correct usage:
+								%s""", WARN, c.getCommandUsage());
 					}
 
 				}
@@ -311,7 +309,8 @@ public class ExceptionHandler {
 					if (c.canTalk())
 						c.reply("""
 							**// ANOMALY DETECTED //**,
-							LiBot has run into a non-fatal unpredictable state. Command execution can not proceed.""");
+							| LiBot has run into a non-fatal unpredictable state. Command execution can not \
+							proceed.""");
 					if (LOG.isErrorEnabled()) {
 						LOG.error("Unpredictable state: {}", Arrays.toString(e.getDebug()));
 						LOG.error("", e);
@@ -339,8 +338,10 @@ public class ExceptionHandler {
 
 					private static void handleNumberFormatException(CommandContext c) {
 						if (c.canTalk())
-							c.replyf("// Not a Number //", """
-								Looks like you have provided text in a place where a number would fit best.""", WARN);
+							c.replyf("// NOT A NUMBER //", """
+								LiBot was expecting a number, but got text. Correct usage:
+								%s
+								""", WARN, c.getCommandUsage());
 					}
 				}
 
@@ -366,13 +367,13 @@ public class ExceptionHandler {
 							c.reply("""
 								```
 								// EMBED REQUIRED //
-								| You must grant LiBot the 'Embed Links' permission in order to be able to execute \
-								| this command.```""");
+								| You must grant LiBot the 'Embed Links' permission to perform this action.
+								```""");
 
 						} else if (c.canTalk()) {
 							c.replyf("// ACCESS DENIED //", """
-								You must grant LiBot the '%s' permission in order to be able to execute this \
-								command!""", WARN, e.getPermission().getName());
+								You must grant LiBot the '%s' permission to perform this action.""", WARN,
+									 e.getPermission().getName());
 						}
 					}
 
