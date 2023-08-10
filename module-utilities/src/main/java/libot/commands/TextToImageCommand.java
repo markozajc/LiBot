@@ -79,6 +79,7 @@ public class TextToImageCommand extends Command {
 	}
 
 	@Nonnull
+	@SuppressWarnings("null")
 	private static String getText(@Nonnull CommandContext c, boolean hasSize) {
 		if (hasSize)
 			return c.params().get(1);
@@ -89,8 +90,8 @@ public class TextToImageCommand extends Command {
 
 	@Nonnull
 	private static BufferedImage getImage(@Nonnull String[] lines, @Nonnull FontMetrics fm, int fontHeight) {
-		return new BufferedImage(stream(lines).mapToInt(fm::stringWidth).max().orElse(0), fontHeight * lines.length,
-								 TYPE_INT_RGB);
+		int width = stream(lines).mapToInt(fm::stringWidth).filter(i -> i > 0).max().orElse(1);
+		return new BufferedImage(width, fontHeight * lines.length, TYPE_INT_RGB);
 	}
 
 	@Nonnull
