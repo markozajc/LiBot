@@ -25,40 +25,48 @@
 	</developers>
 
 	<dependencies>
+
+		<!-- Logging -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
+		<!-- Target Classes -->
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
-
 		<dependency>
-			<groupId>com.github.walkyst</groupId>
-			<artifactId>lavaplayer-fork</artifactId>
+			<groupId>dev.arbjerg</groupId>
+			<artifactId>lavaplayer</artifactId>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
 	<repositories>
-		<repository>
-			<id>m2-dv8tion</id>
-			<url>https://m2.dv8tion.net/releases</url>
-		</repository>
 
 		<repository>
 			<id>jitpack</id>
 			<url>https://jitpack.io</url>
 		</repository>
+
 	</repositories>
 </project>

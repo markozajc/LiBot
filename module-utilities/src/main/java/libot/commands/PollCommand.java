@@ -19,8 +19,8 @@ import java.util.*;
 
 import javax.annotation.Nonnull;
 
+import org.eclipse.collections.api.factory.primitive.*;
 import org.eclipse.collections.api.list.primitive.IntList;
-import org.eclipse.collections.impl.factory.primitive.*;
 
 import libot.commands.PollCommand.Poll.PollException;
 import libot.core.commands.*;

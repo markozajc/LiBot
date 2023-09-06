@@ -7,8 +7,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import javax.annotation.*;
 
+import org.eclipse.collections.api.factory.primitive.LongObjectMaps;
 import org.eclipse.collections.api.map.primitive.*;
-import org.eclipse.collections.impl.factory.primitive.LongObjectMaps;
 import org.slf4j.Logger;
 
 import com.sedmelluq.discord.lavaplayer.player.*;

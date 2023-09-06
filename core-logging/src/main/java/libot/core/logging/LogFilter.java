@@ -54,7 +54,7 @@ public class LogFilter extends Filter<ILoggingEvent> {
 	private static final String MSG_LOADED = "Finished Loading!";
 	private static final String MSG_LOGIN = "Login Successful!";
 	private static final String MSG_UPDATING_YAT = "Updating YouTube visitor id";
-	private static final String MSG_LOADING_LIBMPG = "Native library libmpg123-0: loading with filter";
+	private static final String MSG_NATIVE_LIBRARY = "Native library";
 	private static final String MSG_LOADING_CONNECTOR = "Native library connector: ";
 
 	@Override
@@ -75,7 +75,7 @@ public class LogFilter extends Filter<ILoggingEvent> {
 			return DENY;
 		else if (levelIs(e, INFO) && loggerIs(e, LOG_YATT) && messageStartsWith(e, MSG_UPDATING_YAT))
 			return DENY;
-		else if (levelIs(e, INFO) && loggerIs(e, LOG_NLL) && messageStartsWith(e, MSG_LOADING_LIBMPG))
+		else if (levelIs(e, INFO) && loggerIs(e, LOG_NLL) && messageStartsWith(e, MSG_NATIVE_LIBRARY))
 			return DENY;
 		else if (levelIs(e, INFO) && loggerIs(e, LOG_NLL) && messageStartsWith(e, MSG_LOADING_CONNECTOR))
 			return DENY;

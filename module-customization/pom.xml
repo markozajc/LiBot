@@ -25,20 +25,46 @@
 	</developers>
 
 	<dependencies>
+
 		<!-- Core -->
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
+
+		<!-- Discord API support -->
+		<dependency>
+			<groupId>net.dv8tion</groupId>
+			<artifactId>JDA</artifactId>
+		</dependency>
+
+		<!-- JSON support -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+
+		<!-- Annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.spotbugs</groupId>
+			<artifactId>spotbugs-annotations</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
+
 			<!-- Shader -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

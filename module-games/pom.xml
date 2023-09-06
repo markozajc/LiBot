@@ -25,7 +25,8 @@
 	</developers>
 
 	<dependencies>
-		<!-- Cross-module -->
+
+		<!-- Cross-Module -->
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>core</artifactId>
@@ -35,28 +36,56 @@
 			<artifactId>module-money</artifactId>
 		</dependency>
 
-		<!-- Akinator support -->
+		<!-- Discord API support -->
+		<dependency>
+			<groupId>net.dv8tion</groupId>
+			<artifactId>JDA</artifactId>
+		</dependency>
+
+		<!-- Apache Commons< -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<!-- Eclipse Collections -->
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections-api</artifactId>
+		</dependency>
+
+		<!-- Akinator Support -->
 		<dependency>
 			<groupId>org.eu.zajc</groupId>
 			<artifactId>akiwrapper</artifactId>
 			<version>1.6.1</version>
 		</dependency>
 
-		<!-- Uno support -->
+		<!-- UNO Support -->
 		<dependency>
 			<groupId>org.eu.zajc</groupId>
 			<artifactId>juno</artifactId>
 			<version>2.3.3</version>
 		</dependency>
+
+		<!-- Annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
+
 			<!-- Shader -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

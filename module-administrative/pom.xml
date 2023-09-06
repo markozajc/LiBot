@@ -25,33 +25,63 @@
 	</developers>
 
 	<dependencies>
+
 		<!-- Core -->
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
 
+		<!-- Discord API Support -->
+		<dependency>
+			<groupId>net.dv8tion</groupId>
+			<artifactId>JDA</artifactId>
+		</dependency>
+
+		<!-- Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
 		<!-- Groovy ScriptEngine -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-jsr223</artifactId>
-			<version>3.0.18</version>
+			<version>3.0.19</version>
+		</dependency>
+
+		<!-- ASCII Tables -->
+		<dependency>
+			<groupId>de.vandermeer</groupId>
+			<artifactId>asciitable</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.vandermeer</groupId>
+			<artifactId>ascii-utf-themes</artifactId>
 		</dependency>
 
 		<!-- Annotations -->
 		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
 		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
+
 			<!-- Shader -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

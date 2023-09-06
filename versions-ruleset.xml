@@ -14,5 +14,10 @@
 				<ignoreVersion type="regex">^2003\d{4}.\d{6}$</ignoreVersion>
 			</ignoreVersions>
 		</rule>
+		<rule groupId="commons-io">
+			<ignoreVersions>
+				<ignoreVersion type="exact">20030203.000550</ignoreVersion>
+			</ignoreVersions>
+		</rule>
 	</rules>
 </ruleset>

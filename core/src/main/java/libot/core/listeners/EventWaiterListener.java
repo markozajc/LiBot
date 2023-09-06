@@ -10,8 +10,8 @@ import java.util.function.Predicate;
 import javax.annotation.*;
 
 import org.apache.commons.lang3.tuple.*;
+import org.eclipse.collections.api.factory.primitive.IntObjectMaps;
 import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
-import org.eclipse.collections.impl.factory.primitive.IntObjectMaps;
 
 import libot.core.commands.exceptions.runtime.TimeoutException;
 import libot.utils.MessageLock;

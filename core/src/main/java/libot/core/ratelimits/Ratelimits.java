@@ -2,8 +2,8 @@ package libot.core.ratelimits;
 
 import static java.lang.System.currentTimeMillis;
 
+import org.eclipse.collections.api.factory.primitive.LongLongMaps;
 import org.eclipse.collections.api.map.primitive.MutableLongLongMap;
-import org.eclipse.collections.impl.factory.primitive.LongLongMaps;
 
 public class Ratelimits {
 

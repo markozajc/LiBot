@@ -47,8 +47,6 @@ class MusicCommandUtils {
 		*Currently playing: **[%s](%s)**.*""";
 	static final String FORMAT_QUEUE_FULL = """
 		This track has not been added to the queue because the queue may not exceed %d elements!""";
-	private static final String FORMAT_LOAD_FAILED = """
-		Failed to load this track%s""";
 	private static final String FORMAT_URL_NOT_FOUND = """
 		No playable track found on `%s`. Did you mean `%s %s`?""";
 
@@ -275,14 +273,11 @@ class MusicCommandUtils {
 		}
 
 		@Nonnull
+		@SuppressWarnings("null")
 		private static MessageEmbed getFailureEmbed(FriendlyException e) {
-			var b = new EmbedPrebuilder(FAILURE);
-			String cause;
-			if (e.getCause() == null || e.getCause().getMessage() == null)
-				cause = " due to an unknown error.";
-			else
-				cause = ": " + e.getCause().getMessage();
-			b.setDescriptionf(FORMAT_LOAD_FAILED, cause);
+			var b = new EmbedPrebuilder(e.getMessage(), FAILURE);
+			if (e.getCause() != null && e.getCause().getMessage() != null)
+				b.setFooter(e.getCause().getMessage());
 			return b.build();
 		}
 	}

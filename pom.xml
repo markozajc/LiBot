@@ -40,6 +40,8 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<logback.version>1.4.11</logback.version>
+		<eclipsecollections.version>11.1.0</eclipsecollections.version>
 	</properties>
 
 	<modules>
@@ -65,7 +67,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.11.0</version>
+				<version>2.16.0</version>
 				<configuration>
 					<rulesUri>file://${project.basedir}/versions-ruleset.xml</rulesUri>
 				</configuration>
@@ -75,7 +77,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.4.0</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -97,7 +99,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.6.0</version>
+				<configuration>
+					<ignoreNonCompile>true</ignoreNonCompile>
+				</configuration>
 			</plugin>
 		</plugins>
 
@@ -107,7 +112,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.5.0</version>
 					<configuration>
 						<filters>
 							<filter>
@@ -131,7 +136,8 @@
 							<filter>
 								<artifact>org.codehaus.groovy:groovy</artifact>
 								<excludes>
-									<exclude>META-INF/groovy-release-info.properties</exclude>
+									<exclude>
+										META-INF/groovy-release-info.properties</exclude>
 								</excludes>
 							</filter>
 						</filters>
@@ -152,7 +158,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 					<configuration>
 						<mainClass>none</mainClass>
 						<skip>true</skip>
@@ -163,26 +169,35 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.10.1</version>
+					<version>3.11.0</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.1</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>m2-dv8tion</id>
+			<url>https://m2.dv8tion.net/releases</url>
+		</repository>
+	</repositories>
+
+
 	<dependencyManagement>
 		<dependencies>
+
 			<!-- Cross-module -->
 			<dependency>
 				<groupId>zajc.libot</groupId>
@@ -257,6 +272,130 @@
 				<scope>provided</scope>
 			</dependency>
 
+			<!-- Discord API Client -->
+			<dependency>
+				<groupId>net.dv8tion</groupId>
+				<artifactId>JDA</artifactId>
+				<version>4.4.1_353</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Music Support -->
+			<dependency>
+				<groupId>dev.arbjerg</groupId>
+				<artifactId>lavaplayer</artifactId>
+				<version>2.0.1</version>
+			</dependency>
+
+			<!-- HTTP Client -->
+			<dependency>
+				<groupId>com.konghq</groupId>
+				<artifactId>unirest-java</artifactId>
+				<version>3.14.5</version>
+			</dependency>
+
+			<!-- Apache Commons -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.13.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>1.10.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.13.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Guava -->
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>32.1.2-jre</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Eclipse Collections -->
+			<dependency>
+				<groupId>org.eclipse.collections</groupId>
+				<artifactId>eclipse-collections-api</artifactId>
+				<version>${eclipsecollections.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- JSON Support -->
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.10.1</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Classpath scanning -->
+			<dependency>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections</artifactId>
+				<version>0.10.2</version>
+			</dependency>
+
+			<!-- ASCII Tables -->
+			<dependency>
+				<groupId>de.vandermeer</groupId>
+				<artifactId>asciitable</artifactId>
+				<version>0.3.2</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.antlr</groupId>
+						<artifactId>ST4</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>de.vandermeer</groupId>
+				<artifactId>ascii-utf-themes</artifactId>
+				<version>0.0.1</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>de.vandermeer</groupId>
+				<artifactId>skb-interfaces</artifactId>
+				<version>0.0.1</version>
+			</dependency>
+
+			<!-- Extended Functions -->
+			<dependency>
+				<groupId>org.eu.zajc</groupId>
+				<artifactId>extended-functions</artifactId>
+				<version>1.4.2</version>
+			</dependency>
+
+			<!-- Logging -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>2.0.9</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>${logback.version}</version>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${logback.version}</version>
+			</dependency>
+
 			<!-- Annotations -->
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
@@ -271,48 +410,6 @@
 				<scope>provided</scope>
 			</dependency>
 
-			<!-- Misc shared -->
-			<dependency>
-				<groupId>org.eu.zajc</groupId>
-				<artifactId>extended-functions</artifactId>
-				<version>1.4.2</version>
-			</dependency>
-			<dependency>
-				<groupId>com.konghq</groupId>
-				<artifactId>unirest-java</artifactId>
-				<version>3.14.5</version>
-			</dependency>
-			<dependency>
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-classic</artifactId>
-				<version>1.4.8</version>
-			</dependency>
-			<dependency>
-				<groupId>org.reflections</groupId>
-				<artifactId>reflections</artifactId>
-				<version>0.10.2</version>
-			</dependency>
-			<dependency>
-				<groupId>net.dv8tion</groupId>
-				<artifactId>JDA</artifactId>
-				<version>4.4.1_353</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.walkyst</groupId>
-				<artifactId>lavaplayer-fork</artifactId>
-				<version>1.4.2</version>
-			</dependency>
-			<dependency>
-				<groupId>de.vandermeer</groupId>
-				<artifactId>asciitable</artifactId>
-				<version>0.3.2</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.antlr</groupId>
-						<artifactId>ST4</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

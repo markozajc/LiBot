@@ -138,8 +138,9 @@ public class ChatbotCommand extends Command {
 			.field("botid", BOT_ID)
 			.field("custid", session)
 			.field("input", text)
-			.asBytes()
-			.mapBody(ByteArrayInputStream::new);
+			.asString()
+			.mapBody(s -> new ByteArrayInputStream(s.replace("<hr>", "<br>").getBytes()));
+		// unclosed <hr> causes issues with the
 
 		return extractResponse(bytes);
 	}

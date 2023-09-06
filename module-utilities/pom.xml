@@ -25,6 +25,7 @@
 	</developers>
 
 	<dependencies>
+
 		<!-- Cross-module -->
 		<dependency>
 			<groupId>zajc.libot</groupId>
@@ -35,30 +36,63 @@
 			<artifactId>module-libot</artifactId>
 		</dependency>
 
+		<!-- Discord API support -->
+		<dependency>
+			<groupId>net.dv8tion</groupId>
+			<artifactId>JDA</artifactId>
+		</dependency>
+
+		<!-- HTTP Client -->
+		<dependency>
+			<groupId>com.konghq</groupId>
+			<artifactId>unirest-java</artifactId>
+		</dependency>
+
+		<!-- Apache Commons -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+
+		<!-- Eclipse Collections -->
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections-api</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- JSON Support -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+
 		<!-- Extended functions -->
 		<dependency>
 			<groupId>org.eu.zajc</groupId>
 			<artifactId>extended-functions</artifactId>
 		</dependency>
 
-		<!-- HTTP -->
+		<!-- Logging -->
 		<dependency>
-			<groupId>com.konghq</groupId>
-			<artifactId>unirest-java</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<!-- Annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
 		</dependency>
 
-		<!-- Compression -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.23.0</version>
-		</dependency>
 	</dependencies>
 
 	<build>

@@ -11,8 +11,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Nonnull;
 
+import org.eclipse.collections.api.factory.primitive.IntLists;
 import org.eclipse.collections.api.list.primitive.MutableIntList;
-import org.eclipse.collections.impl.factory.primitive.IntLists;
 
 import libot.core.commands.*;
 import libot.core.commands.exceptions.runtime.NumberOverflowException;

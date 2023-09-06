@@ -1,7 +1,6 @@
 package libot.commands;
 
 import static de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment.CENTER;
-import static java.lang.String.format;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.LIBOT;
 import static libot.utils.Utilities.array;
@@ -32,23 +31,21 @@ public class ShredsCommand extends Command {
 		c.shredder().getShreds().forEach(s -> {
 			var name = s.name();
 			if (c.shredder().getCurrentShred() == s)
-				name = format("> %s <", s.name());
+				name = "> %s <".formatted(s.name());
 			t.addRow(name, s.jda().getSelfUser().getId(), s.jda().getStatus().toString(),
-					 format("%d / 100", s.jda().getGuildCache().size()))
+					 "%d / 100".formatted(s.jda().getGuildCache().size()))
 				.setPaddingLeftRight(1);
 		});
 		t.addRule();
 
-		t.addRow(null, null, "",
-				 format("%d / %d",
-						c.shredder()
-							.getShreds()
-							.stream()
-							.map(Shred::jda)
-							.map(JDA::getGuildCache)
-							.mapToLong(SnowflakeCacheView::size)
-							.sum(),
-						c.shredder().getShreds().size() * 100))
+		long totalGuilds = c.shredder()
+			.getShreds()
+			.stream()
+			.map(Shred::jda)
+			.map(JDA::getGuildCache)
+			.mapToLong(SnowflakeCacheView::size)
+			.sum();
+		t.addRow(null, null, "", "%d / %d".formatted(totalGuilds, c.shredder().getShreds().size() * 100))
 			.setPaddingLeftRight(1);
 		t.addRule();
 		c.replyf(FORMAT_TABLE, t.render());
