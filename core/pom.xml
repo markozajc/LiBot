@@ -211,8 +211,7 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<configuration>
 					<usedDependencies>
-						<usedDependency>
-							club.minnced:udpqueue-native-linux-x86-64</usedDependency>
+						<usedDependency>club.minnced:udpqueue-native-linux-x86-64</usedDependency>
 					</usedDependencies>
 				</configuration>
 			</plugin>
