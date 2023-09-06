@@ -62,7 +62,6 @@
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections-api</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- JSON Support -->

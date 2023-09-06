@@ -36,7 +36,6 @@
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Apache Commons -->
@@ -44,26 +43,22 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.4</version>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Guava -->
@@ -71,7 +66,6 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Eclipse Collections -->
@@ -79,14 +73,12 @@
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections-api</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections</artifactId>
 			<version>${eclipsecollections.version}</version>
 			<scope>runtime</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Native Queue -->
@@ -94,7 +86,6 @@
 			<groupId>com.sedmelluq</groupId>
 			<artifactId>jda-nas</artifactId>
 			<version>1.1.0</version>
-			<optional>true</optional>
 			<exclusions>
 				<exclusion>
 					<groupId>com.sedmelluq</groupId>
@@ -106,7 +97,6 @@
 			<groupId>club.minnced</groupId>
 			<artifactId>udpqueue-native-linux-x86-64</artifactId>
 			<version>0.2.7</version>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- JSON Support -->
@@ -114,14 +104,12 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Classpath Scanning -->
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- ASCII Tables -->
@@ -129,20 +117,17 @@
 			<groupId>de.vandermeer</groupId>
 			<artifactId>asciitable</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>de.vandermeer</groupId>
 			<artifactId>ascii-utf-themes</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Extended Functions -->
 		<dependency>
 			<groupId>org.eu.zajc</groupId>
 			<artifactId>extended-functions</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Logging -->
@@ -150,31 +135,26 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<scope>runtime</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>core-logging</artifactId>
 			<scope>runtime</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Annotations -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 	</dependencies>

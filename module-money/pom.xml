@@ -30,28 +30,24 @@
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>core</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Discord API Support -->
 		<dependency>
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- JSON Support -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Annotations -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 	</dependencies>

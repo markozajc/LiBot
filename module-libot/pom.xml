@@ -30,67 +30,56 @@
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>core</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>zajc.libot</groupId>
 			<artifactId>module-music</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Discord API support -->
 		<dependency>
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Apache Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Eclipse Collections -->
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections-api</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- ASCII Tables -->
 		<dependency>
 			<groupId>de.vandermeer</groupId>
 			<artifactId>asciitable</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>de.vandermeer</groupId>
 			<artifactId>ascii-utf-themes</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>de.vandermeer</groupId>
 			<artifactId>skb-interfaces</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Annotations -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 	</dependencies>
