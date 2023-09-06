@@ -69,14 +69,14 @@ public class CalculatorCommand extends Command {
 	private static final String MODE_EXACT = "exact";
 	private static final String MODE_NORMAL = "";
 
-	private static final byte SEPARATOR = 0;
+	private static final byte SEPARATOR = 0x00;
 
-	private static final byte TYPE_MESSAGE = 1;
-	private static final byte TYPE_RESULT = 2;
+	private static final byte TYPE_MESSAGE = 0x01;
+	private static final byte TYPE_RESULT = 0x02;
 
-	private static final byte LEVEL_INFO = 1;
-	private static final byte LEVEL_WARN = 2;
-	private static final byte LEVEL_ERROR = 3;
+	private static final byte LEVEL_INFO = 0x01;
+	private static final byte LEVEL_WARN = 0x02;
+	private static final byte LEVEL_ERROR = 0x03;
 
 	private static final byte RESULT_APPROXIMATION = 2;
 
@@ -124,12 +124,17 @@ public class CalculatorCommand extends Command {
 			}
 		}
 
-		if (m.isEmpty() && resultFile != null)
-			c.reply("No output", DISABLED);
-		else if (resultFile == null)
-			c.reply(m);
-		else
-			c.replyraw(m).addFile(resultFile, "result.txt").submit();
+		if (!m.isEmpty()) {
+			if (resultFile != null)
+				c.replyraw(m).addFile(resultFile, mode).queue();
+			else
+				c.reply(m);
+		} else {
+			if (resultFile != null)
+				c.replyFile(resultFile, "result.txt");
+			else
+				c.reply("No output", DISABLED);
+		}
 	}
 
 	@Nullable
@@ -204,9 +209,12 @@ public class CalculatorCommand extends Command {
 
 		var b = new ProcessBuilder(command);
 		b.environment().clear();
-		b.environment().put("HOME", getenv(ENV_QALCULATE_HOME));
-		b.environment().put("ENV", getenv(ENV_QALCULATE_HOME) + "/.profile");
-		b.directory(DATA_HOME.toFile());
+		if (getenv(ENV_QALCULATE_HOME) != null) {
+			b.environment().put("HOME", getenv(ENV_QALCULATE_HOME));
+			b.environment().put("ENV", getenv(ENV_QALCULATE_HOME) + "/.profile");
+		}
+		if (DATA_HOME != null)
+			b.directory(DATA_HOME.toFile());
 		return b.start();
 	}
 
@@ -259,7 +267,7 @@ public class CalculatorCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("calc", "c", "calculate");
+		return array("calc", "c", "calculate", "qalc");
 	}
 
 	@Override
