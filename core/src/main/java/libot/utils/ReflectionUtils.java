@@ -1,11 +1,11 @@
 package libot.utils;
 
 import static java.lang.reflect.Modifier.*;
-import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.reflections.scanners.Scanners.SubTypes;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -18,21 +18,21 @@ public class ReflectionUtils {
 	private static final Logger LOG = getLogger(ReflectionUtils.class);
 
 	@Nonnull
-	public static <T> Set<T> scanClasspath(Class<? extends T> supertype, Class<?> packageAnchor) {
+	public static <T> Stream<T> scanClasspath(Class<? extends T> supertype, Class<?> packageAnchor) {
 		return scanClasspath(supertype, packageAnchor, c -> c.getDeclaredConstructor().newInstance());
 	}
 
 	@Nonnull
-	public static <T> Set<T> scanClasspath(Class<? extends T> supertype, Class<?> packageAnchor,
-										   @Nonnull Class<?>[] argumentTypes, @Nonnull Object... arguments) {
+	public static <T> Stream<T> scanClasspath(Class<? extends T> supertype, Class<?> packageAnchor,
+											  @Nonnull Class<?>[] argumentTypes, @Nonnull Object... arguments) {
 		return scanClasspath(supertype, packageAnchor,
 							 c -> c.getDeclaredConstructor(argumentTypes).newInstance(arguments));
 	}
 
 	@Nonnull
 	@SuppressWarnings({ "unchecked", "null" })
-	public static <T> Set<T> scanClasspath(Class<? extends T> supertype, Class<?> packageAnchor,
-										   EFunction<Class<? extends T>, T, ReflectiveOperationException> instantizer) {
+	public static <T> Stream<T> scanClasspath(Class<? extends T> supertype, Class<?> packageAnchor,
+											  EFunction<Class<? extends T>, T, ReflectiveOperationException> instantizer) {
 		var reflections = new Reflections(packageAnchor.getPackageName());
 		return reflections.get(SubTypes.of(supertype).asClass())
 			.stream()
@@ -47,8 +47,7 @@ public class ReflectionUtils {
 					return null;
 				}
 			})
-			.filter(Objects::nonNull)
-			.collect(toUnmodifiableSet());
+			.filter(Objects::nonNull);
 	}
 
 	private ReflectionUtils() {}

@@ -2,13 +2,23 @@ package libot.utils;
 
 import static java.lang.Math.log10;
 import static java.lang.System.getenv;
+import static java.util.stream.Collectors.toMap;
 
+import java.util.HashMap;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
+import java.util.function.*;
+import java.util.stream.Collector;
 
 import javax.annotation.*;
 
 public final class Utilities {
+
+	public static <T, K, U> Collector<T, ?, HashMap<K, U>> toModifiableMap(Function<? super T, ? extends K> keyMapper,
+																		   Function<? super T, ? extends U> valueMapper) {
+		return toMap(keyMapper, valueMapper, (m1, m2) -> {
+			throw new IllegalStateException("Duplicate key");
+		}, HashMap::new);
+	}
 
 	@Nonnull
 	public static String plural(int n) {

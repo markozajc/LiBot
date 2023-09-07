@@ -181,7 +181,7 @@ public class Main {
 								   } catch (NoSuchMethodException e) {
 									   return c.getDeclaredConstructor().newInstance();
 								   }
-							   }).stream()).toArray();
+							   })).toArray();
 		shredder.getShreds().stream().map(Shred::jda).forEach(j -> j.addEventListener(listeners));
 	}
 

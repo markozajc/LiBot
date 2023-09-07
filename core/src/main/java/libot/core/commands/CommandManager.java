@@ -1,7 +1,7 @@
 package libot.core.commands;
 
 import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Collectors.*;
 import static libot.utils.ReflectionUtils.scanClasspath;
 
 import java.util.*;
@@ -15,9 +15,10 @@ public class CommandManager implements Iterable<Command> {
 	@Nonnull private final Set<Command> commands;
 
 	@Nonnull
+	@SuppressWarnings("null")
 	public static CommandManager fromClasspath() {
-		var commands = scanClasspath(Command.class, libot.commands.Anchor.class);
-		return new CommandManager(commands);
+		return new CommandManager(scanClasspath(Command.class, libot.commands.Anchor.class)
+			.collect(toCollection(HashSet::new)));
 	}
 
 	private CommandManager(@Nonnull Set<Command> commands) {
@@ -46,6 +47,11 @@ public class CommandManager implements Iterable<Command> {
 	@SuppressWarnings("null")
 	public Set<Command> getAll() {
 		return unmodifiableSet(this.commands);
+	}
+
+	@Nonnull
+	public Set<Command> getAllDirect() {
+		return this.commands;
 	}
 
 	@Nonnull

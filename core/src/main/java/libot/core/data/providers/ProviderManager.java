@@ -1,10 +1,13 @@
 package libot.core.data.providers;
 
+import static com.google.common.base.Functions.identity;
 import static java.lang.String.format;
+import static java.util.Collections.unmodifiableMap;
 import static libot.utils.ReflectionUtils.scanClasspath;
+import static libot.utils.Utilities.toModifiableMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.*;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -17,18 +20,18 @@ public final class ProviderManager {
 
 	private static final Logger LOG = getLogger(ProviderManager.class);
 
-	private final Map<Class<?>, Provider<?>> providers;
+	@Nonnull private final Map<Class<?>, Provider<?>> providers;
 
-	public ProviderManager(@SuppressWarnings("rawtypes") @Nonnull Set<Provider> providers) {
-		this.providers = new HashMap<>();
-		providers.forEach(p -> this.providers.put(p.getClass(), p));
+	private ProviderManager(@Nonnull Map<Class<?>, Provider<?>> providers) {
+		this.providers = providers;
 	}
 
 	@Nonnull
+	@SuppressWarnings("null")
 	public static ProviderManager fromClasspath(@Nonnull Shredder shredder, @Nonnull DataManager dataManager) {
 		return new ProviderManager(scanClasspath(Provider.class, libot.providers.Anchor.class,
 												 new Class<?>[] { Shredder.class, DataManager.class }, shredder,
-												 dataManager));
+												 dataManager).collect(toModifiableMap(Object::getClass, identity())));
 	}
 
 	public void loadAll() {
@@ -58,6 +61,17 @@ public final class ProviderManager {
 		if (result == null)
 			throw new IllegalStateException(format("Provider of class %s is not registered", clazz.getSimpleName()));
 		return result;
+	}
+
+	@Nonnull
+	@SuppressWarnings("null")
+	public Map<Class<?>, Provider<?>> getAll() {
+		return unmodifiableMap(this.providers);
+	}
+
+	@Nonnull
+	public Map<Class<?>, Provider<?>> getAllDirect() {
+		return this.providers;
 	}
 
 	public int size() {
