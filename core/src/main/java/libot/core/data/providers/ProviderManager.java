@@ -16,13 +16,15 @@ import org.slf4j.Logger;
 import libot.core.data.DataManager;
 import libot.core.shred.Shredder;
 
+@SuppressWarnings("rawtypes") // ecj doesn't complain if I use Provider<?> but javac does, so I'm opting to use raw
+							  // types instead
 public final class ProviderManager {
 
 	private static final Logger LOG = getLogger(ProviderManager.class);
 
-	@Nonnull private final Map<Class<?>, Provider<?>> providers;
+	@Nonnull private final Map<Class<?>, Provider> providers;
 
-	private ProviderManager(@Nonnull Map<Class<?>, Provider<?>> providers) {
+	private ProviderManager(@Nonnull Map<Class<?>, Provider> providers) {
 		this.providers = providers;
 	}
 
@@ -65,12 +67,12 @@ public final class ProviderManager {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public Map<Class<?>, Provider<?>> getAll() {
+	public Map<Class<?>, Provider> getAll() {
 		return unmodifiableMap(this.providers);
 	}
 
 	@Nonnull
-	public Map<Class<?>, Provider<?>> getAllDirect() {
+	public Map<Class<?>, Provider> getAllDirect() {
 		return this.providers;
 	}
 
