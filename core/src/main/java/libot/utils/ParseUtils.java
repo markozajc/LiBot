@@ -3,11 +3,12 @@ package libot.utils;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.time.ZoneOffset.UTC;
-import static java.util.concurrent.TimeUnit.*;
+import static java.time.temporal.ChronoUnit.*;
 import static java.util.regex.Pattern.*;
 import static org.apache.commons.lang3.math.NumberUtils.isDigits;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.regex.*;
@@ -124,7 +125,8 @@ public class ParseUtils {
 		long duration = 0;
 		for (char c : chars) {
 			boolean append = false;
-			TimeUnit unit = switch (c) {
+			ChronoUnit unit = switch (c) {
+				case 'w' -> WEEKS;
 				case 'd' -> DAYS;
 				case 'h' -> HOURS;
 				case 'm' -> MINUTES;
@@ -141,13 +143,14 @@ public class ParseUtils {
 				continue;
 			if (unit == null || durationBuffer.length() == 0) // not a number and not a unit
 				return -1;
-			duration += unit.toMillis(Long.parseLong(durationBuffer.toString()));
+
+			duration += unit.getDuration().toMillis() * Long.parseLong(durationBuffer.toString());
 			durationBuffer.setLength(0);
 		}
 
 		if (durationBuffer.length() != 0)
-			duration += SECONDS.toMillis(Long.parseLong(durationBuffer.toString())); // any number without unit is
-																					 // treated as seconds
+			duration += TimeUnit.SECONDS.toMillis(Long.parseLong(durationBuffer.toString()));
+		// any number without unit is treated as seconds
 
 		return duration;
 	}
