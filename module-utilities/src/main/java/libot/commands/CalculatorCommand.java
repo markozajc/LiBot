@@ -112,7 +112,7 @@ public class CalculatorCommand extends Command {
 		byte[] resultFile = null;
 		if (result != null) {
 			String resultString = parseResult(result);
-			String resultCodeblock = codeblock(resultString);
+			String resultCodeblock = codeblock("ansi", resultString);
 			if (resultCodeblock.length() <= Message.MAX_CONTENT_LENGTH) {
 				m.setContent(resultCodeblock);
 
