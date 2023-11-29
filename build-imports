@@ -3,6 +3,6 @@ find -name '*.java' \
 	| sed -En 's#^.*src\/main\/java\/(.*)\/[a-zA-Z0-9_]+.java$#import \1.*;#p' \
 	| sort -u \
 	| tr '/' '.' \
-	| tee 'libot-module-administrative/src/main/resources/imports-dynamic' \
+	| tee 'module-administrative/src/main/resources/imports-dynamic' \
 	| batcat --tabs=0 --paging=never -p -l java
 echo 'Written imports'
