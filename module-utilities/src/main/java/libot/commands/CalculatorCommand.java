@@ -63,7 +63,7 @@ public class CalculatorCommand extends Command {
 	}
 
 	private static final Pattern REGEX_BASE =
-		compile("(?:\\s+convert)?\\s+to\\s+(?:(b(?:ase)?\\s*(?:[\\d]+))|([^\\s]+))", UNICODE_CHARACTER_CLASS);
+		compile("(?:\\s+convert)?\\s+to\\s+(?:b(?:ase)?\\s*([\\d]+)|([^\\s]+))", UNICODE_CHARACTER_CLASS);
 	private static final Pattern REGEX_MODE =
 		compile("mode\\s+((?:high\\s*)?precision|exact)", UNICODE_CHARACTER_CLASS);
 
@@ -97,14 +97,14 @@ public class CalculatorCommand extends Command {
 		c.typing();
 		String expression = c.params().get(0);
 
-		byte mode = 1;
+		int mode = 1;
 		var modeMatcher = REGEX_MODE.matcher(expression);
 		if (modeMatcher.find()) {
 			mode = getMode(modeMatcher);
 			expression = modeMatcher.replaceFirst("");
 		}
 
-		byte base = 10;
+		int base = 10;
 		var baseMatcher = REGEX_BASE.matcher(expression);
 		if (baseMatcher.find()) {
 			base = getBase(baseMatcher);
@@ -150,7 +150,7 @@ public class CalculatorCommand extends Command {
 		}
 	}
 
-	public static byte getMode(Matcher matcher) {
+	public static int getMode(Matcher matcher) {
 		var mode = matcher.group().toLowerCase();
 		if (mode.endsWith("precision"))
 			return 2;
@@ -158,7 +158,7 @@ public class CalculatorCommand extends Command {
 			return 1;
 	}
 
-	public static byte getBase(Matcher matcher) {
+	public static int getBase(Matcher matcher) {
 		var numeric = matcher.group(1); // base N
 
 		if (numeric != null) {
@@ -204,7 +204,7 @@ public class CalculatorCommand extends Command {
 
 	@Nullable
 	private static Result evaluate(@Nonnull CommandContext c, @Nonnull List<QalcMessage> messages, String expression,
-								   byte mode, byte base) throws IOException, InterruptedException {
+								   int mode, int base) throws IOException, InterruptedException {
 		byte[] output = runCalculatorProcess(c, expression, mode, base);
 
 		int i = -1;
@@ -235,10 +235,9 @@ public class CalculatorCommand extends Command {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	private static byte[] runCalculatorProcess(@Nonnull CommandContext c, String expression, byte mode,
-											   byte base) throws IOException, InterruptedException {
-		var p = executeQalculate(expression, new String(new byte[] { mode }, UTF_8),
-								 new String(new byte[] { base }, UTF_8));
+	private static byte[] runCalculatorProcess(@Nonnull CommandContext c, String expression, int mode,
+											   int base) throws IOException, InterruptedException {
+		var p = executeQalculate(expression, Integer.toString(mode), Integer.toString(base));
 
 		if (!p.waitFor(TIMEOUT_EVALUATE, SECONDS) || p.exitValue() == EXIT_TIMEOUT) {
 			if (p.isAlive())
@@ -286,17 +285,21 @@ public class CalculatorCommand extends Command {
 	@Nonnull
 	@SuppressWarnings("null")
 	private static String parseResult(@Nonnull Result r) {
-		if (r.value().contains("=") || r.value().contains("≈")) {
+		String value = r.value();
+		if (value.contains("=") || value.contains("≈")) {
 			if (r.approximate())
-				return r.value().replace('=', '≈');
-			else
-				return r.value();
+				value = value.replace('=', '≈');
 		} else {
 			if (r.approximate())
-				return "≈ " + r.value();
+				value = "≈ " + value;
 			else
-				return "= " + r.value();
+				value = "= " + value;
 		}
+
+		if (value.endsWith("\033[0m"))
+			value = value.substring(0, value.length() - 4);
+
+		return value;
 	}
 
 	@Nonnull
