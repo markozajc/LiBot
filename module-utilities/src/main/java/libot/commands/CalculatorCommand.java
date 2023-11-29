@@ -1,11 +1,12 @@
 package libot.commands;
 
-import static java.lang.Byte.compare;
+import static java.lang.Byte.*;
 import static java.lang.System.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Paths.get;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.regex.Pattern.*;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
@@ -18,6 +19,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.*;
 
 import javax.annotation.*;
 
@@ -60,14 +62,15 @@ public class CalculatorCommand extends Command {
 		}
 	}
 
+	private static final Pattern REGEX_BASE =
+		compile("(?:\\s+convert)?\\s+to\\s+(?:(b(?:ase)?\\s*(?:[\\d]+))|([^\\s]+))", UNICODE_CHARACTER_CLASS);
+	private static final Pattern REGEX_MODE =
+		compile("mode\\s+((?:high\\s*)?precision|exact)", UNICODE_CHARACTER_CLASS);
+
 	private static final String EMOJI_INFO = "\u2139";
 	private static final String EMOJI_WARN = "\u26A0";
 	private static final String EMOJI_ERROR = "<:e:988959163579269130>";
 	private static final String EMOJI_UNKNOWN = "\u2699";
-
-	private static final String MODE_HIGH_PRECISION = "precision";
-	private static final String MODE_EXACT = "exact";
-	private static final String MODE_NORMAL = "";
 
 	private static final byte SEPARATOR = 0x00;
 
@@ -93,16 +96,26 @@ public class CalculatorCommand extends Command {
 
 		c.typing();
 		String expression = c.params().get(0);
-		String mode;
-		if (expression.startsWith(MODE_HIGH_PRECISION))
-			mode = MODE_HIGH_PRECISION;
-		else if (expression.startsWith(MODE_EXACT))
-			mode = MODE_EXACT;
-		else
-			mode = MODE_NORMAL;
+
+		byte mode = 1;
+		var modeMatcher = REGEX_MODE.matcher(expression);
+		if (modeMatcher.find()) {
+			mode = getMode(modeMatcher);
+			expression = modeMatcher.replaceFirst("");
+		}
+
+		byte base = 10;
+		var baseMatcher = REGEX_BASE.matcher(expression);
+		if (baseMatcher.find()) {
+			base = getBase(baseMatcher);
+			if (base == 0)
+				base = 10; // base invalid, leave expression as-is and set base back to 10
+			else
+				expression = baseMatcher.replaceFirst(""); // base valid, remove conversion string
+		}
 
 		var messages = new ArrayList<QalcMessage>(5);
-		var result = evaluate(c, messages, expression, mode);
+		var result = evaluate(c, messages, expression, mode, base);
 
 		var m = new MessageBuilder();
 
@@ -120,13 +133,13 @@ public class CalculatorCommand extends Command {
 				resultFile = resultString.getBytes(UTF_8);
 
 				if (resultFile.length > Message.MAX_FILE_SIZE)
-					throw c.error("The result is too long (> 8 MiB)", FAILURE);
+					throw c.error("The result is too long (> 8 MiB)", FAILURE); // TODO this will need to be changed
 			}
 		}
 
 		if (!m.isEmpty()) {
 			if (resultFile != null)
-				c.replyraw(m).addFile(resultFile, mode).queue();
+				c.replyraw(m).addFile(resultFile, "result.txt").queue();
 			else
 				c.reply(m);
 		} else {
@@ -137,11 +150,62 @@ public class CalculatorCommand extends Command {
 		}
 	}
 
+	public static byte getMode(Matcher matcher) {
+		var mode = matcher.group().toLowerCase();
+		if (mode.endsWith("precision"))
+			return 2;
+		else
+			return 1;
+	}
+
+	public static byte getBase(Matcher matcher) {
+		var numeric = matcher.group(1); // base N
+
+		if (numeric != null) {
+			try {
+				var base = parseByte(numeric);
+				if (base < 2 || base > 36) // qalculate's own limit
+					return 0;
+				else
+					return base;
+
+			} catch (NumberFormatException e) {
+				return 0;
+			}
+		}
+
+		var textual = matcher.group(2); // hex, dec, bin, ...
+		return switch (textual.toLowerCase()) { // loosely copied from qalc.cc
+			case "fp80" /* qalc.cc also lacks binary80 */ -> -34; // BASE_FP80
+			case "fp128", "binary128" -> -33; // BASE_FP128
+			case "fp64", "binary64", "double" -> -32; // BASE_FP64
+			case "fp32", "binary32", "float" -> -31; // BASE_FP32
+			case "fp16", "binary16" -> -30; // BASE_FP16
+			case "bijective" -> -26; // BASE_BIJECTIVE_26
+			case "bcd" -> -20;
+			case "unicode" -> -4; // BASE_UNICODE
+			case "time" -> -2; // BASE_TIME
+			case "roman" -> -1; // BASE_ROMAN_NUMERALS
+			case "bin", "binary" -> 2;
+			case "oct", "octal" -> 8;
+			case "dec", "decimal" -> 10;
+			case "doz", "dozenal", "duo", "duodecimal" -> 12;
+			case "hex", "hexadecimal" -> 16;
+			case "sexa", "sexagesimal" -> 60; // BASE_SEXAGESIMAL
+			case "sexa2", "sexagesimal2" -> 62; // BASE_SEXAGESIMAL_2
+			case "sexa3", "sexagesimal3" -> 63; // BASE_SEXAGESIMAL_3
+			case "latitude" -> 70; // BASE_LATITUDE
+			case "latitude2" -> 71; // BASE_LATITUDE_2
+			case "longitude" -> 72; // BASE_LONGITUDE
+			case "longitude2" -> 73; // BASE_LONGITUDE_2
+			default -> 0;
+		};
+	}
+
 	@Nullable
-	private static Result evaluate(@Nonnull CommandContext c, @Nonnull List<QalcMessage> messages,
-								   @Nonnull String expression,
-								   @Nonnull String mode) throws IOException, InterruptedException {
-		byte[] output = runCalculatorProcess(c, expression, mode);
+	private static Result evaluate(@Nonnull CommandContext c, @Nonnull List<QalcMessage> messages, String expression,
+								   byte mode, byte base) throws IOException, InterruptedException {
+		byte[] output = runCalculatorProcess(c, expression, mode, base);
 
 		int i = -1;
 		String value = null;
@@ -171,9 +235,10 @@ public class CalculatorCommand extends Command {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	private static byte[] runCalculatorProcess(@Nonnull CommandContext c, @Nonnull String expression,
-											   @Nonnull String mode) throws IOException, InterruptedException {
-		var p = executeQalculate(expression.substring(mode.length()), mode);
+	private static byte[] runCalculatorProcess(@Nonnull CommandContext c, String expression, byte mode,
+											   byte base) throws IOException, InterruptedException {
+		var p = executeQalculate(expression, new String(new byte[] { mode }, UTF_8),
+								 new String(new byte[] { base }, UTF_8));
 
 		if (!p.waitFor(TIMEOUT_EVALUATE, SECONDS) || p.exitValue() == EXIT_TIMEOUT) {
 			if (p.isAlive())
@@ -271,27 +336,26 @@ public class CalculatorCommand extends Command {
 	}
 
 	@Override
-	@SuppressWarnings("null")
 	public String getInfo() {
 		return """
 			Evaluates an expression. Check out the lists of supported \
 			[functions](https://qalculate.github.io/manual/qalculate-definitions-functions.html), \
 			[units](https://qalculate.github.io/manual/qalculate-definitions-units.html), and \
 			[constants](https://qalculate.github.io/manual/qalculate-definitions-variables.html). \
-			Begin your expression with `%s` for high precision mode, or `%s` for exact evaluation mode.
+			Add `mode precision` to the expression for high precision mode, or `mode exact` for exact evaluation mode.
 			Powered by [Qalculate!](https://qalculate.github.io/)
 			_Note: Qalculate! input is multi-line. You can specify variable assignments (x := y) on separate lines._
-			""".formatted(MODE_HIGH_PRECISION, MODE_EXACT);
+			""";
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("[mode]", "expression");
+		return array("expression");
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("evaluation mode (precision/exact)", "expression to evaluate");
+		return array("expression to evaluate");
 	}
 
 	@Override
