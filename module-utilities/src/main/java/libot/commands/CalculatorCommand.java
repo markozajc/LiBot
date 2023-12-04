@@ -66,6 +66,7 @@ public class CalculatorCommand extends Command {
 		compile("(?:\\s+convert)?\\s+to\\s+(?:b(?:ase)?\\s*([\\d]+)|([^\\s]+))", UNICODE_CHARACTER_CLASS);
 	private static final Pattern REGEX_MODE =
 		compile("mode\\s+((?:high\\s*)?precision|exact)", UNICODE_CHARACTER_CLASS);
+	private static final Pattern REGEX_NEWLINES = compile("\\\\\\s*\\n\\s*", UNICODE_CHARACTER_CLASS | MULTILINE);
 
 	private static final String EMOJI_INFO = "\u2139";
 	private static final String EMOJI_WARN = "\u26A0";
@@ -96,6 +97,7 @@ public class CalculatorCommand extends Command {
 
 		c.typing();
 		String expression = c.params().get(0);
+		expression = REGEX_NEWLINES.matcher(expression).replaceAll(" ");
 
 		int mode = 1;
 		var modeMatcher = REGEX_MODE.matcher(expression);
