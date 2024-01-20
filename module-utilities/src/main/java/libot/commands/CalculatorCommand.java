@@ -157,7 +157,7 @@ public class CalculatorCommand extends Command {
 		if (mode.endsWith("precision"))
 			return 2;
 		else
-			return 1;
+			return 3;
 	}
 
 	public static int getBase(Matcher matcher) {
