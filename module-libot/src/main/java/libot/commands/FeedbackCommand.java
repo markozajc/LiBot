@@ -61,7 +61,7 @@ public class FeedbackCommand extends Command {
 		c.reply("Thank you for your feedback!", SUCCESS);
 
 		var mail = b.build();
-		c.messageSysadmins(p -> p.sendMessageEmbeds(mail));
+		c.messageSysadmins(mail);
 	}
 
 	@Nonnull

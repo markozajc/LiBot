@@ -370,19 +370,15 @@ public class PollCommand extends Command {
 			eb.setColor(SUCCESS);
 			var embed = eb.build();
 
-			var pca = shredder.openPrivateChannelById(this.authorId);
-			if (pca != null)
-				pca.flatMap(pc -> pc.sendMessageEmbeds(embed)).queue(null, PRIVATE_MESSAGE_ERROR_HANDLER);
-
+			shredder.sendPrivateMessageEmbeds(this.authorId, embed);
 			if (this.disclosePublicly) {
 				var channel = (TextChannel) message.getChannel();
 				if (channel.canTalk()) {
 					channel.sendMessageEmbeds(embed).queue();
 
-				} else if (pca != null) {
-					pca.flatMap(pc -> pc.sendMessage(format(FORMAT_DISCLOSE_NO_PERMISSION, channel.getAsMention(),
-															channel.getAsMention())))
-						.queue(null, PRIVATE_MESSAGE_ERROR_HANDLER);
+				} else {
+					shredder.sendPrivateMessage(this.authorId, FORMAT_DISCLOSE_NO_PERMISSION
+						.formatted(channel.getAsMention(), channel.getAsMention()));
 				}
 			}
 		}

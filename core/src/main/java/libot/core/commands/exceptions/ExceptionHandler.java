@@ -66,7 +66,7 @@ public class ExceptionHandler {
 			Failed to execute %s:```
 			%s```""".formatted(c.getCommandName(), abbreviate(getStackTrace(throwable), maxTraceLength));
 
-		c.messageSysadmins(p -> p.sendMessage(report));
+		c.messageSysadmins(report);
 
 		LOG.error("Unhandled exception in {}", c.getCommandName());
 		LOG.error("", throwable);

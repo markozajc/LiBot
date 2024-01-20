@@ -10,9 +10,7 @@ import static net.dv8tion.jda.api.Permission.*;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
 import java.awt.Color;
-import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.function.Function;
 
 import javax.annotation.*;
 
@@ -34,7 +32,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed.Footer;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.*;
 import net.dv8tion.jda.api.managers.AudioManager;
-import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.utils.AttachmentOption;
 
@@ -340,18 +337,16 @@ public class CommandContext {
 			.orElse(getConfig().defaultPrefix());
 	}
 
-	public void messageSysadmins(@Nonnull Function<PrivateChannel, RestAction<Message>> message) {
-		stream(getConfig().sysadminIds()).mapToObj(i -> shredder().openPrivateChannelById(i))
-			// TODO 🚫BLOCKED use the below when eclipse gets better null analysis
-			// .filter(Objects::nonNull)
-			// .map(r -> r.flatMap(message))
-			.map(r -> {
-				if (r == null)
-					return null;
-				return r.flatMap(message);
-			})
-			.filter(Objects::nonNull)
-			.forEach(RestAction<Message>::queue);
+	public void messageSysadmins(@Nonnull Message message) {
+		stream(getConfig().sysadminIds()).forEach(i -> shredder().sendPrivateMessage(i, message));
+	}
+
+	public void messageSysadmins(@Nonnull String message) {
+		stream(getConfig().sysadminIds()).forEach(i -> shredder().sendPrivateMessage(i, message));
+	}
+
+	public void messageSysadmins(@Nonnull MessageEmbed embed, @Nonnull MessageEmbed... other) {
+		stream(getConfig().sysadminIds()).forEach(i -> shredder().sendPrivateMessageEmbeds(i, embed, other));
 	}
 
 	// ===============* Shortcuts *===============

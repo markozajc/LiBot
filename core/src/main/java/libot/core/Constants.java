@@ -3,7 +3,6 @@ package libot.core;
 import static java.lang.System.getenv;
 import static java.util.Arrays.stream;
 import static libot.utils.ResourceUtils.resourceAsString;
-import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.awt.Color;
@@ -19,7 +18,6 @@ import com.google.gson.Gson;
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.asciithemes.TA_Grid;
 import de.vandermeer.asciithemes.u8.U8_Grids;
-import net.dv8tion.jda.api.exceptions.ErrorHandler;
 
 @SuppressWarnings("null")
 public class Constants {
@@ -66,7 +64,6 @@ public class Constants {
 		Role "%s" does not exist""";
 
 	// Miscellaneous
-	public static final ErrorHandler PRIVATE_MESSAGE_ERROR_HANDLER = new ErrorHandler().ignore(UNKNOWN_USER);
 	public static final File PROPERTIES_DIRECTORY = new File("config");
 	public static final Gson GSON = new Gson();
 	public static final Consumer<Throwable> EMPTY_FAIL_CONSUMER = e -> {};

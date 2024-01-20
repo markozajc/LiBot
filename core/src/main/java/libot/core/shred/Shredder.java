@@ -1,27 +1,34 @@
 package libot.core.shred;
 
+import static com.google.common.cache.CacheBuilder.newBuilder;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.Collections.addAll;
 import static libot.core.Constants.RESOURCE_GUILDS;
 import static libot.core.processes.ProcessManager.getCurrentProcess;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.annotation.*;
 
 import org.eu.zajc.ef.consumer.execpt.all.AEConsumer;
+import org.slf4j.*;
 
-import net.dv8tion.jda.api.JDA;
+import com.google.common.cache.Cache;
+
+import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 
 public class Shredder {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Shredder.class);
 
 	private static final String FORMAT_CLASH_LEAVE = """
 		Leaving %s because there is another shred present (%s).""";
@@ -34,11 +41,18 @@ public class Shredder {
 
 	}
 
+	public static record PrivateMessageFailure(long userId, long shredId) {}
+
 	@Nonnull private final List<Shred> shreds;
 	@Nonnull private final Map<String, String> emojiCache = new ConcurrentHashMap<>();
 
+	private static final Object FAILURE_CACHE_VALUE = new Object();
+	@Nonnull private final Cache<PrivateMessageFailure, Object> failures;
+
+	@SuppressWarnings("null")
 	public Shredder(@Nonnull List<Shred> shreds) {
 		this.shreds = shreds;
+		this.failures = newBuilder().expireAfterWrite(Duration.ofSeconds(shreds.size() * 5L)).softValues().build();
 	}
 
 	public List<Shred> getShreds() {
@@ -69,9 +83,55 @@ public class Shredder {
 			.orElse(null);
 	}
 
-	@Nullable
-	public RestAction<PrivateChannel> openPrivateChannelById(long userId) {
-		return getJDAObject(j -> j.getUserById(userId)).map(User::openPrivateChannel).orElse(null);
+	@Nonnull
+	public CompletableFuture<Message> sendPrivateMessage(long userId, @Nonnull String message) {
+		return sendPrivateMessage(userId, new MessageBuilder().setContent(message).build());
+	}
+
+	@Nonnull
+	public CompletableFuture<Message> sendPrivateMessageEmbeds(long userId, @Nonnull MessageEmbed embed,
+															   @Nonnull MessageEmbed... other) {
+		var embeds = new ArrayList<MessageEmbed>(1 + other.length);
+		embeds.add(embed);
+		addAll(embeds, other);
+
+		return sendPrivateMessage(userId, new MessageBuilder().setEmbeds(embeds).build());
+	}
+
+	@Nonnull
+	public CompletableFuture<Message> sendPrivateMessage(long userId, @Nonnull Message message) {
+		var result = new CompletableFuture<Message>();
+		sendPrivateMessage(0, result, userId, message);
+		return result;
+	}
+
+	private void sendPrivateMessage(int shredIndex, @Nonnull CompletableFuture<Message> result, long userId,
+									@Nonnull Message message) {
+		if (shredIndex >= getShreds().size()) {
+			result.completeExceptionally(new IllegalStateException("Failed to send the message"));
+			return;
+		}
+
+		var shred = getShreds().get(shredIndex);
+		var user = shred.jda().getUserById(userId);
+
+		var failureRecord = new PrivateMessageFailure(userId, shred.id());
+		if (user == null || this.failures.getIfPresent(failureRecord) != null) {
+			sendPrivateMessage(shredIndex + 1, result, userId, message);
+			return;
+		}
+
+		user.openPrivateChannel().flatMap(p -> p.sendMessage(message)).queue(result::complete, t -> {
+			if (t instanceof ErrorResponseException) {
+				this.failures.put(failureRecord, FAILURE_CACHE_VALUE);
+				sendPrivateMessage(shredIndex + 1, result, userId, message);
+
+			} else {
+				LOG.error("Failed to send a message to {} due to an unexpected error", userId);
+				LOG.error("", t);
+				result.completeExceptionally(t);
+			}
+		});
 	}
 
 	@Nullable

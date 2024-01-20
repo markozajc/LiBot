@@ -1,8 +1,6 @@
 package libot.providers;
 
 import static java.lang.Long.compare;
-import static java.lang.String.format;
-import static libot.core.Constants.PRIVATE_MESSAGE_ERROR_HANDLER;
 
 import java.util.List;
 
@@ -17,8 +15,6 @@ import libot.providers.TimerProvider.UserTimer;
 
 public class TimerProvider extends TimedTaskProvider<UserTimer> {
 
-	private static final String FORMAT_MESSAGE = "**\u23F3 Timer:** %s";
-
 	public static record UserTimer(long userId, String text, long endTime) implements TimedTaskProvider.TimedTask {}
 
 	public TimerProvider(@Nonnull Shredder shredder, @Nonnull DataManager dataManager) {
@@ -28,9 +24,7 @@ public class TimerProvider extends TimedTaskProvider<UserTimer> {
 	@Override
 	@SuppressWarnings("null")
 	public void onExpiry(UserTimer t) {
-		var pc = getShredder().openPrivateChannelById(t.userId());
-		if (pc != null)
-			pc.flatMap(c -> c.sendMessage(format(FORMAT_MESSAGE, t.text()))).queue(null, PRIVATE_MESSAGE_ERROR_HANDLER);
+		getShredder().sendPrivateMessage(t.userId(), "**\u23F3 Timer:** %s".formatted(t.text()));
 	}
 
 	@Nonnull

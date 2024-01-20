@@ -131,7 +131,6 @@ public class Main {
 
 	}
 
-	@SuppressWarnings("null")
 	public static void stop(@Nonnull BotContext bot) {
 		LOG.info("Shutting down providers");
 		bot.providers().shutdownAll();

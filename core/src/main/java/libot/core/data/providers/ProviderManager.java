@@ -57,7 +57,6 @@ public final class ProviderManager {
 	}
 
 	@Nonnull
-	@SuppressWarnings("unchecked")
 	public <T extends Provider<?>> T get(@Nonnull Class<T> clazz) {
 		T result = (T) this.providers.get(clazz);
 		if (result == null)
