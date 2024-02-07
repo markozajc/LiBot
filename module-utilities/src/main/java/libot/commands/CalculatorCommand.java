@@ -69,7 +69,7 @@ public class CalculatorCommand extends Command {
 	private static final Pattern REGEX_NEWLINES = compile("\\\\\\s*\\n\\s*", UNICODE_CHARACTER_CLASS | MULTILINE);
 
 	private static final String EMOJI_INFO = "\u2139";
-	private static final String EMOJI_WARN = "\u26A0";
+	private static final String EMOJI_WARN = "\u26A0\uFE0F";
 	private static final String EMOJI_ERROR = "<:e:988959163579269130>";
 	private static final String EMOJI_UNKNOWN = "\u2699";
 
