@@ -64,8 +64,7 @@ public class CalculatorCommand extends Command {
 
 	private static final Pattern REGEX_BASE =
 		compile("(?:\\s+convert)?\\s+to\\s+(?:b(?:ase)?\\s*([\\d]+)|([^\\s]+))", UNICODE_CHARACTER_CLASS);
-	private static final Pattern REGEX_MODE =
-		compile("mode\\s+((?:high\\s*)?precision|exact)", UNICODE_CHARACTER_CLASS);
+	private static final Pattern REGEX_MODE = compile("mode\\s+(\\p{IsLatin}+)", UNICODE_CHARACTER_CLASS);
 	private static final Pattern REGEX_NEWLINES = compile("\\\\\\s*\\n\\s*", UNICODE_CHARACTER_CLASS | MULTILINE);
 
 	private static final String EMOJI_INFO = "\u2139";
@@ -90,7 +89,23 @@ public class CalculatorCommand extends Command {
 
 	private static record Result(@Nonnull String value, boolean approximate) {}
 
+	@Nonnull
+	@SuppressWarnings("null")
+	private static String getModes(@Nonnull String expression, @Nonnull List<QalcMessage> messages,
+								   @Nonnull Set<Mode> modes) {
+		return REGEX_MODE.matcher(expression).replaceAll(r -> {
+			Arrays.stream(Mode.values())
+				.filter(m -> m.name().equalsIgnoreCase(r.group(1)))
+				.findAny()
+				.ifPresentOrElse(modes::add, () -> {
+					messages.add(new QalcMessage(LEVEL_WARN, "Unknown mode: " + r.group(1).toLowerCase()));
+				});
+			return "";
+		});
+	}
+
 	@Override
+	@SuppressWarnings("null")
 	public void execute(CommandContext c) throws InterruptedException, IOException {
 		if (!ENABLED || KILL_SWITCH != null && exists(KILL_SWITCH))
 			throw c.errorf("%s is unavailable.", DISABLED, c.getCommandName());
@@ -99,12 +114,9 @@ public class CalculatorCommand extends Command {
 		String expression = c.params().get(0);
 		expression = REGEX_NEWLINES.matcher(expression).replaceAll(" ");
 
-		int mode = 1;
-		var modeMatcher = REGEX_MODE.matcher(expression);
-		if (modeMatcher.find()) {
-			mode = getMode(modeMatcher);
-			expression = modeMatcher.replaceFirst("");
-		}
+		var messages = new ArrayList<QalcMessage>(5);
+		var modes = EnumSet.noneOf(Mode.class);
+		expression = getModes(expression, messages, modes);
 
 		int base = 10;
 		var baseMatcher = REGEX_BASE.matcher(expression);
@@ -116,8 +128,7 @@ public class CalculatorCommand extends Command {
 				expression = baseMatcher.replaceFirst(""); // base valid, remove conversion string
 		}
 
-		var messages = new ArrayList<QalcMessage>(5);
-		var result = evaluate(c, messages, expression, mode, base);
+		var result = evaluate(c, messages, expression, modes, base);
 
 		var m = new MessageBuilder();
 
@@ -206,8 +217,8 @@ public class CalculatorCommand extends Command {
 
 	@Nullable
 	private static Result evaluate(@Nonnull CommandContext c, @Nonnull List<QalcMessage> messages, String expression,
-								   int mode, int base) throws IOException, InterruptedException {
-		byte[] output = runCalculatorProcess(c, expression, mode, base);
+								   @Nonnull Set<Mode> modes, int base) throws IOException, InterruptedException {
+		byte[] output = runCalculatorProcess(c, expression, modes, base);
 
 		int i = -1;
 		String value = null;
@@ -237,9 +248,9 @@ public class CalculatorCommand extends Command {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	private static byte[] runCalculatorProcess(@Nonnull CommandContext c, String expression, int mode,
+	private static byte[] runCalculatorProcess(@Nonnull CommandContext c, String expression, @Nonnull Set<Mode> modes,
 											   int base) throws IOException, InterruptedException {
-		var p = executeQalculate(expression, Integer.toString(mode), Integer.toString(base));
+		var p = executeQalculate(expression, Integer.toString(Mode.toBits(modes)), Integer.toString(base));
 
 		if (!p.waitFor(TIMEOUT_EVALUATE, SECONDS) || p.exitValue() == EXIT_TIMEOUT) {
 			if (p.isAlive())
@@ -346,8 +357,12 @@ public class CalculatorCommand extends Command {
 			Evaluates an expression. Check out the lists of supported \
 			[functions](https://qalculate.github.io/manual/qalculate-definitions-functions.html), \
 			[units](https://qalculate.github.io/manual/qalculate-definitions-units.html), and \
-			[constants](https://qalculate.github.io/manual/qalculate-definitions-variables.html). \
-			Add `mode precision` to the expression for high precision mode, or `mode exact` for exact evaluation mode.
+			[constants](https://qalculate.github.io/manual/qalculate-definitions-variables.html).
+			Add `mode [mode]` to the expression to activate a mode. You can activate multiple modes in an expression.
+			Available modes:
+			- `mode nocolor` - disables ANSI color in the output
+			- `mode precision` - sets output precision to 900 digits
+			- `mode exact` - avoids approximation in the output
 			Powered by [Qalculate!](https://qalculate.github.io/)
 			_Note: Qalculate! input is multi-line. You can specify variable assignments (x := y) on separate lines._
 			""";
@@ -371,6 +386,28 @@ public class CalculatorCommand extends Command {
 	@Override
 	public CommandCategory getCategory() {
 		return UTILITIES;
+	}
+
+	public enum Mode {
+
+		PRECISION(0),
+		EXACT(1),
+		NOCOLOR(2);
+
+		private final int bit;
+
+		Mode(int bit) {
+			this.bit = 1 << bit;
+		}
+
+		public int getBit() {
+			return this.bit;
+		}
+
+		public static int toBits(@Nonnull Collection<Mode> modes) {
+			return modes.stream().mapToInt(Mode::getBit).reduce((m1, m2) -> m1 | m2).orElse(0);
+		}
+
 	}
 
 }
