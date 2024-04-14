@@ -111,7 +111,7 @@ public class CalculatorCommand extends Command {
 
 		c.typing();
 		String expression = c.params().get(0);
-		expression = REGEX_NEWLINES.matcher(expression).replaceAll(" ");
+		expression = REGEX_NEWLINES.matcher(expression).replaceAll(" ").replace("\\", "");
 
 		var messages = new ArrayList<QalcMessage>(5);
 		var modes = EnumSet.noneOf(Mode.class);
