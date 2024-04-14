@@ -1,7 +1,7 @@
 package libot.commands;
 
-import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNullElse;
+import static java.util.regex.Pattern.compile;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.GAMES;
@@ -9,18 +9,18 @@ import static libot.utils.Utilities.array;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.eu.zajc.akiwrapper.Akiwrapper.Answer.*;
-import static org.eu.zajc.akiwrapper.core.entities.Server.GuessType.CHARACTER;
-import static org.eu.zajc.akiwrapper.core.entities.Server.Language.ENGLISH;
+import static org.eu.zajc.akiwrapper.Akiwrapper.Language.ENGLISH;
 
+import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import javax.annotation.*;
 
 import org.eu.zajc.akiwrapper.*;
-import org.eu.zajc.akiwrapper.Akiwrapper.Answer;
+import org.eu.zajc.akiwrapper.Akiwrapper.*;
 import org.eu.zajc.akiwrapper.core.entities.*;
-import org.eu.zajc.akiwrapper.core.entities.Server.Language;
-import org.eu.zajc.akiwrapper.core.exceptions.*;
+import org.slf4j.*;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
@@ -29,7 +29,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 
 public class AkinatorCommand extends Command {
 
-	private static final String TIMEOUT_MESSAGE = "TIMEOUT";
+	private static final Logger LOG = LoggerFactory.getLogger(AkinatorCommand.class);
+
 	private static final String FORMAT_CHEAT_SHEET = """
 
 		Answer with \
@@ -39,66 +40,45 @@ public class AkinatorCommand extends Command {
 		**`P`** (probably), \
 		**`PN`** (probably not) or \
 		**`B`** (back).""";
-	private static final String TITLE_DEBUG = "Debug information";
-	private static final String FORMAT_DEBUG = """
-		**`session health:. . . . `** %s
-		**`server                 `**
-		**` ┣ url:  . . . . . . . `** %s
-		**` ┣ language: . . . . . `** %s
-		**` ┗ type: . . . . . . . `** %s
-		**`time                   `**
-		**` ┣ since start:  . . . `** %d
-		**` ┗ since last request: `** %d
-		**`progression            `**
-		**` ┣ old:  . . . . . . . `** %.3f
-		**` ┗ current:  . . . . . `** %.3f
-		**`guess count: . . . . . `** %d""";
-	private static final String FORMAT_SERVERS_DOWN = """
-		Currently, all Akinator's servers for language %s are unavailable.
-		**Suggestions:**
-		• Retry after a while
-		• Use another language""";
 	private static final String FORMAT_LANGUAGE_UNSUPPORTED = "Sorry, that language isn't supported. Try%s";
 
 	private static final String[] ANSWERS_BACK = array("b", "u", "back", "undo");
-	private static final String ANSWER_DEBUG = "debug";
 	private static final String ANSWER_EXIT = "exit";
 
-	private static final String EMOTE_BASE_URL = "https://libot.eu.org/img/akitudes/%s.webp";
+	private static final String AKITUDE_BASE_URL = "https://libot.eu.org/img/akitudes/%s.webp";
+	private static final Pattern AKITUDE_PATTERN = compile("/([^/]+)\\.png$");
+	private static final Set<String> AKITUDES = Set
+		.of("concentration_intense", "confiant", "deception", "etonnement", "inspiration_forte", "inspiration_legere",
+			"leger_decouragement", "mobile", "serein", "surprise", "tension", "triomphe", "vrai_decouragement", "defi");
 
 	@Override
 	public void execute(CommandContext c) {
 		c.typing();
 		var lang = selectLanguage(c);
 		var aw = constructAkiwrapper(c, lang);
-		long startTimestamp = currentTimeMillis();
-		long lastTimestamp = currentTimeMillis();
 
-		double oldProgress = 0;
-		double progression = 0;
+		for (var q = aw.getCurrentQuery(); q != null; q = aw.getCurrentQuery()) {
+			if (q instanceof Question qe) {
+				askQuestion(c, qe);
 
-		try {
-			for (var q = aw.getQuestion(); q != null; q = aw.getQuestion()) {
-				if (checkGuess(c, aw, false))
+			} else if (q instanceof Guess g) {
+				if (reviewGuess(c, g)) {
+					g.confirm();
+					finish(c, true);
 					return;
 
-				askQuestion(c, aw, q, startTimestamp, lastTimestamp, oldProgress, progression);
-				oldProgress = progression;
-				progression = q.getProgression();
+				} else {
+					g.reject();
 
-				lastTimestamp = currentTimeMillis();
+					if (!c.confirm("Continue?")) {
+						finish(c, false);
+						return;
+					}
+				}
 			}
-
-			if (!checkGuess(c, aw, true))
-				finish(c, aw, null);
-
-		} catch (ServerStatusException e) {
-			if (TIMEOUT_MESSAGE.equals(e.getStatus().getMessage()))
-				throw c.error("Session has expired.", DISABLED);
-			else
-				throw e;
 		}
 
+		finish(c, false);
 	}
 
 	@SuppressWarnings("null")
@@ -120,21 +100,15 @@ public class AkinatorCommand extends Command {
 
 	@Nonnull
 	private static Akiwrapper constructAkiwrapper(@Nonnull CommandContext c, @Nonnull Language lang) {
-		try {
-			return new AkiwrapperBuilder().setFilterProfanity(!c.isChannelNSFW())
-				.setLanguage(lang)
-				.setGuessType(CHARACTER)
-				.build();
-		} catch (ServerNotFoundException e) {
-			throw c.errorf(FORMAT_SERVERS_DOWN, DISABLED, capitalize(lang.toString().toLowerCase()));
-		}
+		return new AkiwrapperBuilder().setFilterProfanity(!c.isChannelNSFW())
+			.setLanguage(lang)
+			.setTheme(Theme.CHARACTER)
+			.build();
 	}
 
 	@SuppressWarnings("null")
-	private static void askQuestion(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, @Nonnull Question q,
-									long startTimestamp, long lastTimestamp, double oldProgression,
-									double progression) {
-		c.reply(createQuestionEmbed(q, oldProgression, progression));
+	private static void askQuestion(@Nonnull CommandContext c, @Nonnull Question q) {
+		c.reply(createQuestionEmbed(q));
 		boolean answered = false;
 		while (!answered) {
 			String response = c.ask().toLowerCase();
@@ -143,15 +117,12 @@ public class AkinatorCommand extends Command {
 				if (c.confirm("Are you sure you want to exit?"))
 					throw c.exit();
 
-			} else if (ANSWER_DEBUG.equals(response)) {
-				sendDebug(c, aw, startTimestamp, lastTimestamp, oldProgression, progression);
-
 			} else if (contains(ANSWERS_BACK, response)) {
 				if (q.getStep() == 0) {
 					c.reply("You can't go further back");
 				} else {
 					c.typing();
-					aw.undoAnswer();
+					q.undoAnswer();
 					answered = true;
 				}
 
@@ -160,76 +131,28 @@ public class AkinatorCommand extends Command {
 
 			} else {
 				c.typing();
-				aw.answer(answer);
+				q.answer(answer);
 				answered = true;
 			}
 		}
 	}
 
-	@SuppressWarnings("null")
-	private static void sendDebug(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, long startTimestamp,
-								  long lastTimestamp, double oldProgression, double progression) {
-		List<Guess> guesses = null;
-		Exception ex = null;
-		try {
-			guesses = aw.getGuesses();
-		} catch (Exception e1) {
-			ex = e1;
-		}
-
-		var de = new EmbedPrebuilder(LITHIUM);
-		de.setTitle(TITLE_DEBUG);
-		de.appendDescriptionf(FORMAT_DEBUG, ex == null ? "OK (via guesses route)" : "KO (%s)".formatted(ex.toString()),
-							  aw.getServer().getUrl(), aw.getServer().getLanguage().toString().toLowerCase(),
-							  aw.getServer().getGuessType().toString().toLowerCase(),
-							  currentTimeMillis() - startTimestamp, currentTimeMillis() - lastTimestamp, oldProgression,
-							  progression, guesses == null ? 0 : guesses.size());
-
-		if (guesses != null && !guesses.isEmpty()) {
-			de.addField("Guesses",
-						guesses.stream()
-							.map(g -> "`%.3f` %s [%d]".formatted(g.getProbability(), g.getName(), g.getIdLong()))
-							.collect(joining("\n")));
-		}
-
-		c.reply(de);
-	}
-
 	@Nonnull
-	private static EmbedPrebuilder createQuestionEmbed(@Nonnull Question q, double oldProgression, double progression) {
+	private static EmbedPrebuilder createQuestionEmbed(@Nonnull Question q) {
 		var e = new EmbedPrebuilder(LITHIUM);
-		e.setTitle("Question #%02d".formatted(q.getStep() + 1));
-		e.setDescription(q.getQuestion());
+		e.setTitlef("Question #%02d", q.getStep() + 1);
+		e.setDescription(q.getText());
 		if (q.getStep() == 0)
 			e.appendDescription(FORMAT_CHEAT_SHEET);
 		e.setFooter(EXIT_FOOTER);
-		e.setThumbnail(getEmoteUrl(q.getStep(), progression, oldProgression));
+		e.setThumbnail(getAkitudeUrl(q.getAkitude()));
 		return e;
-	}
-
-	private static boolean checkGuess(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, boolean exhausted) {
-		var guess = aw.suggestGuess();
-		if (guess != null) {
-			if (reviewGuess(c, guess)) {
-				finish(c, aw, guess);
-				return true;
-
-			} else {
-				aw.rejectLastGuess();
-
-				if (exhausted || !c.confirm("Continue?")) {
-					finish(c, aw, null);
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	private static boolean reviewGuess(@Nonnull CommandContext c, @Nonnull Guess g) {
 		var e = new EmbedPrebuilder(LITHIUM);
 		e.setTitle("Is this your character?");
-		e.setThumbnail(EMOTE_BASE_URL.formatted("confiant"));
+		e.setThumbnail(AKITUDE_BASE_URL.formatted("confiant"));
 		e.addFieldf(g.getName(), "_%s_", requireNonNullElse(g.getDescription(), "No description"));
 
 		var image = g.getImage();
@@ -239,20 +162,19 @@ public class AkinatorCommand extends Command {
 		return c.confirm(true, e);
 	}
 
-	private static void finish(@Nonnull CommandContext c, @Nonnull Akiwrapper aw, @Nullable Guess confirmedGuess) {
+	private static void finish(@Nonnull CommandContext c, boolean akinatorWins) {
 		var e = new EmbedBuilder();
-		if (confirmedGuess != null) {
-			aw.confirmGuess(confirmedGuess);
+		if (akinatorWins) {
 			e.setTitle("Great,");
 			e.setDescription("guessed right one more time.");
 			e.setColor(SUCCESS);
-			e.setThumbnail(EMOTE_BASE_URL.formatted("triomphe"));
+			e.setThumbnail(AKITUDE_BASE_URL.formatted("triomphe"));
 
 		} else {
 			e.setTitle("Bravo,");
 			e.setDescription("you defeated me.");
 			e.setColor(DISABLED);
-			e.setThumbnail(EMOTE_BASE_URL.formatted("deception"));
+			e.setThumbnail(AKITUDE_BASE_URL.formatted("deception"));
 		}
 		c.reply(e);
 	}
@@ -269,41 +191,22 @@ public class AkinatorCommand extends Command {
 		};
 	}
 
-	@Nonnull
-	@SuppressWarnings("null")
-	private static String getEmoteUrl(int step, double progression, double oldProgression) {
-		// taken and translated directly from akinator (workflow_game_desktop.js)
-		int progressionTarget = step * 4;
-		double progressionWeighed;
-		if (step <= 10)
-			progressionWeighed = (step * progression + (10 - step) * progressionTarget) / 10;
-		else
-			progressionWeighed = 0;
+	private static String getAkitudeUrl(URL akitudeUrl) {
+		var m = AKITUDE_PATTERN.matcher(akitudeUrl.toString());
+		if (m.find()) {
+			var akitude = m.group(1);
+			if (AKITUDES.contains(akitude)) {
+				return AKITUDE_BASE_URL.formatted(akitude);
 
-		String name;
-		if (progression >= 80)
-			name = "mobile";
-		else if (oldProgression < 50 && progression >= 50)
-			name = "inspiration_forte";
-		else if (progression >= 50)
-			name = "confiant";
-		else if (oldProgression - progression > 16)
-			name = "surprise";
-		else if (progressionWeighed - progression > 8)
-			name = "etonnement";
-		else if (progressionWeighed >= progressionTarget)
-			name = "inspiration_legere";
-		else if (progressionWeighed >= progressionTarget * .8D)
-			name = "serein";
-		else if (progressionWeighed >= progressionTarget * .6D)
-			name = "concentration_intense";
-		else if (progressionWeighed >= progressionTarget * .4D)
-			name = "leger_decouragement";
-		else if (progressionWeighed >= progressionTarget * .2D)
-			name = "tension";
-		else
-			name = "vrai_decouragement";
-		return EMOTE_BASE_URL.formatted(name);
+			} else {
+				LOG.warn("Unknown akitude: {}", akitude);
+				return akitudeUrl.toString();
+			}
+
+		} else {
+			LOG.warn("Unknown akitude format: {}", akitudeUrl);
+			return akitudeUrl.toString();
+		}
 	}
 
 	@Override
