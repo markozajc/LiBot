@@ -1,5 +1,6 @@
 package libot.commands;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.regex.Pattern.compile;
 import static javax.xml.xpath.XPathConstants.STRING;
 import static libot.core.Constants.*;
@@ -138,7 +139,7 @@ public class ChatbotCommand extends Command {
 			.field("custid", session)
 			.field("input", text)
 			.asString()
-			.mapBody(s -> new ByteArrayInputStream(s.replace("<hr>", "<br>").getBytes()));
+			.mapBody(s -> new ByteArrayInputStream(s.replace("<hr>", "<br>").getBytes(UTF_8)));
 		// unclosed <hr> causes issues with the
 
 		return extractResponse(bytes);

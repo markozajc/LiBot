@@ -57,11 +57,13 @@ public final class ProviderManager {
 	}
 
 	@Nonnull
+	@SuppressWarnings("null")
 	public <T extends Provider<?>> T get(@Nonnull Class<T> clazz) {
-		T result = (T) this.providers.get(clazz);
-		if (result == null)
+		var result = this.providers.get(clazz);
+		if (clazz.isAssignableFrom(clazz))
+			return clazz.cast(result);
+		else
 			throw new IllegalStateException(format("Provider of class %s is not registered", clazz.getSimpleName()));
-		return result;
 	}
 
 	@Nonnull
