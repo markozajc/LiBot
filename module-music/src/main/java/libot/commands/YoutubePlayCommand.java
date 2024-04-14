@@ -2,7 +2,6 @@ package libot.commands;
 
 import static libot.commands.MusicCommandUtils.*;
 import static libot.core.commands.CommandCategory.MUSIC;
-import static libot.utils.Utilities.array;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
@@ -22,7 +21,7 @@ public class YoutubePlayCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("ytplay", "youtube", "yt");
+		return new String[] { "ytplay", "youtube", "yt" };
 	}
 
 	@Override
@@ -32,12 +31,12 @@ public class YoutubePlayCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("query");
+		return new String[] { "query" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("query to search on youtube");
+		return new String[] { "query to search on youtube" };
 	}
 
 	@Override

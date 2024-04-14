@@ -5,7 +5,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.MONEY;
-import static libot.utils.Utilities.array;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
@@ -58,7 +57,7 @@ public class MoneyCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("balance", "work", "reward");
+		return new String[] { "balance", "work", "reward" };
 	}
 
 	@Override

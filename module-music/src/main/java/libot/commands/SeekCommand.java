@@ -8,7 +8,6 @@ import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
 import static libot.utils.ParseUtils.parseRelativeTime;
-import static libot.utils.Utilities.array;
 
 import java.util.concurrent.TimeUnit;
 
@@ -126,7 +125,7 @@ public class SeekCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[position]");
+		return new String[] { "[position]" };
 	}
 
 	@Override

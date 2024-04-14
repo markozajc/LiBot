@@ -6,7 +6,6 @@ import static libot.commands.MusicCommandUtils.*;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDuration;
 
@@ -100,7 +99,7 @@ public class PlayingCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("p");
+		return new String[] { "p" };
 	}
 
 	@Override

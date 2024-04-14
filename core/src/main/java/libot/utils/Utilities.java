@@ -38,12 +38,6 @@ public final class Utilities {
 		return elements[ThreadLocalRandom.current().nextInt(elements.length)];
 	}
 
-	@SafeVarargs
-	@Nonnull
-	public static <T> T[] array(@Nonnull T... elements) {
-		return elements;
-	}
-
 	@Nonnull
 	public static String getenvOrThrow(@Nonnull String key) {
 		var value = getenv(key);

@@ -2,7 +2,6 @@ package libot.commands;
 
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
-import static libot.utils.Utilities.array;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
@@ -39,7 +38,7 @@ public class GlobalDisableCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("gdisable");
+		return new String[] { "gdisable" };
 	}
 
 	@Override
@@ -49,7 +48,7 @@ public class GlobalDisableCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("command");
+		return new String[] { "command" };
 	}
 
 	@Override

@@ -4,7 +4,6 @@ import static javax.script.ScriptContext.ENGINE_SCOPE;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 import static libot.utils.ResourceUtils.resourceAsString;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -99,7 +98,7 @@ public class EvaluateCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("eval");
+		return new String[] { "eval" };
 	}
 
 	@Override
@@ -109,7 +108,7 @@ public class EvaluateCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("script");
+		return new String[] { "script" };
 	}
 
 	@Override

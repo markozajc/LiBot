@@ -3,7 +3,6 @@ package libot.commands;
 import static libot.core.Constants.*;
 import static libot.core.FinderUtils.findRoles;
 import static libot.core.commands.CommandCategory.CUSTOMIZATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 
@@ -82,7 +81,7 @@ public class DjRoleCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("dj");
+		return new String[] { "dj" };
 	}
 
 	@Override
@@ -99,7 +98,7 @@ public class DjRoleCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(VOICE_CONNECT, VOICE_SPEAK, MANAGE_SERVER);
+		return new Permission[] { VOICE_CONNECT, VOICE_SPEAK, MANAGE_SERVER };
 	}
 
 	@Override
@@ -109,12 +108,12 @@ public class DjRoleCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[role]");
+		return new String[] { "[role]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("role to use as the DJ role or `disable` to allow everyone");
+		return new String[] { "role to use as the DJ role or `disable` to allow everyone" };
 	}
 
 	@Override

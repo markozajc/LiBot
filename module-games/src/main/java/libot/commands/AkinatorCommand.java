@@ -5,7 +5,6 @@ import static java.util.regex.Pattern.compile;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.GAMES;
-import static libot.utils.Utilities.array;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.eu.zajc.akiwrapper.Akiwrapper.Answer.*;
@@ -42,7 +41,7 @@ public class AkinatorCommand extends Command {
 		**`B`** (back).""";
 	private static final String FORMAT_LANGUAGE_UNSUPPORTED = "Sorry, that language isn't supported. Try%s";
 
-	private static final String[] ANSWERS_BACK = array("b", "u", "back", "undo");
+	private static final String[] ANSWERS_BACK = { "b", "u", "back", "undo" };
 	private static final String ANSWER_EXIT = "exit";
 
 	private static final String AKITUDE_BASE_URL = "https://libot.eu.org/img/akitudes/%s.webp";
@@ -223,12 +222,12 @@ public class AkinatorCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[language]");
+		return new String[] { "[language]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("language to play in, English by default");
+		return new String[] { "language to play in, English by default" };
 	}
 
 	@Override

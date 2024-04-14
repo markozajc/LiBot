@@ -4,7 +4,6 @@ import static libot.commands.MusicCommandUtils.*;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 
 import libot.core.commands.*;
@@ -45,12 +44,12 @@ public class SkipCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[tracks]");
+		return new String[] { "[tracks]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("number of tracks to skip, 1 by default");
+		return new String[] { "number of tracks to skip, 1 by default" };
 	}
 
 	@Override

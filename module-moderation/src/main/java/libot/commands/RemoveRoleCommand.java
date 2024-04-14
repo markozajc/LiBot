@@ -3,7 +3,6 @@ package libot.commands;
 import static libot.commands.ModerationCommandUtils.getRoleMemberTuple;
 import static libot.core.Constants.ACCEPT_EMOJI;
 import static libot.core.commands.CommandCategory.MODERATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.MANAGE_ROLES;
 
 import libot.core.commands.*;
@@ -27,7 +26,7 @@ public class RemoveRoleCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("rmrole");
+		return new String[] { "rmrole" };
 	}
 
 	@Override
@@ -37,12 +36,12 @@ public class RemoveRoleCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MANAGE_ROLES);
+		return new Permission[] { MANAGE_ROLES };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("member", "role");
+		return new String[] { "member", "role" };
 	}
 
 	@Override

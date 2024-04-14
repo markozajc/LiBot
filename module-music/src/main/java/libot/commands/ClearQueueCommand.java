@@ -4,7 +4,6 @@ import static libot.commands.MusicCommandUtils.nothingIsPlaying;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
-import static libot.utils.Utilities.array;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
@@ -33,7 +32,7 @@ public class ClearQueueCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("clear");
+		return new String[] { "clear" };
 	}
 
 	@Override

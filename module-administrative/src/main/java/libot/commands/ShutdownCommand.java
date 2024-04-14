@@ -2,7 +2,6 @@ package libot.commands;
 
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
-import static libot.utils.Utilities.array;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import libot.core.commands.*;
@@ -26,7 +25,7 @@ public class ShutdownCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[exit code]");
+		return new String[] { "[exit code]" };
 	}
 
 	@Override

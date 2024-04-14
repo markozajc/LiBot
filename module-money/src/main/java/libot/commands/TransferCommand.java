@@ -5,7 +5,6 @@ import static libot.core.Constants.*;
 import static libot.core.FinderUtils.*;
 import static libot.core.commands.CommandCategory.MONEY;
 import static libot.providers.MoneyProvider.DEFAULT_BALANCE;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 
 import libot.core.commands.*;
@@ -74,7 +73,7 @@ public class TransferCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("sendmoney", "donate");
+		return new String[] { "sendmoney", "donate" };
 	}
 
 	@Override
@@ -86,12 +85,12 @@ public class TransferCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("amount", "user");
+		return new String[] { "amount", "user" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("amount of Ł to transfer", "recipient");
+		return new String[] { "amount of Ł to transfer", "recipient" };
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package libot.commands;
 
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.CUSTOMIZATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.MANAGE_SERVER;
 
 import javax.annotation.Nonnull;
@@ -139,7 +138,7 @@ public class GreeterCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("welcome", "goodbye", "farewell", "wgmo", "welcomegoodbyemessageoptions", "greet");
+		return new String[] { "welcome", "goodbye", "farewell", "wgmo", "welcomegoodbyemessageoptions", "greet" };
 	}
 
 	@Override
@@ -154,17 +153,17 @@ public class GreeterCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MANAGE_SERVER);
+		return new Permission[] { MANAGE_SERVER };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("subcommand", "type");
+		return new String[] { "subcommand", "type" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("set/remove/test", "welcome/goodbye");
+		return new String[] { "set/remove/test", "welcome/goodbye" };
 	}
 
 	@Override

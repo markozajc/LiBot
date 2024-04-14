@@ -8,7 +8,6 @@ import static java.util.regex.Pattern.*;
 import static libot.commands.GoogleCommand.SearchResult.BLANK_RESULT;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.SEARCH;
-import static libot.utils.Utilities.array;
 import static org.apache.commons.text.StringEscapeUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -166,7 +165,7 @@ public class GoogleCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("g");
+		return new String[] { "g" };
 	}
 
 	@Override
@@ -176,7 +175,7 @@ public class GoogleCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("query");
+		return new String[] { "query" };
 	}
 
 	@Override

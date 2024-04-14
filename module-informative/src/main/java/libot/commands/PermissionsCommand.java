@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.utils.CommandUtils.findMemberOrAuthor;
-import static libot.utils.Utilities.array;
 
 import java.util.EnumSet;
 
@@ -68,7 +67,7 @@ public class PermissionsCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("perms");
+		return new String[] { "perms" };
 	}
 
 	@Override
@@ -80,12 +79,12 @@ public class PermissionsCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[user]");
+		return new String[] { "[user]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("user to get permissions of");
+		return new String[] { "user to get permissions of" };
 	}
 
 	@Override

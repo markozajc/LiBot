@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.utils.CommandUtils.findMemberOrAuthor;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.ADMINISTRATOR;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
@@ -83,7 +82,7 @@ public class UserInfoCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("user", "ui");
+		return new String[] { "user", "ui" };
 	}
 
 	@Override
@@ -95,12 +94,12 @@ public class UserInfoCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[user]");
+		return new String[] { "[user]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("user to get information about");
+		return new String[] { "user to get information about" };
 	}
 
 	@Override

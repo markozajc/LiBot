@@ -4,7 +4,6 @@ import static java.util.regex.Pattern.compile;
 import static javax.xml.xpath.XPathConstants.STRING;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
-import static libot.utils.Utilities.array;
 import static org.apache.commons.lang3.tuple.Pair.of;
 import static org.eu.zajc.ef.EHandle.handle;
 
@@ -176,7 +175,7 @@ public class ChatbotCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("chat", "talk");
+		return new String[] { "chat", "talk" };
 	}
 
 	@Override

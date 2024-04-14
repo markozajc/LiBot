@@ -3,7 +3,6 @@ package libot.commands;
 import static libot.commands.ModerationCommandUtils.moderationAction;
 import static libot.commands.ModerationCommandUtils.ModAction.BAN;
 import static libot.core.commands.CommandCategory.MODERATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.BAN_MEMBERS;
 
 import libot.core.commands.*;
@@ -29,17 +28,17 @@ public class BanCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(BAN_MEMBERS);
+		return new Permission[] { BAN_MEMBERS };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("member", "[reason]");
+		return new String[] { "member", "[reason]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("name or mention of member to ban", "reason for ban");
+		return new String[] { "name or mention of member to ban", "reason for ban" };
 	}
 
 	@Override

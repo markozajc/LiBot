@@ -10,7 +10,6 @@ import static java.util.regex.Pattern.*;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.*;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
@@ -348,7 +347,7 @@ public class CalculatorCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("calc", "c", "calculate", "qalc");
+		return new String[] { "calc", "c", "calculate", "qalc" };
 	}
 
 	@Override
@@ -370,12 +369,12 @@ public class CalculatorCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("expression");
+		return new String[] { "expression" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("expression to evaluate");
+		return new String[] { "expression to evaluate" };
 	}
 
 	@Override

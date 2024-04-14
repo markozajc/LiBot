@@ -3,7 +3,7 @@ package libot.commands;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.GAMES;
 import static libot.module.money.BettableGame.GameResult.*;
-import static libot.utils.Utilities.*;
+import static libot.utils.Utilities.random;
 
 import javax.annotation.Nullable;
 
@@ -75,7 +75,7 @@ public class RockPaperScissorsCommand extends BettableGame {
 
 	@Override
 	public String[] getAliases() {
-		return array("rps");
+		return new String[] { "rps" };
 	}
 
 	@Override

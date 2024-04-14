@@ -4,7 +4,6 @@ import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.GAMES;
 import static libot.core.processes.ProcessManager.getProcesses;
 import static libot.module.money.BettableGame.GameResult.*;
-import static libot.utils.Utilities.array;
 
 import javax.annotation.*;
 
@@ -179,12 +178,12 @@ public abstract class BettableGame extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("bet");
+		return new String[] { "bet" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("amount of Ł to bet (leave empty to play without betting)");
+		return new String[] { "amount of Ł to bet (leave empty to play without betting)" };
 	}
 
 	@Override

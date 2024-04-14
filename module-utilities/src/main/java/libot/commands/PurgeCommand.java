@@ -4,7 +4,7 @@ import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static libot.core.commands.exceptions.ExceptionHandler.unpackThrowable;
 import static libot.core.commands.exceptions.ExceptionHandler.ThrowableHandler.handleThrowable;
-import static libot.utils.Utilities.*;
+import static libot.utils.Utilities.plural;
 import static net.dv8tion.jda.api.Permission.MESSAGE_MANAGE;
 
 import libot.core.commands.*;
@@ -44,17 +44,17 @@ public class PurgeCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MESSAGE_MANAGE);
+		return new Permission[] { MESSAGE_MANAGE };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("messages");
+		return new String[] { "messages" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("number of messages to purge");
+		return new String[] { "number of messages to purge" };
 	}
 
 	@Override

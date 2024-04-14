@@ -3,7 +3,6 @@ package libot.commands;
 import static de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment.CENTER;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.LIBOT;
-import static libot.utils.Utilities.array;
 
 import de.vandermeer.asciitable.AsciiTable;
 import libot.core.commands.*;
@@ -58,7 +57,7 @@ public class ShredsCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("shredder");
+		return new String[] { "shredder" };
 	}
 
 	@Override

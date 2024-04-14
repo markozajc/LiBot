@@ -5,7 +5,6 @@ import static libot.commands.MusicCommandUtils.nothingIsPlaying;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.entities.MessageEmbed.DESCRIPTION_MAX_LENGTH;
 
 import java.util.*;
@@ -94,12 +93,12 @@ public class QueueCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("page");
+		return new String[] { "page" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("page number");
+		return new String[] { "page number" };
 	}
 
 	@Override

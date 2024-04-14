@@ -9,7 +9,6 @@ import static kong.unirest.Unirest.spawnInstance;
 import static libot.commands.UrbanDictionaryCommand.Definition.BLANK;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.SEARCH;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.entities.MessageEmbed.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
@@ -138,7 +137,7 @@ public class UrbanDictionaryCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("urban", "ud");
+		return new String[] { "urban", "ud" };
 	}
 
 	@Override
@@ -148,12 +147,12 @@ public class UrbanDictionaryCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("term");
+		return new String[] { "term" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("term to define");
+		return new String[] { "term to define" };
 	}
 
 	@Override

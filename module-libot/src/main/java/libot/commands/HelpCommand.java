@@ -5,7 +5,6 @@ import static libot.commands.AboutCommand.LINKS;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.*;
 import static libot.module.ModuleLibotShared.sendUsage;
-import static libot.utils.Utilities.array;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Random;
@@ -94,7 +93,7 @@ public class HelpCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("man", "manual");
+		return new String[] { "man", "manual" };
 	}
 
 	@Override
@@ -106,12 +105,12 @@ public class HelpCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[command]");
+		return new String[] { "[command]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("command to describe");
+		return new String[] { "command to describe" };
 	}
 
 	@Override

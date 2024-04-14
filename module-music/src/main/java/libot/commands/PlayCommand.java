@@ -5,7 +5,6 @@ import static libot.commands.PauseCommand.FORMAT_RESUMED;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
-import static libot.utils.Utilities.array;
 
 import libot.core.commands.*;
 import libot.core.commands.exceptions.startup.UsageException;
@@ -41,7 +40,7 @@ public class PlayCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[URL]");
+		return new String[] { "[URL]" };
 	}
 
 	@Override

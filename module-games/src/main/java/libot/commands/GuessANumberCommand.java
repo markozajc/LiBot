@@ -4,7 +4,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.GAMES;
-import static libot.utils.Utilities.*;
+import static libot.utils.Utilities.getDigits;
 import static org.apache.commons.lang3.StringUtils.rightPad;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -137,7 +137,7 @@ public class GuessANumberCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("guessnumber", "guessanum", "guessnum");
+		return new String[] { "guessnumber", "guessanum", "guessnum" };
 	}
 
 	@Override
@@ -148,12 +148,12 @@ public class GuessANumberCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[max number]");
+		return new String[] { "[max number]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("upper bound for the hidden number, 100 by default");
+		return new String[] { "upper bound for the hidden number, 100 by default" };
 	}
 
 	@Override

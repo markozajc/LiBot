@@ -4,7 +4,6 @@ import static java.lang.System.currentTimeMillis;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static libot.utils.ParseUtils.parseTime;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.utils.TimeFormat.DATE_TIME_LONG;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationWords;
 
@@ -41,7 +40,7 @@ public class TimerCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("reminder", "remind", "remindme", "pomodoro");
+		return new String[] { "reminder", "remind", "remindme", "pomodoro" };
 	}
 
 	@Override
@@ -51,13 +50,14 @@ public class TimerCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("time", "[text]");
+		return new String[] { "time", "[text]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("[time](https://libot.eu.org/doc/commands/parameter-types.html) to set",
-					 "text to display when the timer runs out");
+		return new String[] {
+			"[time](https://libot.eu.org/doc/commands/parameter-types.html) to set",
+			"text to display when the timer runs out" };
 	}
 
 	@Override

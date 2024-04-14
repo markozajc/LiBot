@@ -5,7 +5,6 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
-import static libot.utils.Utilities.array;
 
 import javax.annotation.Nonnull;
 
@@ -113,7 +112,7 @@ public class KillProcessCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("kill", "ps");
+		return new String[] { "kill", "ps" };
 	}
 
 	@Override
@@ -132,12 +131,12 @@ public class KillProcessCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[pid]");
+		return new String[] { "[pid]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("PID of the process to kill");
+		return new String[] { "PID of the process to kill" };
 	}
 
 	@Override

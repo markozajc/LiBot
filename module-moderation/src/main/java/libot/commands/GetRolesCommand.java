@@ -3,7 +3,6 @@ package libot.commands;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.MODERATION;
-import static libot.utils.Utilities.array;
 
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
@@ -27,7 +26,7 @@ public class GetRolesCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("roles");
+		return new String[] { "roles" };
 	}
 
 	@Override

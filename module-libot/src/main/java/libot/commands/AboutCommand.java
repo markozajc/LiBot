@@ -4,7 +4,6 @@ import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.Instant.ofEpochMilli;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.LIBOT;
-import static libot.utils.Utilities.array;
 
 import javax.annotation.Nonnull;
 
@@ -56,7 +55,7 @@ public class AboutCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("info", "botinfo", "stats");
+		return new String[] { "info", "botinfo", "stats" };
 	}
 
 	@Override

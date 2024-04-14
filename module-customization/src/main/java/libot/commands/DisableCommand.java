@@ -3,7 +3,6 @@ package libot.commands;
 import static java.lang.String.format;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.CUSTOMIZATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.MANAGE_SERVER;
 
 import javax.annotation.Nonnull;
@@ -61,7 +60,7 @@ public class DisableCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("disable");
+		return new String[] { "disable" };
 	}
 
 	@Override
@@ -73,17 +72,17 @@ public class DisableCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MANAGE_SERVER);
+		return new Permission[] { MANAGE_SERVER };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("name");
+		return new String[] { "name" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("name/alias of command or category");
+		return new String[] { "name/alias of command or category" };
 	}
 
 	@Override

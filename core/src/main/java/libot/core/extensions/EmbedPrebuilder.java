@@ -8,7 +8,7 @@ import javax.annotation.*;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 
-public class EmbedPrebuilder extends EmbedBuilder {
+public final class EmbedPrebuilder extends EmbedBuilder {
 
 	public EmbedPrebuilder(@Nullable String title, @Nonnull String message, @Nullable String footer,
 						   @Nullable String footerIconUrl, @Nullable Color color) {

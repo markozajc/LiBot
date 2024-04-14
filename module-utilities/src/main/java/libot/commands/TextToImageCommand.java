@@ -8,7 +8,6 @@ import static java.util.Arrays.stream;
 import static libot.core.Constants.FAILURE;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static libot.utils.ParseUtils.parseParameters;
-import static libot.utils.Utilities.array;
 import static org.apache.commons.lang3.math.NumberUtils.isParsable;
 
 import java.awt.*;
@@ -109,7 +108,7 @@ public class TextToImageCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("tti");
+		return new String[] { "tti" };
 	}
 
 	@Override
@@ -127,12 +126,12 @@ public class TextToImageCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[size]", "text");
+		return new String[] { "[size]", "text" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("text size in pixels", "text to render");
+		return new String[] { "text size in pixels", "text to render" };
 	}
 
 	@Override

@@ -4,7 +4,6 @@ import static java.lang.String.format;
 import static libot.core.Constants.*;
 import static libot.core.FinderUtils.findRoles;
 import static libot.core.commands.CommandCategory.CUSTOMIZATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.MANAGE_ROLES;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 
@@ -141,17 +140,17 @@ public class AutoRoleCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MANAGE_ROLES);
+		return new Permission[] { MANAGE_ROLES };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("[role]");
+		return new String[] { "[role]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("role to use as the auto role or `disable` to disable");
+		return new String[] { "role to use as the auto role or `disable` to disable" };
 	}
 
 	@Override

@@ -3,7 +3,6 @@ package libot.commands;
 import static java.lang.String.format;
 import static libot.core.Constants.FAILURE;
 import static libot.core.commands.CommandCategory.UTILITIES;
-import static libot.utils.Utilities.array;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -35,7 +34,7 @@ public class DiceCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("roll");
+		return new String[] { "roll" };
 	}
 
 	@Override
@@ -45,12 +44,12 @@ public class DiceCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[sides]");
+		return new String[] { "[sides]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array(format("number of sides, %d by default", DEFAULT_SIDES));
+		return new String[] { format("number of sides, %d by default", DEFAULT_SIDES) };
 	}
 
 	@Override

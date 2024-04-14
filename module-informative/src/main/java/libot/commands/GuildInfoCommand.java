@@ -3,7 +3,6 @@ package libot.commands;
 import static java.lang.String.format;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
 import static net.dv8tion.jda.api.utils.TimeFormat.RELATIVE;
 import static org.apache.commons.lang3.StringUtils.capitalize;
@@ -83,7 +82,7 @@ public class GuildInfoCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("server", "serverinfo", "guild", "gi", "si");
+		return new String[] { "server", "serverinfo", "guild", "gi", "si" };
 	}
 
 	@Override

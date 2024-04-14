@@ -3,7 +3,6 @@ package libot.commands;
 import static libot.commands.ModerationCommandUtils.moderationAction;
 import static libot.commands.ModerationCommandUtils.ModAction.KICK;
 import static libot.core.commands.CommandCategory.MODERATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.KICK_MEMBERS;
 
 import libot.core.commands.*;
@@ -29,17 +28,17 @@ public class KickCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(KICK_MEMBERS);
+		return new Permission[] { KICK_MEMBERS };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("member", "[reason]");
+		return new String[] { "member", "[reason]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("name or mention of member to kick", "reason for kick");
+		return new String[] { "name or mention of member to kick", "reason for kick" };
 	}
 
 	@Override

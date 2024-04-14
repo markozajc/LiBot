@@ -7,7 +7,6 @@ import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.FAILURE;
 import static libot.core.commands.CommandCategory.UTILITIES;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.MESSAGE_HISTORY;
 
 import java.time.*;
@@ -154,7 +153,7 @@ public class DumpMessagesCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("dump");
+		return new String[] { "dump" };
 	}
 
 	@Override
@@ -164,7 +163,7 @@ public class DumpMessagesCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MESSAGE_HISTORY);
+		return new Permission[] { MESSAGE_HISTORY };
 	}
 
 	@Override
@@ -174,12 +173,12 @@ public class DumpMessagesCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("messsages");
+		return new String[] { "messsages" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("number of messages to dump");
+		return new String[] { "number of messages to dump" };
 	}
 
 	@Override

@@ -9,7 +9,7 @@ import static libot.commands.PollCommand.Poll.createPoll;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static libot.utils.ParseUtils.parseTime;
-import static libot.utils.Utilities.*;
+import static libot.utils.Utilities.plural;
 import static net.dv8tion.jda.api.Permission.*;
 import static net.dv8tion.jda.api.entities.MessageEmbed.TITLE_MAX_LENGTH;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
@@ -696,17 +696,17 @@ public class PollCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MANAGE_SERVER);
+		return new Permission[] { MANAGE_SERVER };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("[switch]", "[index]");
+		return new String[] { "[switch]", "[index]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("list, end, delete, or help", "index of the poll for end and delete");
+		return new String[] { "list, end, delete, or help", "index of the poll for end and delete" };
 	}
 
 	@Override

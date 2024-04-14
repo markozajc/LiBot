@@ -2,7 +2,6 @@ package libot.commands;
 
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.CUSTOMIZATION;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.Permission.MANAGE_SERVER;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
 
@@ -62,7 +61,7 @@ public class SetPrefixCommand extends Command {
 
 	@Override
 	public String[] getAliases() {
-		return array("prefix");
+		return new String[] { "prefix" };
 	}
 
 	@Override
@@ -73,17 +72,17 @@ public class SetPrefixCommand extends Command {
 
 	@Override
 	public Permission[] getPermissions() {
-		return array(MANAGE_SERVER);
+		return new Permission[] { MANAGE_SERVER };
 	}
 
 	@Override
 	public String[] getParameters() {
-		return array("[prefix]");
+		return new String[] { "[prefix]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("prefix to use (leave empty to reset to default)");
+		return new String[] { "prefix to use (leave empty to reset to default)" };
 	}
 
 	@Override

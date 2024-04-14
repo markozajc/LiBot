@@ -15,6 +15,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -147,7 +148,7 @@ public class Main {
 		return getenv().entrySet()
 			.stream()
 			.filter(e -> e.getKey().startsWith(ENV_SHRED_TOKEN))
-			.sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey()))
+			.sorted(Comparator.comparing(Entry<String, String>::getKey))
 			.map(e -> {
 				var name = e.getKey().substring(ENV_SHRED_TOKEN.length(), e.getKey().length());
 				try {

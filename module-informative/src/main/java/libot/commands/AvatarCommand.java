@@ -6,7 +6,6 @@ import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.core.commands.exceptions.ExceptionHandler.reportException;
 import static libot.utils.CommandUtils.findUserOrAuthor;
 import static libot.utils.ParseUtils.parseLong;
-import static libot.utils.Utilities.array;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -120,12 +119,12 @@ public class AvatarCommand extends Command {
 
 	@Override
 	public String[] getParameters() {
-		return array("[user or ID]");
+		return new String[] { "[user or ID]" };
 	}
 
 	@Override
 	public String[] getParameterInfo() {
-		return array("user to get avatar of");
+		return new String[] { "user to get avatar of" };
 	}
 
 	@Override
