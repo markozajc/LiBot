@@ -43,6 +43,11 @@
 			<groupId>dev.arbjerg</groupId>
 			<artifactId>lavaplayer</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.github.lavalink-devs.youtube-source</groupId>
+			<artifactId>common</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
 		<!-- Apache Commons -->
 		<dependency>

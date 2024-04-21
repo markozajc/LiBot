@@ -18,6 +18,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.slf4j.*;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -31,6 +32,8 @@ import libot.utils.MessageLock;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 class MusicCommandUtils {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MusicCommandUtils.class);
 
 	static final String YOUTUBE_URL_PREFIX = "https://www.youtube.com/watch?v=";
 
@@ -268,6 +271,8 @@ class MusicCommandUtils {
 
 		@Override
 		public void loadFailed(FriendlyException e) {
+			LOG.error("Failed to load a track from url {}", this.url);
+			LOG.error("", e);
 			this.lock.send(null);
 			this.c.reply(getFailureEmbed(e));
 		}

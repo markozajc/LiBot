@@ -1,15 +1,11 @@
 package libot.module.music;
 
 import static com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry.DEFAULT_REGISTRY;
-import static java.lang.System.getenv;
-import static libot.core.Constants.*;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import javax.annotation.*;
 
 import org.eclipse.collections.api.factory.primitive.LongObjectMaps;
 import org.eclipse.collections.api.map.primitive.*;
-import org.slf4j.Logger;
 
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
@@ -19,14 +15,12 @@ import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
 public class GlobalMusicManager {
-
-	private static final Logger LOG = getLogger(GlobalMusicManager.class);
 
 	public static class MusicManager {
 
@@ -77,12 +71,7 @@ public class GlobalMusicManager {
 	public static final AudioPlayerManager APM;
 	static {
 		APM = new DefaultAudioPlayerManager();
-		if (getenv(ENV_YOUTUBE_EMAIL) == null || getenv(ENV_YOUTUBE_PASSWORD) == null) {
-			LOG.warn("{} and/or {} are not set, age-restricted video playback will be unavailable", ENV_YOUTUBE_EMAIL,
-					 ENV_YOUTUBE_PASSWORD);
-		}
-		APM.registerSourceManager(new YoutubeAudioSourceManager(true, getenv(ENV_YOUTUBE_EMAIL),
-																getenv(ENV_YOUTUBE_PASSWORD)));
+		APM.registerSourceManager(new YoutubeAudioSourceManager());
 		APM.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		APM.registerSourceManager(new BandcampAudioSourceManager());
 		APM.registerSourceManager(new VimeoAudioSourceManager());
