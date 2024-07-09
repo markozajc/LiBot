@@ -66,10 +66,10 @@ public class CalculatorCommand extends Command {
 	private static final Pattern REGEX_MODE = compile("mode\\s+(\\p{IsLatin}+)", UNICODE_CHARACTER_CLASS);
 	private static final Pattern REGEX_NEWLINES = compile("\\\\\\s*\\n\\s*", UNICODE_CHARACTER_CLASS | MULTILINE);
 
-	private static final String EMOJI_INFO = "\u2139";
+	private static final String EMOJI_INFO = "\u2139\uFE0F";
 	private static final String EMOJI_WARN = "\u26A0\uFE0F";
 	private static final String EMOJI_ERROR = "<:e:988959163579269130>";
-	private static final String EMOJI_UNKNOWN = "\u2699";
+	private static final String EMOJI_UNKNOWN = "\u2699\uFE0F";
 
 	private static final byte SEPARATOR = 0x00;
 
@@ -322,15 +322,19 @@ public class CalculatorCommand extends Command {
 			case LEVEL_WARN -> WARN;
 			default -> FAILURE;
 		};
-		var text = messages.stream()
-			.sorted((m1, m2) -> compare(m1.level(), m2.level()))
-			.map(e -> "%s %s".formatted(switch (e.level()) {
-				case LEVEL_INFO -> EMOJI_INFO;
-				case LEVEL_WARN -> EMOJI_WARN;
-				case LEVEL_ERROR -> EMOJI_ERROR;
-				default -> EMOJI_UNKNOWN;
-			}, monospace(e.message())))
-			.collect(joining("\n"));
+		var text = messages.stream().sorted((m1, m2) -> compare(m1.level(), m2.level())).map(e -> {
+			if (e.level == LEVEL_INFO && e.message.contains("\n")) {
+				return codeblock(e.message);
+
+			} else {
+				return "%s %s".formatted(switch (e.level()) {
+					case LEVEL_INFO -> EMOJI_INFO;
+					case LEVEL_WARN -> EMOJI_WARN;
+					case LEVEL_ERROR -> EMOJI_ERROR;
+					default -> EMOJI_UNKNOWN;
+				}, monospace(e.message()));
+			}
+		}).collect(joining("\n"));
 
 		return new EmbedPrebuilder(text, color).build();
 	}
