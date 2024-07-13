@@ -65,6 +65,7 @@ public class CalculatorCommand extends Command {
 		compile("(?:\\s+convert)?\\s+to\\s+(?:b(?:ase)?\\s*([\\d]+)|([^\\s]+))", UNICODE_CHARACTER_CLASS);
 	private static final Pattern REGEX_MODE = compile("mode\\s+(\\p{IsLatin}+)", UNICODE_CHARACTER_CLASS);
 	private static final Pattern REGEX_NEWLINES = compile("\\\\\\s*\\n\\s*", UNICODE_CHARACTER_CLASS | MULTILINE);
+	private static final Pattern MESSAGE_LINE_MARKER = compile("line \\d+: |-{3,}");
 
 	private static final String EMOJI_INFO = "\u2139\uFE0F";
 	private static final String EMOJI_WARN = "\u26A0\uFE0F";
@@ -80,13 +81,11 @@ public class CalculatorCommand extends Command {
 	private static final byte LEVEL_WARN = 0x02;
 	private static final byte LEVEL_ERROR = 0x03;
 
-	private static final byte RESULT_APPROXIMATION = 2;
-
 	private static final int EXIT_TIMEOUT = 102;
 
 	private static record QalcMessage(byte level, @Nonnull String message) {}
 
-	private static record Result(@Nonnull String value, boolean approximate) {}
+	private static record Result(@Nonnull String value) {}
 
 	@Nonnull
 	@SuppressWarnings("null")
@@ -136,13 +135,12 @@ public class CalculatorCommand extends Command {
 
 		byte[] resultFile = null;
 		if (result != null) {
-			String resultString = parseResult(result);
-			String resultCodeblock = codeblock("ansi", resultString);
+			String resultCodeblock = codeblock("ansi", result.value());
 			if (resultCodeblock.length() <= Message.MAX_CONTENT_LENGTH) {
 				m.setContent(resultCodeblock);
 
 			} else {
-				resultFile = resultString.getBytes(UTF_8);
+				resultFile = result.value().getBytes(UTF_8);
 
 				if (resultFile.length > Message.MAX_FILE_SIZE)
 					throw c.error("The result is too long (> 8 MiB)", FAILURE); // TODO this will need to be changed
@@ -221,16 +219,13 @@ public class CalculatorCommand extends Command {
 
 		int i = -1;
 		String value = null;
-		boolean approximate = false;
 		while (i != output.length - 1) {
 			int next = indexOf(output, SEPARATOR, i + 1);
 			switch (output[i + 1]) {
+				case TYPE_RESULT -> value = new String(output, i + 2, next - i - 2, UTF_8);
 				case TYPE_MESSAGE -> messages
 					.add(new QalcMessage(output[i + 2], new String(output, i + 3, next - i - 3, UTF_8)));
-				case TYPE_RESULT -> {
-					approximate = output[i + 2] == RESULT_APPROXIMATION;
-					value = new String(output, i + 3, next - i - 3, UTF_8);
-				}
+
 				default -> {
 					if (LOG.isErrorEnabled())
 						LOG.error("Unparsable output! (base64): {}", Base64.getEncoder().encodeToString(output));
@@ -242,7 +237,7 @@ public class CalculatorCommand extends Command {
 		if (value == null)
 			return null;
 		else
-			return new Result(value, approximate);
+			return new Result(value);
 	}
 
 	@Nonnull
@@ -276,13 +271,17 @@ public class CalculatorCommand extends Command {
 	}
 
 	@Nonnull
-	@SuppressWarnings("null")
-	@SuppressFBWarnings(value = "COMMAND_INJECTION", justification = "input is filtered")
-	public static Process executeQalculate(@Nonnull String... params) throws IOException {
+	private static Process executeQalculate(@Nonnull String... params) throws IOException {
 		var command = new String[1 + params.length];
 		command[0] = getenv(ENV_QALCULATE_PATH);
 		arraycopy(params, 0, command, 1, params.length);
+		return startProcess(command);
+	}
 
+	@Nonnull
+	@SuppressWarnings("null")
+	@SuppressFBWarnings(value = "COMMAND_INJECTION", justification = "input is filtered")
+	public static Process startProcess(@Nonnull String... command) throws IOException {
 		var b = new ProcessBuilder(command);
 		b.environment().clear();
 		if (getenv(ENV_QALCULATE_HOME) != null) {
@@ -296,26 +295,6 @@ public class CalculatorCommand extends Command {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	private static String parseResult(@Nonnull Result r) {
-		String value = r.value();
-		if (value.contains("=") || value.contains("≈")) {
-			if (r.approximate())
-				value = value.replace('=', '≈');
-		} else {
-			if (r.approximate())
-				value = "≈ " + value;
-			else
-				value = "= " + value;
-		}
-
-		if (value.endsWith("\033[0m"))
-			value = value.substring(0, value.length() - 4);
-
-		return value;
-	}
-
-	@Nonnull
-	@SuppressWarnings("null")
 	private static MessageEmbed parseMessages(@Nonnull List<QalcMessage> messages) {
 		var color = switch (messages.stream().mapToInt(QalcMessage::level).max().orElse(1)) {
 			case LEVEL_INFO -> LITHIUM;
@@ -324,7 +303,7 @@ public class CalculatorCommand extends Command {
 		};
 		var text = messages.stream().sorted((m1, m2) -> compare(m1.level(), m2.level())).map(e -> {
 			if (e.level == LEVEL_INFO && e.message.contains("\n")) {
-				return codeblock(e.message);
+				return codeblock(MESSAGE_LINE_MARKER.matcher(e.message).replaceAll(""));
 
 			} else {
 				return "%s %s".formatted(switch (e.level()) {

@@ -37,6 +37,7 @@ public class Constants {
 	public static final String ENV_YOUTUBE_PASSWORD = "YOUTUBE_PASSWORD";
 	public static final String ENV_RESOURCE_GUILDS = "RESOURCE_GUILDS";
 	public static final String ENV_QALCULATE_PATH = "QALCULATE_HELPER_PATH";
+	public static final String ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH = "QALCULATE_HELPER_EXCHANGE_RATE_UPDATER_PATH";
 	public static final String ENV_QALCULATE_HOME = "QALCULATE_HOME_PATH";
 
 	// Colors

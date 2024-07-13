@@ -1,6 +1,9 @@
 package libot.listeners;
 
+import static java.lang.System.getenv;
 import static java.util.concurrent.TimeUnit.*;
+import static libot.commands.CalculatorCommand.startProcess;
+import static libot.core.Constants.ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH;
 import static org.eu.zajc.ef.EHandle.handle;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -19,17 +22,21 @@ public class CalculatorRateUpdaterListener implements BotEventListener {
 
 	@Override
 	public void onStartup(BotContext bot) {
-		if (CalculatorCommand.ENABLED) {
-			bot.cron().scheduleAtFixedRate(handle(CalculatorRateUpdaterListener::updateRates, t -> {
-				LOG.error("Failed to update exchange rates", t);
-			}), 0, UPDATE_INTERVAL, MILLISECONDS);
-		}
+		if (!CalculatorCommand.ENABLED)
+			return;
+
+		if (getenv(ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH) == null)
+			LOG.warn("{} is unset. Exchange rates will not be updated", ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH);
+
+		bot.cron().scheduleAtFixedRate(handle(CalculatorRateUpdaterListener::updateRates, t -> {
+			LOG.error("Failed to update exchange rates", t);
+		}), 0, UPDATE_INTERVAL, MILLISECONDS);
 	}
 
 	private static void updateRates() throws IOException, InterruptedException {
 		LOG.debug("Updating exchange rates");
 
-		var p = CalculatorCommand.executeQalculate("update");
+		var p = startProcess(getenv(ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH));
 
 		if (!p.waitFor(UPDATE_TIMEOUT, MILLISECONDS)) {
 			if (p.isAlive())
