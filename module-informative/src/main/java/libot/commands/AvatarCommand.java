@@ -23,6 +23,7 @@ import libot.core.extensions.EmbedPrebuilder;
 import net.dv8tion.jda.api.entities.Message.MentionType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 public class AvatarCommand extends Command {
 
@@ -70,14 +71,14 @@ public class AvatarCommand extends Command {
 		sendAvatar(c, url, b.getBody());
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "resource" })
 	private static void sendAvatar(@Nonnull CommandContext c, @Nonnull String url, @Nonnull byte[] data) {
 		var extension = url.substring(url.lastIndexOf('.') + 1);
 		var e = new EmbedPrebuilder(LITHIUM);
 		e.setImage("attachment://avatar." + extension);
 		e.setDescriptionf("[View original](%s?size=4096) (%d KiB%s)", url, data.length / 1024,
 						  getImageResolutionString(data, extension));
-		c.getChannel().sendFile(data, "avatar." + extension).setEmbeds(e.build()).queue();
+		c.getChannel().sendFiles(FileUpload.fromData(data, "avatar." + extension)).setEmbeds(e.build()).queue();
 	}
 
 	@Nonnull
