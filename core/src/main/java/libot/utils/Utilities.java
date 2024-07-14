@@ -4,7 +4,7 @@ import static java.lang.Math.log10;
 import static java.lang.System.getenv;
 import static java.util.stream.Collectors.toMap;
 
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.Collector;
@@ -57,6 +57,14 @@ public final class Utilities {
 		var cf = new CompletableFuture<T>();
 		cf.obtrudeException(t);
 		return cf;
+	}
+
+	@Nonnull
+	public static <T> Collection<T> concat(@Nullable T element, @Nonnull T[] more) {
+		var result = new ArrayList<T>(1 + more.length);
+		result.add(element);
+		Collections.addAll(result, more);
+		return result;
 	}
 
 	private Utilities() {}

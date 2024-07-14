@@ -7,29 +7,32 @@ import javax.annotation.Nonnull;
 
 import libot.core.listeners.EventWaiterListener;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.*;
 
 public class EventUtils {
 
-	private int timeout;
-	private final User user;
-	private final MessageChannel channel;
-	private final EventWaiterListener ewl;
+	private int timeout = 0;
+	@Nonnull private final EventWaiterListener ewl;
+	@Nonnull private final User user;
+	@Nonnull private final MessageChannelUnion channel;
 
-	public EventUtils(EventWaiterListener ewl, User user, MessageChannel channel) {
+	public EventUtils(@Nonnull EventWaiterListener ewl, @Nonnull User user, @Nonnull MessageChannelUnion channel) {
+		this(ewl, user, channel, 0);
+	}
+
+	public EventUtils(@Nonnull EventWaiterListener ewl, @Nonnull User user, @Nonnull MessageChannelUnion channel,
+					  int timeout) {
 		this.user = user;
 		this.channel = channel;
 		this.ewl = ewl;
-	}
-
-	public EventUtils(EventWaiterListener ewl, User user, MessageChannel channel, int timeout) {
-		this(ewl, user, channel);
 		this.timeout = timeout;
 	}
 
 	@Nonnull
-	public MessageReaction getReaction(Message message) throws InterruptedException {
+	public MessageReaction getReaction(@Nonnull Message message) throws InterruptedException {
 		return this.ewl.awaitEvent(p -> {
 			GenericMessageReactionEvent e = (GenericMessageReactionEvent) p;
 			return e.getUserIdLong() == this.user.getIdLong() && e.getMessageIdLong() == message.getIdLong();
@@ -45,13 +48,13 @@ public class EventUtils {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public Message getMessage(String emoji) throws InterruptedException {
+	public Message getMessage(@Nonnull Emoji emoji) throws InterruptedException {
 		GenericMessageReactionEvent event = this.ewl.awaitEvent(p -> {
 
 			GenericMessageReactionEvent e = (GenericMessageReactionEvent) p;
 
 			return e.getUserIdLong() == this.user.getIdLong() && e.getChannel().getIdLong() == this.channel.getIdLong()
-				&& e.getReactionEmote().getName().equals(emoji);
+				&& e.getReaction().getEmoji().equals(emoji);
 
 		}, null, this.timeout, SECONDS, GenericMessageReactionEvent.class);
 
@@ -72,12 +75,12 @@ public class EventUtils {
 	}
 
 	public boolean awaitBoolean(@Nonnull Message question, boolean keepPrompt) throws InterruptedException {
-		boolean result = ACCEPT_EMOJI.equals(this.ewl.awaitEvent(p -> {
+		var event = this.ewl.awaitEvent(p -> {
 			MessageReactionAddEvent e = (MessageReactionAddEvent) p;
-			String emote = e.getReactionEmote().getName();
+			var emoji = e.getReaction().getEmoji();
 
 			return e.getUserIdLong() == this.user.getIdLong() && e.getMessageIdLong() == question.getIdLong()
-				&& (ACCEPT_EMOJI.equals(emote) || DENY_EMOJI.equals(emote));
+				&& (ACCEPT_EMOJI.equals(emoji) || DENY_EMOJI.equals(emoji));
 
 		}, p -> {
 			try {
@@ -87,7 +90,9 @@ public class EventUtils {
 				return true;
 			}
 
-		}, this.timeout, SECONDS, MessageReactionAddEvent.class).getReactionEmote().getName());
+		}, this.timeout, SECONDS, MessageReactionAddEvent.class);
+
+		boolean result = ACCEPT_EMOJI.equals(event.getReaction().getEmoji());
 
 		if (!keepPrompt)
 			question.delete().queue();

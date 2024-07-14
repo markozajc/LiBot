@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.asciithemes.TA_Grid;
 import de.vandermeer.asciithemes.u8.U8_Grids;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 @SuppressWarnings("null")
 public class Constants {
@@ -48,10 +49,10 @@ public class Constants {
 	public static final Color DISABLED = new Color(198, 198, 198);
 
 	// Emoji
-	public static final String ACCEPT_EMOJI = "\u2705";
-	public static final String DENY_EMOJI = "\u274E";
-	public static final String FAILURE_EMOJI = "\u274C";
-	public static final String MISSING_EMOJI = "\uD83D\uDEAB";
+	@Nonnull public static final Emoji ACCEPT_EMOJI = Emoji.fromUnicode("\u2705");
+	@Nonnull public static final Emoji DENY_EMOJI = Emoji.fromUnicode("\u274E");
+	@Nonnull public static final Emoji FAILURE_EMOJI = Emoji.fromUnicode("\u274C");
+	@Nonnull public static final Emoji MISSING_EMOJI = Emoji.fromUnicode("\uD83D\uDEAB");
 
 	// Limits
 	public static final int MAX_CUSTOM_PREFIX_LENGTH = 50;

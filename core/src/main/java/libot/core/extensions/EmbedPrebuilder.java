@@ -61,6 +61,7 @@ public final class EmbedPrebuilder extends EmbedBuilder {
 	}
 
 	@Nonnull
+	@SuppressWarnings("null")
 	public EmbedPrebuilder addFieldf(boolean inline, @Nonnull String title, @Nonnull String value,
 									 @Nonnull Object... args) {
 		super.addField(title, format(value, args), inline);
