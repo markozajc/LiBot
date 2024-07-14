@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>zajc.libot</groupId>
 		<artifactId>libot</artifactId>
-		<version>5.0.5-4</version>
+		<version>5.0.5-5</version>
 	</parent>
 	<artifactId>module-music</artifactId>
 
@@ -44,9 +44,9 @@
 			<artifactId>lavaplayer</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.github.lavalink-devs.youtube-source</groupId>
-			<artifactId>common</artifactId>
-			<version>1.0.2</version>
+			<groupId>dev.lavalink.youtube</groupId>
+			<artifactId>v2</artifactId>
+			<version>1.4.0</version>
 		</dependency>
 
 		<!-- Apache Commons -->
@@ -85,8 +85,8 @@
 
 		<!-- Required for lavaplayer's dependencies -->
 		<repository>
-			<id>jitpack</id>
-			<url>https://jitpack.io</url>
+			<id>lavalink</id>
+			<url>https://maven.lavalink.dev/releases</url>
 		</repository>
 
 	</repositories>
