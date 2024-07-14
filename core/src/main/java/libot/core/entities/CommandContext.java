@@ -30,6 +30,7 @@ import libot.utils.ParseUtils.Prefix;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.MessageEmbed.Footer;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.*;
@@ -73,6 +74,11 @@ public class CommandContext {
 	@Nonnull
 	public MessageChannelUnion getChannel() {
 		return this.event.getChannel();
+	}
+
+	@Nonnull
+	public ChannelType getChannelType() {
+		return this.event.getChannelType();
 	}
 
 	@Nonnull
