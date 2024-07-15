@@ -11,6 +11,7 @@ import static libot.utils.ReflectionUtils.scanClasspath;
 import static net.dv8tion.jda.api.OnlineStatus.*;
 import static net.dv8tion.jda.api.requests.GatewayIntent.*;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.*;
+import static net.dv8tion.jda.api.utils.cache.CacheFlag.SCHEDULED_EVENTS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class Main {
 			.create(GUILD_MEMBERS, GUILD_EMOJIS_AND_STICKERS, GUILD_VOICE_STATES, GUILD_MESSAGES, MESSAGE_CONTENT,
 					GUILD_MESSAGE_REACTIONS)
 			.enableCache(VOICE_STATE, EMOJI, MEMBER_OVERRIDES)
-			.disableCache(ACTIVITY, CLIENT_STATUS, ONLINE_STATUS)
+			.disableCache(ACTIVITY, CLIENT_STATUS, ONLINE_STATUS, SCHEDULED_EVENTS)
 			.setChunkingFilter(ChunkingFilter.ALL)
 			.addEventListeners(ewl)
 			.setStatus(IDLE)
