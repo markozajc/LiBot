@@ -37,7 +37,7 @@ public class AboutCommand extends Command {
 		b.setDescriptionf(FORMAT_DESCRIPTION, LINKS);
 		b.setThumbnail(c.getSelfUser().getAvatarUrl());
 		appendStatistics(c, b);
-		b.setFooterf("v%s | Last reboot: ", VERSION);
+		b.setFooterf("v%s | Last reboot ", VERSION);
 		b.setTimestamp(ofEpochMilli(getRuntimeMXBean().getStartTime()));
 		c.reply(b);
 	}
