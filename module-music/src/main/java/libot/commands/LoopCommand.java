@@ -17,7 +17,7 @@ public class LoopCommand extends Command {
 	@Override
 	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
-		var vc = c.getConnectedVChannel();
+		var vc = c.getConnectedAChannel();
 		if (vc == null)
 			throw nothingIsPlaying(c);
 

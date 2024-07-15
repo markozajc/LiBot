@@ -88,6 +88,7 @@ public class Shredder {
 	}
 
 	@Nonnull
+	@SuppressWarnings("resource")
 	public CompletableFuture<Message> sendPrivateMessage(long userId, @Nonnull String message) {
 		return sendPrivateMessage(userId, new MessageCreateBuilder().setContent(message).build());
 	}
@@ -105,6 +106,7 @@ public class Shredder {
 	}
 
 	@Nonnull
+	@SuppressWarnings("resource")
 	public CompletableFuture<Message> sendPrivateMessage(long userId, @Nonnull MessageCreateBuilder message) {
 		return sendPrivateMessage(userId, message.build());
 	}

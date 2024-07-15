@@ -3,15 +3,15 @@ package libot.core.commands.exceptions;
 import javax.annotation.*;
 
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.utils.messages.*;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 public class CommandException extends RuntimeException {
 
 	@Nullable private final transient MessageCreateData errorMessage;
 	private final boolean registerRatelimit;
 
-	public CommandException(@Nullable MessageCreateBuilder builder, boolean registerRatelimit) {
-		this.errorMessage = builder == null ? null : builder.build();
+	public CommandException(@Nullable MessageCreateData message, boolean registerRatelimit) {
+		this.errorMessage = message;
 		this.registerRatelimit = registerRatelimit;
 	}
 

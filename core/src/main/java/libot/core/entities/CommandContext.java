@@ -34,7 +34,7 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.*;
-import net.dv8tion.jda.api.entities.emoji.*;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.*;
 import net.dv8tion.jda.api.managers.AudioManager;
@@ -161,7 +161,7 @@ public class CommandContext {
 	}
 
 	@Nullable
-	public AudioChannelUnion getConnectedVChannel() { // TODO rename to AChannel
+	public AudioChannelUnion getConnectedAChannel() {
 		return getAudioManager().getConnectedChannel();
 	}
 
@@ -399,7 +399,7 @@ public class CommandContext {
 		if (getChannel() instanceof GuildChannel guildChannel)
 			return getSelfMember().hasPermission(guildChannel, permissions);
 		else
-			return true; // TODO is this correct?
+			return true;
 	}
 
 	public boolean hasGuildPermission(@Nonnull Permission... permissions) {
@@ -410,7 +410,7 @@ public class CommandContext {
 		if (getChannel() instanceof GuildChannel guildChannel)
 			return getMember().hasPermission(guildChannel, permissions);
 		else
-			return true; // TODO is this correct?
+			return true;
 	}
 
 	public boolean hasAuthorGuildPermission(@Nonnull Permission... permissions) {
@@ -461,18 +461,6 @@ public class CommandContext {
 			return permissionExceptionFuture(MESSAGE_ADD_REACTION);
 	}
 
-	@Nonnull
-	@Deprecated
-	public CompletableFuture<Void> react(@Nonnull RichCustomEmoji emote) {
-		return react(emote);
-	}
-
-	@Nonnull
-	@Deprecated
-	public CompletableFuture<Void> react(@Nonnull String unicode) {
-		return react(Emoji.fromUnicode(unicode));
-	}
-
 	// ===============* reply *===============
 
 	@Nonnull
@@ -485,6 +473,7 @@ public class CommandContext {
 	}
 
 	@Nonnull
+	@SuppressWarnings("resource")
 	public CompletableFuture<Message> reply(@Nonnull MessageCreateBuilder builder) {
 		return reply(builder.build());
 	}
@@ -542,6 +531,7 @@ public class CommandContext {
 	}
 
 	@Nonnull
+	@SuppressWarnings("resource")
 	public MessageCreateAction replyraw(@Nonnull MessageCreateBuilder builder) {
 		return replyraw(builder.build());
 	}
@@ -621,13 +611,6 @@ public class CommandContext {
 		return replyMessage(getChannel().sendFiles(files)).submit();
 	}
 
-	@Nonnull
-	@Deprecated
-	@SuppressWarnings("resource")
-	public CompletableFuture<Message> replyFile(@Nonnull byte[] data, @Nonnull String fileName) {
-		return replyFiles(FileUpload.fromData(data, fileName));
-	}
-
 	// ===============* directf *===============
 
 	@SuppressWarnings("null")
@@ -679,8 +662,9 @@ public class CommandContext {
 
 	@Nonnull
 	@CheckReturnValue
+	@SuppressWarnings("resource")
 	public CommandException error(boolean ratelimit, @Nonnull String message) {
-		return new CommandException(new MessageCreateBuilder().setContent(message), ratelimit);
+		return new CommandException(new MessageCreateBuilder().setContent(message).build(), ratelimit);
 	}
 
 	@Nonnull
@@ -691,8 +675,9 @@ public class CommandContext {
 
 	@Nonnull
 	@CheckReturnValue
+	@SuppressWarnings("resource")
 	public CommandException error(boolean ratelimit, @Nonnull Collection<MessageEmbed> embeds) {
-		return new CommandException(new MessageCreateBuilder().addEmbeds(embeds), ratelimit);
+		return new CommandException(new MessageCreateBuilder().addEmbeds(embeds).build(), ratelimit);
 	}
 
 	@Nonnull
