@@ -2,6 +2,7 @@ package libot.commands;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.regex.Pattern.compile;
+import static javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING;
 import static javax.xml.xpath.XPathConstants.STRING;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
@@ -20,8 +21,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.xml.sax.SAXException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import kong.unirest.Unirest;
 import libot.core.commands.*;
+import libot.core.commands.exceptions.ContinuumException;
 import libot.core.entities.CommandContext;
 
 @SuppressWarnings("java:S4248") // false positive spam (non-static pattern)
@@ -46,6 +49,14 @@ public class ChatbotCommand extends Command {
 
 	static {
 		var dbf = DocumentBuilderFactory.newInstance();
+		try {
+			dbf.setFeature(FEATURE_SECURE_PROCESSING, true);
+		} catch (ParserConfigurationException e) {
+			// From the #setFeature javadoc:
+			// All implementations are required to support the
+			// javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING feature.
+			throw new ContinuumException(e);
+		}
 		DOCUMENT_BUILDER = handle(dbf::newDocumentBuilder, e -> null).get();
 
 		var xp = XPathFactory.newInstance().newXPath();
@@ -162,6 +173,7 @@ public class ChatbotCommand extends Command {
 	}
 
 	@Nullable
+	@SuppressFBWarnings("XXE_DOCUMENT")
 	private static synchronized String extractResponse(@Nonnull ByteArrayInputStream response) throws SAXException,
 																							   IOException,
 																							   XPathExpressionException {
