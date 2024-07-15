@@ -105,6 +105,7 @@ public class ChatbotCommand extends Command {
 				break;
 
 			} else if (!m.getContentRaw().startsWith("=")) {
+				c.typing();
 				c.replyf("%s: %s", NAME, think(m.getContentStripped(), session));
 			}
 		}
