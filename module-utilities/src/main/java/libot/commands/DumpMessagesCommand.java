@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.FAILURE;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static net.dv8tion.jda.api.Permission.MESSAGE_HISTORY;
+import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +33,7 @@ public class DumpMessagesCommand extends Command {
 	private static final String L2 = "\n\t\t";
 	private static final int MESSAGES_CAP = 100_000;
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "resource" })
 	@Override
 	public void execute(CommandContext c) {
 		int limit = c.params().getInt(0);
@@ -54,7 +55,7 @@ public class DumpMessagesCommand extends Command {
 
 		c.getChannel()
 			.sendMessage(format("Dumped %d messages:", messages.size()))
-			.addFile(messages.stream().collect(joining("\n")).getBytes(UTF_8), "messagedump.txt")
+			.addFiles(fromData(messages.stream().collect(joining("\n")).getBytes(UTF_8), "messagedump.txt"))
 			.queue();
 	}
 

@@ -8,6 +8,7 @@ import static java.util.Arrays.stream;
 import static libot.core.Constants.FAILURE;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static libot.utils.ParseUtils.parseParameters;
+import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 import static org.apache.commons.lang3.math.NumberUtils.isParsable;
 
 import java.awt.*;
@@ -39,7 +40,7 @@ public class TextToImageCommand extends Command {
 	private static final int DEFAULT_SIZE = 16;
 
 	@Override
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "resource" })
 	public void execute(CommandContext c) throws IOException {
 		boolean hasSize = c.params().check(1) && isParsable(c.params().get(0));
 		int size = hasSize ? c.params().getInt(0) : DEFAULT_SIZE;
@@ -72,7 +73,7 @@ public class TextToImageCommand extends Command {
 
 		try (var baos = new ByteArrayOutputStream()) {
 			ImageIO.write(img, "png", baos);
-			c.replyFile(baos.toByteArray(), "image.png");
+			c.replyFiles(fromData(baos.toByteArray(), "image.png"));
 		}
 		g.dispose();
 	}
