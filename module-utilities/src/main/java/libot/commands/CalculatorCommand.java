@@ -10,6 +10,7 @@ import static java.util.regex.Pattern.*;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
+import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.*;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
@@ -29,8 +30,9 @@ import libot.core.commands.*;
 import libot.core.commands.exceptions.CommandException;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 public class CalculatorCommand extends Command {
 
@@ -103,7 +105,7 @@ public class CalculatorCommand extends Command {
 	}
 
 	@Override
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "resource" })
 	public void execute(CommandContext c) throws InterruptedException, IOException {
 		if (!ENABLED || KILL_SWITCH != null && exists(KILL_SWITCH))
 			throw c.errorf("%s is unavailable.", DISABLED, c.getCommandName());
@@ -128,33 +130,35 @@ public class CalculatorCommand extends Command {
 
 		var result = evaluate(c, messages, expression, modes, base);
 
-		var m = new MessageBuilder();
+		var m = new MessageCreateBuilder();
 
 		if (!messages.isEmpty())
 			m.setEmbeds(parseMessages(messages));
 
-		byte[] resultFile = null;
+		FileUpload resultFile = null;
 		if (result != null) {
 			String resultCodeblock = codeblock("ansi", result.value());
 			if (resultCodeblock.length() <= Message.MAX_CONTENT_LENGTH) {
 				m.setContent(resultCodeblock);
 
 			} else {
-				resultFile = result.value().getBytes(UTF_8);
+				byte[] bytes = result.value().getBytes(UTF_8);
 
-				if (resultFile.length > Message.MAX_FILE_SIZE)
-					throw c.error("The result is too long (> 8 MiB)", FAILURE); // TODO this will need to be changed
+				if (bytes.length > Message.MAX_FILE_SIZE)
+					throw c.error("The result is too long (> 25 MiB)", FAILURE);
+
+				resultFile = fromData(bytes, "result.txt");
 			}
 		}
 
 		if (!m.isEmpty()) {
 			if (resultFile != null)
-				c.replyraw(m).addFile(resultFile, "result.txt").queue();
+				c.replyraw(m).addFiles(resultFile).queue();
 			else
 				c.reply(m);
 		} else {
 			if (resultFile != null)
-				c.replyFile(resultFile, "result.txt");
+				c.replyFiles(resultFile);
 			else
 				c.reply("No output", DISABLED);
 		}

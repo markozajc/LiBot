@@ -18,7 +18,8 @@ import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 
 public class GlobalMusicManager {
 
@@ -26,14 +27,16 @@ public class GlobalMusicManager {
 
 		@Nonnull private final AudioPlayer player;
 		@Nonnull private final TrackScheduler scheduler;
-		private final long vchannelId;
+		private final long channelId;
+		@Nonnull private final ChannelType channelType;
 
 		@SuppressWarnings("null")
-		public MusicManager(@Nonnull AudioPlayerManager manager, long vchannelId) {
+		public MusicManager(@Nonnull AudioPlayerManager manager, @Nonnull AudioChannelUnion channel) {
 			this.player = manager.createPlayer();
 			this.scheduler = new TrackScheduler(this.player);
 			this.player.addListener(this.scheduler);
-			this.vchannelId = vchannelId;
+			this.channelId = channel.getIdLong();
+			this.channelType = channel.getType();
 		}
 
 		@Nonnull
@@ -46,8 +49,13 @@ public class GlobalMusicManager {
 			return this.scheduler;
 		}
 
-		public long getVchannelId() {
-			return this.vchannelId;
+		public long getChannelId() {
+			return this.channelId;
+		}
+
+		@Nonnull
+		public ChannelType getChannelType() {
+			return this.channelType;
 		}
 
 		@Nonnull
@@ -89,8 +97,8 @@ public class GlobalMusicManager {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public static synchronized MusicManager getMusicManager(@Nonnull VoiceChannel vc) {
-		return MANAGERS.getIfAbsentPut(vc.getGuild().getIdLong(), () -> new MusicManager(APM, vc.getIdLong()));
+	public static synchronized MusicManager getMusicManager(@Nonnull AudioChannelUnion ac) {
+		return MANAGERS.getIfAbsentPut(ac.getGuild().getIdLong(), () -> new MusicManager(APM, ac));
 	}
 
 	@Nullable

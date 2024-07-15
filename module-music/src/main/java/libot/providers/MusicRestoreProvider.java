@@ -1,5 +1,6 @@
 package libot.providers;
 
+import static java.lang.Thread.currentThread;
 import static java.util.Arrays.stream;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toCollection;
@@ -22,40 +23,43 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
 
 import libot.core.data.DataManager;
-import libot.core.data.providers.SnowflakeProvider;
+import libot.core.data.providers.MapProvider;
 import libot.core.shred.Shredder;
 import libot.module.music.GlobalMusicManager.MusicManager;
-import libot.providers.MusicRestoreProvider.MusicState;
+import libot.providers.MusicRestoreProvider.*;
 import libot.utils.MessageLock;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 
-public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
+public class MusicRestoreProvider extends MapProvider<MusicChannel, MusicState> {
 
 	private static final Logger LOG = getLogger(MusicRestoreProvider.class);
 
 	public static record MusicState(@Nonnull String[] tracks, boolean paused, long position, boolean loop) {} // NOSONAR
-	// [java:S6218] not needed
+
+	public static record MusicChannel(long id, @Nonnull ChannelType type) {} // NOSONAR
 
 	public MusicRestoreProvider(@Nonnull Shredder shredder, @Nonnull DataManager dataManager) {
 		super(shredder, dataManager, new TypeToken<>() {}, "musicqueues");
 	}
 
 	@SuppressWarnings("null")
-	private void restorePlayback(long vchannelId, @Nonnull MusicState state) {
+	private void restorePlayback(MusicChannel channel, @Nonnull MusicState state) {
 		try {
-			var vc = getShredder().getVoiceChannelById(vchannelId);
-			if (vc == null || vc.getMembers().stream().noneMatch(NO_BOT))
+			var ac = (AudioChannelUnion) getShredder().getChannelById(channel.type(), channel.id());
+			if (ac == null || ac.getMembers().stream().noneMatch(NO_BOT))
 				return;
-			LOG.debug("Restoring playback on guild {}", vc.getGuild().getId());
+			LOG.debug("Restoring playback on guild {}", ac.getGuild().getId());
 
-			var am = vc.getGuild().getAudioManager();
-			var manager = getMusicManager(vc);
-			stopPlayback(vc.getGuild().getIdLong());
+			var am = ac.getGuild().getAudioManager();
+			var manager = getMusicManager(ac);
+			stopPlayback(ac.getGuild().getIdLong());
 
 			if (am.getSendingHandler() == null)
 				am.setSendingHandler(manager.getSendHandler());
 
 			if (!am.isConnected())
-				am.openAudioConnection(vc);
+				am.openAudioConnection(ac);
 
 			manager.getPlayer().setPaused(state.paused());
 			manager.getScheduler().setLoop(state.loop());
@@ -64,7 +68,11 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 			if (skip != -1)
 				resolveAudioTracks(state.tracks(), skip).limit((long) QUEUE_MAX_SIZE - manager.getScheduler().size())
 					.collect(toCollection(manager.getScheduler()::getQueue));
-		} catch (Exception e) { // NOSONAR [java:S2142] the thread dies right after
+
+		} catch (InterruptedException e) {
+			currentThread().interrupt();
+
+		} catch (Exception e) {
 			LOG.error("Could not restore audio playback on a guild", e);
 		}
 	}
@@ -157,7 +165,6 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 	}
 
 	@Override
-	@SuppressWarnings("null")
 	protected void onShredderReady() {
 		if (!this.data.isEmpty()) {
 			new Thread(() -> {
@@ -186,7 +193,8 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 
 			var state = new MusicState(tracks, manager.getPlayer().isPaused(), playing.getPosition(),
 									   manager.getScheduler().isLoop());
-			this.data.put(manager.getVchannelId(), state);
+			var channel = new MusicChannel(manager.getChannelId(), manager.getChannelType());
+			this.data.put(channel, state);
 		});
 
 		store();

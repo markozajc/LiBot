@@ -3,10 +3,10 @@ package libot.commands;
 import static javax.imageio.ImageIO.*;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
-import static libot.core.commands.exceptions.ExceptionHandler.reportException;
 import static libot.utils.CommandUtils.findUserOrAuthor;
 import static libot.utils.ParseUtils.parseLong;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
+import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 
-import kong.unirest.*;
+import kong.unirest.Unirest;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
@@ -51,33 +51,24 @@ public class AvatarCommand extends Command {
 		}
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "resource" })
 	private static void downloadAndSendAvatar(@Nonnull CommandContext c, @Nonnull User user) {
 		var url = user.getEffectiveAvatarUrl();
-		Unirest.get(url + "?size=4096").asBytesAsync().thenAccept(b -> sendAvatar(c, url, b)).exceptionally(t -> {
-			reportException(c, t);
-			c.error("Couldn't download the avatar due to an unknown error");
-			return null;
-		});
-	}
+		var resp = Unirest.get(url + "?size=4096").asBytes();
 
-	@SuppressWarnings("null")
-	private static void sendAvatar(@Nonnull CommandContext c, @Nonnull String url, @Nonnull HttpResponse<byte[]> b) {
-		if (!b.isSuccess())
-			throw new RuntimeException("Non-zero status code when downloading '%s?size=4096':%d %s"
-				.formatted(url, b.getStatus(), b.getStatusText()));
+		if (!resp.isSuccess()) {
+			throw c.errorf("Non-zero status code when downloading '%s?size=4096':%d %s", url, resp.getStatus(),
+						   resp.getStatusText());
+		}
 
-		sendAvatar(c, url, b.getBody());
-	}
-
-	@SuppressWarnings("null")
-	private static void sendAvatar(@Nonnull CommandContext c, @Nonnull String url, @Nonnull byte[] data) {
 		var extension = url.substring(url.lastIndexOf('.') + 1);
 		var e = new EmbedPrebuilder(LITHIUM);
+
+		e.setTitlef("%s's avatar", user.getEffectiveName());
 		e.setImage("attachment://avatar." + extension);
-		e.setDescriptionf("[View original](%s?size=4096) (%d KiB%s)", url, data.length / 1024,
-						  getImageResolutionString(data, extension));
-		c.getChannel().sendFile(data, "avatar." + extension).setEmbeds(e.build()).queue();
+		e.setDescriptionf("[View original](%s?size=4096) (%d KiB%s)", url, resp.getBody().length / 1024,
+						  getImageResolutionString(resp.getBody(), extension));
+		c.getChannel().sendFiles(fromData(resp.getBody(), "avatar." + extension)).setEmbeds(e.build()).queue();
 	}
 
 	@Nonnull

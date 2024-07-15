@@ -55,7 +55,7 @@ public class GuildInfoCommand extends Command {
 	@Nonnull
 	@SuppressWarnings("null")
 	private static CompletableFuture<Void> appendOwner(@Nonnull Guild guild, @Nonnull EmbedBuilder builder) {
-		return guild.retrieveOwner(false)
+		return guild.retrieveOwner()
 			.submit()
 			.thenAccept(owner -> builder.addField("Owner", owner.getUser().getAsMention(), false));
 	}

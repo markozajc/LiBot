@@ -13,6 +13,7 @@ import libot.listeners.GreeterListener;
 import libot.providers.GreeterProvider;
 import libot.providers.GreeterProvider.GreeterConfiguration;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GreeterCommand extends Command {
 
@@ -21,7 +22,7 @@ public class GreeterCommand extends Command {
 	private static final String FORMAT_INVALID_SUBCOMMAND = """
 		%s is not a valid subcommand. Please use `set`, `remove`, or `test`.""";
 	private static final String FORMAT_SET = """
-		You're setting the **%s** message for **%s - #%s**.
+		You're setting the **%s** message for %s.
 		Please type in your desired message.""";
 	private static final String FORMAT_SET_VARIABLES_LIST = """
 		`{name}   ` Username - %s
@@ -37,7 +38,7 @@ public class GreeterCommand extends Command {
 		A %s message has not yet been configured for this guild.""";
 	private static final String FORMAT_TEST_CHANNEL_MISSING = """
 		The channel LiBot would send the welcome/goodbye message to does no longer exist.
-		Do you want to set the current channel as the welcome/goodbye channel?""";
+		Do you want to set %s as the welcome/goodbye channel?""";
 	private static final String FORMAT_TEST_OK = """
 		A test %s message has been sent to %s.""";
 
@@ -67,7 +68,7 @@ public class GreeterCommand extends Command {
 
 	public static void set(@Nonnull CommandContext c, @Nonnull EventType type, @Nonnull GreeterConfiguration conf) {
 		var e = new EmbedPrebuilder(LITHIUM);
-		e.setDescriptionf(FORMAT_SET, type.toString().toLowerCase(), c.getGuildName(), c.getChannelname());
+		e.setDescriptionf(FORMAT_SET, type.toString().toLowerCase(), c.getChannelMention());
 		e.addFieldf("Available variables", FORMAT_SET_VARIABLES_LIST, c.getUsername(), c.getUserDiscriminator(),
 					c.getUserMention(), c.getGuildName());
 		e.setFooter(EXIT_FOOTER);
@@ -78,7 +79,7 @@ public class GreeterCommand extends Command {
 		if (input.length() > MAX_GREETER_MESSAGE_LENGTH)
 			throw c.errorf(FORMAT_SET_TOO_LONG, FAILURE, MAX_GREETER_MESSAGE_LENGTH);
 
-		conf.setChannel(c.getChannelIdLong());
+		conf.setChannel(c.getChannelIdLong(), c.getChannelType());
 
 		switch (type) {
 			case WELCOME -> conf.setWelcomeMessage(input);
@@ -109,16 +110,6 @@ public class GreeterCommand extends Command {
 	}
 
 	public static void test(@Nonnull CommandContext c, @Nonnull EventType type, @Nonnull GreeterConfiguration conf) {
-		var ch = c.getGuild().getTextChannelById(conf.getChannelId());
-		if (ch == null) {
-			if (c.confirm("// WARNING //", FORMAT_TEST_CHANNEL_MISSING, WARN)) {
-				ch = c.getChannel();
-				conf.setChannel(ch.getIdLong());
-			} else {
-				throw c.cancel();
-			}
-		}
-
 		var message = switch (type) {
 			case WELCOME -> conf.getWelcomeMessage();
 			case GOODBYE -> conf.getGoodbyeMessage();
@@ -126,6 +117,19 @@ public class GreeterCommand extends Command {
 
 		if (message == null)
 			throw c.errorf(FORMAT_TEST_MISSING, DISABLED, type.toString().toLowerCase());
+
+		var ch = (MessageChannelUnion) c.getGuild()
+			.getChannelCache()
+			.getElementById(conf.getChannelType(), conf.getChannelId());
+
+		if (ch == null) {
+			if (c.confirmf("// WARNING //", FORMAT_TEST_CHANNEL_MISSING, WARN, c.getChannel().getAsMention())) {
+				ch = c.getChannel();
+				conf.setChannel(ch.getIdLong(), ch.getType());
+			} else {
+				throw c.cancel();
+			}
+		}
 
 		ch.sendMessage(GreeterListener.parseMessage(message, c.getUser(), c.getGuild())).queue();
 		c.replyf(FORMAT_TEST_OK, SUCCESS, type.toString().toLowerCase(), ch.getAsMention());

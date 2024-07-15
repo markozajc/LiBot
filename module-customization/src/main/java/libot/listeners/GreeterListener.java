@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import libot.core.entities.BotContext;
 import libot.providers.GreeterProvider;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.guild.member.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -29,7 +30,10 @@ public class GreeterListener extends ListenerAdapter {
 
 	private void run(@Nonnull GenericGuildEvent event) {
 		var config = this.bot.provider(GreeterProvider.class).get(event.getGuild().getIdLong());
-		var channel = event.getGuild().getTextChannelById(config.getChannelId());
+		var channel = (MessageChannelUnion) event.getGuild()
+			.getChannelCache()
+			.getElementById(config.getChannelType(), config.getChannelId());
+
 		if (channel == null || !channel.canTalk())
 			return;
 

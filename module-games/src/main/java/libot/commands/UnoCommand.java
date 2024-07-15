@@ -126,6 +126,7 @@ public class UnoCommand extends BettableGame {
 				throw c.glose();
 		}
 
+		@SuppressWarnings("null")
 		private void reportChooseAction(@Nonnull UnoGame game, @Nonnull UnoPlayer next) {
 			this.e.clearFields();
 			appendFeed();
@@ -142,23 +143,23 @@ public class UnoCommand extends BettableGame {
 			if (!drawCards.isEmpty()) {
 				this.actions
 					.append(FORMAT_PLAYER_ACTION_DRAW_FORCED.formatted(drawCards.size() * drawCards.get(0).getAmount(),
-																	   getEmoteWithName(this.c, game.getTopCard())));
+																	   getEmojiWithName(this.c, game.getTopCard())));
 			} else {
-				this.actions.append(FORMAT_PLAYER_ACTION_DRAW.formatted(getPileEmote(this.c)));
+				this.actions.append(FORMAT_PLAYER_ACTION_DRAW.formatted(getPileEmoji(this.c)));
 			}
 
 			int i = 1;
 			for (UnoCard card : this.getCards()) {
-				this.actions.append(FORMAT_PLAYER_ACTION.formatted(i, getEmoteWithName(this.c, card)));
+				this.actions.append(FORMAT_PLAYER_ACTION.formatted(i, getEmojiWithName(this.c, card)));
 				i++;
 			}
 		}
 
 		private void constructStatus(@Nonnull UnoGame game, @Nonnull UnoPlayer next) {
 			this.status.setLength(0);
-			this.status.append(FORMAT_PLAYER_STATUS_TOP_CARD.formatted(getEmoteWithName(this.c, game.getTopCard())));
+			this.status.append(FORMAT_PLAYER_STATUS_TOP_CARD.formatted(getEmojiWithName(this.c, game.getTopCard())));
 			this.status.append(FORMAT_PLAYER_STATUS_BOT
-				.formatted(next.getName(), next.getHand().getSize(), getPileEmote(this.c),
+				.formatted(next.getName(), next.getHand().getSize(), getPileEmoji(this.c),
 						   next.getHand().getSize() == 1 ? " __**UNO!**__" : ""));
 		}
 
@@ -169,17 +170,18 @@ public class UnoCommand extends BettableGame {
 			return inputColor();
 		}
 
+		@SuppressWarnings("null")
 		private void reportChooseColor(@Nonnull UnoGame game) {
 			this.e.clearFields();
 			appendFeed();
 			var top = game.getDiscard().getTop();
-			this.e.addFieldf(true, "Top card", getEmoteWithName(this.c, top));
+			this.e.addFieldf(true, "Top card", getEmojiWithName(this.c, top));
 
 			this.e.addField("Your cards",
 							this.getHand()
 								.getCards()
 								.stream()
-								.map(card -> getEmoteWithName(this.c, card))
+								.map(card -> getEmojiWithName(this.c, card))
 								.collect(joining(" ")),
 							true);
 			this.e.addField("Choose a color", FORMAT_COLOR_CHOOSE, false);
@@ -212,7 +214,7 @@ public class UnoCommand extends BettableGame {
 		@Override
 		public boolean shouldPlayDrawnCard(UnoGame game, UnoCard drawnCard) {
 			return this.c.confirmf(true, FORMAT_PLAYER_CONFIRM_PLACE_DRAWN, LITHIUM,
-								   getEmoteWithName(this.c, drawnCard));
+								   getEmojiWithName(this.c, drawnCard));
 		}
 
 		@SuppressWarnings("null")
@@ -224,16 +226,16 @@ public class UnoCommand extends BettableGame {
 
 		@Nonnull
 		@SuppressWarnings("null")
-		private static String getEmoteWithName(BettableGameContext c, UnoCard card) {
-			return "%s %s"
-				.formatted(c.shredder().getEmojiResource(card.toString().toLowerCase().replace(" ", ""), MISSING_EMOJI),
-						   card);
+		private static String getEmojiWithName(BettableGameContext c, UnoCard card) {
+			return c.shredder()
+				.getEmojiResource(card.toString().toLowerCase().replace(" ", ""), MISSING_EMOJI)
+				.getFormatted() + " " +
+				card;
 		}
 
 		@Nonnull
-		@SuppressWarnings("null")
-		private static String getPileEmote(BettableGameContext c) {
-			return c.shredder().getEmojiResource("pile", MISSING_EMOJI);
+		private static String getPileEmoji(BettableGameContext c) {
+			return c.shredder().getEmojiResource("pile", MISSING_EMOJI).getFormatted();
 		}
 
 	}

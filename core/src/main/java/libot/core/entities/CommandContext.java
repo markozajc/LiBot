@@ -10,6 +10,7 @@ import static net.dv8tion.jda.api.Permission.*;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.concurrent.*;
 
 import javax.annotation.*;
@@ -29,11 +30,17 @@ import libot.utils.ParseUtils.Prefix;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.MessageEmbed.Footer;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.unions.*;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.*;
 import net.dv8tion.jda.api.managers.AudioManager;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.dv8tion.jda.api.utils.AttachmentOption;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.*;
 
 public class CommandContext {
 
@@ -41,15 +48,15 @@ public class CommandContext {
 
 	@Nonnull private static final CanceledException CANCELED = new CanceledException();
 
-	@Nonnull private final GuildMessageReceivedEvent event;
+	@Nonnull private final MessageReceivedEvent event;
 	@Nullable private Message reference;
 	@Nonnull private final Parameters parameters;
 	@Nonnull private final Command command;
 	@Nonnull private final BotContext botContext;
 	@Nullable private EventUtils waiter;
 
-	public CommandContext(@Nonnull GuildMessageReceivedEvent event, @Nonnull Command command,
-						  @Nonnull BotContext botContext, @Nonnull Prefix prefix) {
+	public CommandContext(@Nonnull MessageReceivedEvent event, @Nonnull Command command, @Nonnull BotContext botContext,
+						  @Nonnull Prefix prefix) {
 		this.event = event;
 		this.command = command;
 		this.botContext = botContext;
@@ -65,8 +72,13 @@ public class CommandContext {
 	}
 
 	@Nonnull
-	public TextChannel getChannel() {
+	public MessageChannelUnion getChannel() {
 		return this.event.getChannel();
+	}
+
+	@Nonnull
+	public ChannelType getChannelType() {
+		return this.event.getChannelType();
 	}
 
 	@Nonnull
@@ -93,7 +105,7 @@ public class CommandContext {
 	}
 
 	@Nonnull
-	public GuildMessageReceivedEvent getEvent() {
+	public MessageReceivedEvent getEvent() {
 		return this.event;
 	}
 
@@ -149,7 +161,7 @@ public class CommandContext {
 	}
 
 	@Nullable
-	public VoiceChannel getConnectedVChannel() {
+	public AudioChannelUnion getConnectedAChannel() {
 		return getAudioManager().getConnectedChannel();
 	}
 
@@ -297,7 +309,10 @@ public class CommandContext {
 	}
 
 	public boolean isChannelNSFW() {
-		return getChannel().isNSFW();
+		if (getChannel() instanceof TextChannel textChannel)
+			return textChannel.isNSFW();
+		else
+			return false;
 	}
 
 	@Nonnull
@@ -337,7 +352,7 @@ public class CommandContext {
 			.orElse(getConfig().defaultPrefix());
 	}
 
-	public void messageSysadmins(@Nonnull Message message) {
+	public void messageSysadmins(@Nonnull MessageCreateData message) {
 		stream(getConfig().sysadminIds()).forEach(i -> shredder().sendPrivateMessage(i, message));
 	}
 
@@ -381,7 +396,10 @@ public class CommandContext {
 	}
 
 	public boolean hasChannelPermission(@Nonnull Permission... permissions) {
-		return getSelfMember().hasPermission(getChannel(), permissions);
+		if (getChannel() instanceof GuildChannel guildChannel)
+			return getSelfMember().hasPermission(guildChannel, permissions);
+		else
+			return true;
 	}
 
 	public boolean hasGuildPermission(@Nonnull Permission... permissions) {
@@ -389,7 +407,10 @@ public class CommandContext {
 	}
 
 	public boolean hasAuthorChannelPermission(@Nonnull Permission... permissions) {
-		return getMember().hasPermission(getChannel(), permissions);
+		if (getChannel() instanceof GuildChannel guildChannel)
+			return getMember().hasPermission(guildChannel, permissions);
+		else
+			return true;
 	}
 
 	public boolean hasAuthorGuildPermission(@Nonnull Permission... permissions) {
@@ -406,7 +427,7 @@ public class CommandContext {
 	public void ensureChannelPermission(@Nonnull Permission... permissions) {
 		for (var perm : permissions) {
 			if (!hasChannelPermission(perm)) {
-				throw new InsufficientPermissionException(getChannel(), perm);
+				throw new InsufficientPermissionException((GuildChannel) getChannel(), perm);
 			}
 		}
 	}
@@ -433,17 +454,9 @@ public class CommandContext {
 	// ===============* react *===============
 
 	@Nonnull
-	public CompletableFuture<Void> react(@Nonnull Emote emote) {
+	public CompletableFuture<Void> react(@Nonnull Emoji emoji) {
 		if (canReact())
-			return getMessage().addReaction(emote).submit();
-		else
-			return permissionExceptionFuture(MESSAGE_ADD_REACTION);
-	}
-
-	@Nonnull
-	public CompletableFuture<Void> react(@Nonnull String unicode) {
-		if (canReact())
-			return getMessage().addReaction(unicode).submit();
+			return getMessage().addReaction(emoji).submit();
 		else
 			return permissionExceptionFuture(MESSAGE_ADD_REACTION);
 	}
@@ -451,16 +464,17 @@ public class CommandContext {
 	// ===============* reply *===============
 
 	@Nonnull
-	public CompletableFuture<Message> reply(@Nonnull Message message) {
+	public CompletableFuture<Message> reply(@Nonnull MessageCreateData message) {
 		if (canTalk())
 			return replyraw(message).submit();
 		else {
-			return permissionExceptionFuture(MESSAGE_WRITE);
+			return permissionExceptionFuture(MESSAGE_SEND);
 		}
 	}
 
 	@Nonnull
-	public CompletableFuture<Message> reply(@Nonnull MessageBuilder builder) {
+	@SuppressWarnings("resource")
+	public CompletableFuture<Message> reply(@Nonnull MessageCreateBuilder builder) {
 		return reply(builder.build());
 	}
 
@@ -469,7 +483,7 @@ public class CommandContext {
 		if (canTalk())
 			return replyMessage(getChannel().sendMessage(message)).submit();
 		else {
-			return permissionExceptionFuture(MESSAGE_WRITE);
+			return permissionExceptionFuture(MESSAGE_SEND);
 		}
 	}
 
@@ -478,7 +492,7 @@ public class CommandContext {
 		if (canTalk())
 			return replyMessage(getChannel().sendMessageEmbeds(embed)).submit();
 		else {
-			return permissionExceptionFuture(MESSAGE_WRITE);
+			return permissionExceptionFuture(MESSAGE_SEND);
 		}
 	}
 
@@ -487,7 +501,7 @@ public class CommandContext {
 		if (canTalk())
 			return replyMessage(getChannel().sendMessageEmbeds(builder.build())).submit();
 		else
-			return permissionExceptionFuture(MESSAGE_WRITE);
+			return permissionExceptionFuture(MESSAGE_SEND);
 	}
 
 	@Nonnull
@@ -512,12 +526,13 @@ public class CommandContext {
 	// ===============* replyraw *===============
 
 	@Nonnull
-	public MessageAction replyraw(@Nonnull Message message) {
+	public MessageCreateAction replyraw(@Nonnull MessageCreateData message) {
 		return replyMessage(getChannel().sendMessage(message));
 	}
 
 	@Nonnull
-	public MessageAction replyraw(@Nonnull MessageBuilder builder) {
+	@SuppressWarnings("resource")
+	public MessageCreateAction replyraw(@Nonnull MessageCreateBuilder builder) {
 		return replyraw(builder.build());
 	}
 
@@ -584,12 +599,16 @@ public class CommandContext {
 		return direct(null, message, null, color);
 	}
 
-	// ===============* replyfile *===============
+	// ===============* replyFiles *===============
 
 	@Nonnull
-	public CompletableFuture<Message> replyFile(@Nonnull byte[] data, @Nonnull String fileName,
-												@Nonnull AttachmentOption... options) {
-		return replyMessage(getChannel().sendFile(data, fileName, options)).submit();
+	public CompletableFuture<Message> replyFiles(@Nonnull FileUpload file, @Nonnull FileUpload... more) {
+		return replyFiles(concat(file, more));
+	}
+
+	@Nonnull
+	public CompletableFuture<Message> replyFiles(@Nonnull Collection<? extends FileUpload> files) {
+		return replyMessage(getChannel().sendFiles(files)).submit();
 	}
 
 	// ===============* directf *===============
@@ -643,8 +662,9 @@ public class CommandContext {
 
 	@Nonnull
 	@CheckReturnValue
+	@SuppressWarnings("resource")
 	public CommandException error(boolean ratelimit, @Nonnull String message) {
-		return new CommandException(new MessageBuilder(message), ratelimit);
+		return new CommandException(new MessageCreateBuilder().setContent(message).build(), ratelimit);
 	}
 
 	@Nonnull
@@ -655,14 +675,27 @@ public class CommandContext {
 
 	@Nonnull
 	@CheckReturnValue
-	public CommandException error(boolean ratelimit, @Nonnull MessageEmbed embed) {
-		return new CommandException(new MessageBuilder(embed), ratelimit);
+	@SuppressWarnings("resource")
+	public CommandException error(boolean ratelimit, @Nonnull Collection<MessageEmbed> embeds) {
+		return new CommandException(new MessageCreateBuilder().addEmbeds(embeds).build(), ratelimit);
 	}
 
 	@Nonnull
 	@CheckReturnValue
-	public CommandException error(@Nonnull MessageEmbed embed) {
-		return error(false, embed);
+	public CommandException error(boolean ratelimit, @Nonnull MessageEmbed embed, @Nonnull MessageEmbed... more) {
+		return error(ratelimit, concat(embed, more));
+	}
+
+	@Nonnull
+	@CheckReturnValue
+	public CommandException error(@Nonnull Collection<MessageEmbed> embeds) {
+		return error(false, embeds);
+	}
+
+	@Nonnull
+	@CheckReturnValue
+	public CommandException error(@Nonnull MessageEmbed embed, @Nonnull MessageEmbed... more) {
+		return error(false, embed, more);
 	}
 
 	@Nonnull
@@ -1090,9 +1123,9 @@ public class CommandContext {
 	}
 
 	@Nonnull
-	private MessageAction replyMessage(MessageAction message) {
-		return message.allowedMentions(emptyList())
-			.reference(this.reference != null ? this.reference : getMessage())
+	private MessageCreateAction replyMessage(MessageCreateAction message) {
+		return message.setAllowedMentions(emptyList())
+			.setMessageReference(this.reference != null ? this.reference : getMessage())
 			.mentionRepliedUser(false);
 	}
 

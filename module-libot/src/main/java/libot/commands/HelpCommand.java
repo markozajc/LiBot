@@ -5,6 +5,7 @@ import static libot.commands.AboutCommand.LINKS;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.*;
 import static libot.module.ModuleLibotShared.sendUsage;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Random;
@@ -43,6 +44,7 @@ public class HelpCommand extends Command {
 			list(c);
 	}
 
+	@SuppressWarnings("null")
 	private static void list(@Nonnull CommandContext c) {
 		var e = new EmbedPrebuilder("LiBot manual", LITHIUM);
 		e.setFooter("LiBot v" + VERSION, c.getSelfAvatar());
@@ -56,9 +58,7 @@ public class HelpCommand extends Command {
 
 			b.setLength(0);
 			for (Command cmd : c.getCommands().getInCategory(category)) {
-				b.append("`");
-				b.append(rightPad(cmd.getName(), maxLength));
-				b.append("` ");
+				b.append(monospace(rightPad(cmd.getName(), maxLength)));
 				b.append(abbreviate(HYPERLINK_REGEX.matcher(cmd.getInfo().replace("\n", "")).replaceAll("$1"),
 									LIST_MAX_WIDTH - maxLength));
 				b.append("\n");

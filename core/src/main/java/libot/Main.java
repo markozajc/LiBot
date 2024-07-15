@@ -11,6 +11,7 @@ import static libot.utils.ReflectionUtils.scanClasspath;
 import static net.dv8tion.jda.api.OnlineStatus.*;
 import static net.dv8tion.jda.api.requests.GatewayIntent.*;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.*;
+import static net.dv8tion.jda.api.utils.cache.CacheFlag.SCHEDULED_EVENTS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
@@ -19,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-import javax.security.auth.login.LoginException;
 
 import org.slf4j.Logger;
 
@@ -38,7 +38,8 @@ import libot.listeners.BotEventListener;
 import libot.management.ManagementServer;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -60,14 +61,15 @@ public class Main {
 		LOG.info("Creating shreds");
 		var ewl = new EventWaiterListener();
 
-		var builder =
-			JDABuilder.create(GUILD_MEMBERS, GUILD_EMOJIS, GUILD_VOICE_STATES, GUILD_MESSAGES, GUILD_MESSAGE_REACTIONS)
-				.enableCache(VOICE_STATE, EMOTE, MEMBER_OVERRIDES)
-				.disableCache(ACTIVITY, CLIENT_STATUS, ONLINE_STATUS)
-				.setChunkingFilter(ChunkingFilter.ALL)
-				.addEventListeners(ewl)
-				.setStatus(IDLE)
-				.setAudioSendFactory(new NativeAudioSendFactory());
+		var builder = JDABuilder
+			.create(GUILD_MEMBERS, GUILD_EMOJIS_AND_STICKERS, GUILD_VOICE_STATES, GUILD_MESSAGES, MESSAGE_CONTENT,
+					GUILD_MESSAGE_REACTIONS)
+			.enableCache(VOICE_STATE, EMOJI, MEMBER_OVERRIDES)
+			.disableCache(ACTIVITY, CLIENT_STATUS, ONLINE_STATUS, SCHEDULED_EVENTS)
+			.setChunkingFilter(ChunkingFilter.ALL)
+			.addEventListeners(ewl)
+			.setStatus(IDLE)
+			.setAudioSendFactory(new NativeAudioSendFactory());
 
 		var shreds = startShreds(builder);
 		if (shreds.isEmpty())
@@ -162,7 +164,7 @@ public class Main {
 
 					});
 					return new Shred(jda, name);
-				} catch (LoginException le) {
+				} catch (InvalidTokenException le) {
 					LOG.error("Failed to log into shred {}", name);
 					LOG.error("", le);
 					return null;

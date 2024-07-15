@@ -9,7 +9,7 @@ import libot.core.entities.*;
 import libot.core.processes.ProcessManager;
 import libot.providers.CustomizationsProvider;
 import libot.utils.ParseUtils.Prefix;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class MessageListener extends ListenerAdapter {
@@ -21,8 +21,8 @@ public class MessageListener extends ListenerAdapter {
 	}
 
 	@Override
-	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		if (event.getAuthor().isBot())
+	public void onMessageReceived(MessageReceivedEvent event) {
+		if (!event.isFromGuild() || event.getAuthor().isBot())
 			return;
 
 		var guild = event.getGuild();
