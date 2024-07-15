@@ -1,12 +1,13 @@
 package libot.commands;
 
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.DAYS;
 import static libot.core.Constants.FAILURE;
 import static libot.core.FinderUtils.*;
 import static net.dv8tion.jda.api.Permission.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
@@ -14,6 +15,7 @@ import libot.core.entities.CommandContext;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 
 final class ModerationCommandUtils {
 
@@ -63,13 +65,13 @@ final class ModerationCommandUtils {
 	public enum ModAction {
 
 		KICK(Member::kick, KICK_MEMBERS, "kicked out of"),
-		BAN((t, r) -> t.ban(0, r), BAN_MEMBERS, "banned from");
+		BAN(t -> t.ban(0, DAYS), BAN_MEMBERS, "banned from");
 
-		@Nonnull private final BiFunction<Member, String, RestAction<Void>> action;
+		@Nonnull private final Function<Member, AuditableRestAction<Void>> action;
 		@Nonnull private final Permission permission;
 		@Nonnull private final String verb;
 
-		ModAction(@Nonnull BiFunction<Member, String, RestAction<Void>> action, @Nonnull Permission permission,
+		ModAction(@Nonnull Function<Member, AuditableRestAction<Void>> action, @Nonnull Permission permission,
 				  @Nonnull String verb) {
 			this.action = action;
 			this.permission = permission;
@@ -77,9 +79,8 @@ final class ModerationCommandUtils {
 		}
 
 		@Nonnull
-		@SuppressWarnings("null")
 		public RestAction<Void> act(@Nonnull Member target, @Nonnull String reason) {
-			return this.action.apply(target, reason);
+			return this.action.apply(target).reason(reason);
 		}
 
 		@Nonnull
