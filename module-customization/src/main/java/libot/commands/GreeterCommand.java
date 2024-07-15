@@ -110,6 +110,14 @@ public class GreeterCommand extends Command {
 	}
 
 	public static void test(@Nonnull CommandContext c, @Nonnull EventType type, @Nonnull GreeterConfiguration conf) {
+		var message = switch (type) {
+			case WELCOME -> conf.getWelcomeMessage();
+			case GOODBYE -> conf.getGoodbyeMessage();
+		};
+
+		if (message == null)
+			throw c.errorf(FORMAT_TEST_MISSING, DISABLED, type.toString().toLowerCase());
+
 		var ch = (MessageChannelUnion) c.getGuild()
 			.getChannelCache()
 			.getElementById(conf.getChannelType(), conf.getChannelId());
@@ -122,14 +130,6 @@ public class GreeterCommand extends Command {
 				throw c.cancel();
 			}
 		}
-
-		var message = switch (type) {
-			case WELCOME -> conf.getWelcomeMessage();
-			case GOODBYE -> conf.getGoodbyeMessage();
-		};
-
-		if (message == null)
-			throw c.errorf(FORMAT_TEST_MISSING, DISABLED, type.toString().toLowerCase());
 
 		ch.sendMessage(GreeterListener.parseMessage(message, c.getUser(), c.getGuild())).queue();
 		c.replyf(FORMAT_TEST_OK, SUCCESS, type.toString().toLowerCase(), ch.getAsMention());

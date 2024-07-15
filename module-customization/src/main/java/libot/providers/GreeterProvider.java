@@ -62,7 +62,7 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 	@Nonnull
 	@SuppressWarnings("null")
 	public GreeterConfiguration get(long guildId) {
-		return this.data.getOrDefault(guildId, new GreeterConfiguration());
+		return this.data.computeIfAbsent(guildId, id -> new GreeterConfiguration());
 	}
 
 	public void remove(long guildId) {
