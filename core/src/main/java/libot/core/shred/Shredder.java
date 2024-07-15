@@ -23,7 +23,7 @@ import com.google.common.cache.Cache;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.channel.*;
 import net.dv8tion.jda.api.entities.channel.concrete.*;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
@@ -160,9 +160,14 @@ public class Shredder {
 		return getJDAObject(j -> j.getChannelById(type, id)).orElse(null);
 	}
 
+	@Nullable
+	public Channel getChannelById(@Nonnull ChannelType type, long id) {
+		return getJDAObject(j -> j.getChannelCache().getElementById(type, id)).orElse(null);
+	}
+
 	@Nonnull
 	@SuppressWarnings("null")
-	private <T> Optional<T> getJDAObject(Function<JDA, T> getter) {
+	public <T> Optional<T> getJDAObject(Function<JDA, T> getter) {
 		return this.shreds.stream().map(Shred::jda).map(getter).filter(Objects::nonNull).findAny();
 	}
 
