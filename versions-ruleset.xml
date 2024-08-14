@@ -6,7 +6,7 @@
 	<rules>
 		<rule groupId="*">
 			<ignoreVersions>
-				<ignoreVersion type="regex">.*(-|\.)(beta|alpha|RC|M)(\.)?\d+$</ignoreVersion>
+				<ignoreVersion type="regex">.*[-.](?:beta|alpha|RC|M)[-.]?\d+$</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 		<rule groupId="commons-net">
