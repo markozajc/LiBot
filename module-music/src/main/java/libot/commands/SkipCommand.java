@@ -22,11 +22,12 @@ public class SkipCommand extends Command {
 		if (amount < 1)
 			throw c.error("Can not skip backwards", FAILURE);
 
-		var track = getMusicManager(vc).getScheduler().skipTrack(amount);
+		var sched = getMusicManager(vc).getScheduler();
+		var track = sched.skipTrack(amount);
 
 		if (track != null)
-			c.replyf(FORMAT_PLAY_TRACK, SUCCESS, escape(track.getInfo().title, true), track.getInfo().uri,
-					 escape(track.getInfo().author, true));
+			c.replyf(FORMAT_PLAY_TRACK, SUCCESS, sched.isLoop() ? EMOJI_LOOP : EMOJI_PLAYING,
+					 escape(track.getInfo().title, true), track.getInfo().uri, escape(track.getInfo().author, true));
 		else
 			c.react(ACCEPT_EMOJI);
 	}
