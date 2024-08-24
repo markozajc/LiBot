@@ -338,8 +338,8 @@ public class ExceptionHandler {
 
 					private static void handleNumberFormatException(CommandContext c) {
 						if (c.canTalk())
-							c.replyf("// NOT A NUMBER //", """
-								LiBot was expecting a number, but got text. Correct usage:
+							c.replyf("// NOT AN INTEGER //", """
+								LiBot was expecting an integer input, but got text. Correct usage:
 								%s
 								""", WARN, c.getCommandUsage());
 					}
