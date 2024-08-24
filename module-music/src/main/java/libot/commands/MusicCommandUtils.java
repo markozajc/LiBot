@@ -37,6 +37,9 @@ class MusicCommandUtils {
 
 	static final String YOUTUBE_URL_PREFIX = "https://www.youtube.com/watch?v=";
 
+	static final String EMOJI_PLAYING = "\u25B6\uFE0F";
+	static final String EMOJI_LOOP = "\uD83D\uDD01";
+
 	private static final String FORMAT_NOTHING_PLAYING = """
 		Play a track with `%s [track's name]` or `%s [url]`!""";
 	private static final String FORMAT_TITLE_PICKER = """
@@ -44,10 +47,7 @@ class MusicCommandUtils {
 	private static final String FORMAT_FOOTER_PICKER = """
 		Please type in a track's index (the bold number) or EXIT to abort""";
 	public static final String FORMAT_PLAY_TRACK = """
-		\u25B6 Now playing: **[%s](%s)** by _%s_.""";
-	public static final String FORMAT_QUEUE_TRACK = """
-		\u23EC Put **[%s](%s)** by _%s_ into queue.
-		*Currently playing: **[%s](%s)**.*""";
+		%s Now playing: **[%s](%s)** by _%s_.""";
 	static final String FORMAT_QUEUE_FULL = """
 		This track has not been added to the queue because the queue may not exceed %d elements!""";
 	private static final String FORMAT_URL_NOT_FOUND = """
@@ -184,8 +184,10 @@ class MusicCommandUtils {
 			this.lock.send(null);
 
 			var info = track.getInfo();
-			this.manager.getScheduler().queueCallback(track, () -> {
-				var a = this.c.replyf("Started playing", FORMAT_PLAY_TRACK, SUCCESS, escape(info.title, true), info.uri,
+			var sched = this.manager.getScheduler();
+			sched.queueCallback(track, () -> {
+				var a = this.c.replyf("Started playing", FORMAT_PLAY_TRACK, SUCCESS,
+									  sched.isLoop() ? EMOJI_LOOP : EMOJI_PLAYING, escape(info.title, true), info.uri,
 									  escape(info.author, true));
 				return e -> a.thenAccept(m -> m.editMessageEmbeds(getFailureEmbed(e)).queue());
 			}, () -> { // NOSONAR
@@ -197,8 +199,11 @@ class MusicCommandUtils {
 					playingUri = playing.getInfo().uri;
 				}
 
-				this.c.replyf("Track queued", FORMAT_QUEUE_TRACK, SUCCESS, escape(info.title, true), info.uri,
-							  escape(info.author, true), escape(playingTitle, true), playingUri);
+				this.c.replyf("Track queued", """
+					\u23EC Put **[%s](%s)** by _%s_ into queue.
+					*Currently %s: **[%s](%s)**.*""", SUCCESS, escape(info.title, true), info.uri,
+							  escape(info.author, true), sched.isLoop() ? "looping" : "playing",
+							  escape(playingTitle, true), playingUri);
 			}, () -> { // NOSONAR
 				this.c.replyf("Queue is full", FORMAT_QUEUE_FULL, FAILURE, QUEUE_MAX_SIZE);
 			});
