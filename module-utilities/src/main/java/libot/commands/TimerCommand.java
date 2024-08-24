@@ -27,7 +27,7 @@ public class TimerCommand extends Command {
 			throw c.error(FORMAT_NEGATIVE_DURATION, FAILURE);
 
 		long absTime = currentTimeMillis() + time;
-		var timer = new UserTimer(c.getUserIdLong(), c.params().getOrDefault(1, "Beep, beep."), absTime);
+		var timer = new UserTimer(c.params().getOrDefault(1, null), absTime, c);
 		c.provider(TimerProvider.class).register(timer);
 
 		c.replyf(FORMAT_SUCCESS, SUCCESS, formatDurationWords(time, true, true), DATE_TIME_LONG.format(absTime));
