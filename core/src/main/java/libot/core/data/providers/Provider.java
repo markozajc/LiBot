@@ -83,7 +83,7 @@ public abstract class Provider<T> {
 	public final void load() {
 		try {
 			var json = getDataManager().get(this.dataKey);
-			if (json != null && (this.data = constructData(json)) != null)
+			if (json != null && !json.equals("null") && (this.data = constructData(json)) != null)
 				onDataLoaded();
 			else
 				this.data = createEmptyData();
