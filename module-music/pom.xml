@@ -45,7 +45,7 @@
 		</dependency>
 		<dependency>
 			<groupId>dev.lavalink.youtube</groupId>
-			<artifactId>v2</artifactId>
+			<artifactId>common</artifactId>
 			<version>1.7.2</version>
 		</dependency>
 
