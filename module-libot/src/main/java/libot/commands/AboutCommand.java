@@ -21,14 +21,14 @@ public class AboutCommand extends Command {
 		Total of **%d** commands launched,
 		Currently playing music on **%d** guild%s.""";
 	private static final String FORMAT_DESCRIPTION = """
-		[LiBot](https://libot.eu.org/) is a Discord multi-purpose bot written by [Marko Zajc](https://zajc.eu.org/) in \
+		[LiBot](https://libot.eu.org/) is a Discord multi-purpose bot written by [Marko Zajc](https://zajc.tel/) in \
 		[Java](https://openjdk.java.net/) using [JDA](https://github.com/DV8FromTheWorld/JDA/).
 		%s""";
 	static final String LINKS = """
 		**[Get LiBot](https://libot.eu.org/get/)** - \
 		**[Website](https://libot.eu.org/)** - \
 		**[Support guild](https://discord.gg/asDUrbR)** - \
-		**[Source](https://git.zajc.eu.org/libot/)**""";
+		**[Source](https://git.zajc.tel/libot/)**""";
 
 	@Override
 	public void execute(CommandContext c) {

@@ -11,13 +11,13 @@ Building LiBot --------------
     Prerequisites:
        - Maven 3.2.5 or up (https://maven.apache.org/download.cgi)
        - JDK 17 or up (https://adoptium.net/)
-       - qalculate-helper (https://git.zajc.eu.org/libot/qalculate-helper.git,
+       - qalculate-helper (https://git.zajc.tel/libot/qalculate-helper.git,
          optional if you want *calculator from module-utilities to work)
 
     Building:
        Building LiBot should be rather easy:
        
-          $ git clone git://git.zajc.eu.org/libot/authoritative.git libot
+          $ git clone git://git.zajc.tel/libot/authoritative.git libot
           $ cd libot
           $ mvn clean package -DoutputLocation=/output/path
 
