@@ -26,8 +26,7 @@ public class SetPrefixCommand extends Command {
 			.permissions(MANAGE_SERVER)
 			.parameters(PREFIX)
 			.description("""
-				Changes LiBot's command prefix.""")
-			.build());
+				Changes LiBot's command prefix."""));
 	}
 
 	@Override

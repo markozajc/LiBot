@@ -25,8 +25,7 @@ public class DisableCommand extends Command {
 			.parameters(NAME)
 			.description("""
 				Disables a command or category. \
-				It will not be possible to use it until it is reenabled with the `enable` command.""")
-			.build());
+				It will not be possible to use it until it is reenabled with the `enable` command."""));
 	}
 
 	@Override

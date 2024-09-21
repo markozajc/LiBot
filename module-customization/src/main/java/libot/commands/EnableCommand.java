@@ -24,8 +24,7 @@ public class EnableCommand extends Command {
 			.permissions(MANAGE_SERVER)
 			.parameters(NAME)
 			.description("""
-				Enables a previously disabled command or category.""")
-			.build());
+				Enables a previously disabled command or category."""));
 	}
 
 	@Override

@@ -20,8 +20,7 @@ public class ShutdownCommand extends Command {
 	public ShutdownCommand() {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "shutdown")
 			.description("Shuts down the bot")
-			.parameters(EXIT_CODE)
-			.build());
+			.parameters(EXIT_CODE));
 	}
 
 	@Override

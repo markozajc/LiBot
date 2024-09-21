@@ -19,8 +19,7 @@ public class AboutCommand extends Command {
 	public AboutCommand() {
 		super(CommandMetadata.builder(LIBOT, "about")
 			.aliases("info", "botinfo", "stats")
-			.description("Displays information about the bot.")
-			.build());
+			.description("Displays information about the bot."));
 	}
 
 	public static final String LINKS = """

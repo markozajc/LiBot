@@ -39,8 +39,7 @@ public class KillProcessCommand extends Command {
 				- `C`hannel/`G`uild matches
 				- `U`ser matches
 				- Has custom `D`ata
-				- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`""")
-			.build());
+				- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`"""));
 	}
 
 	@Override

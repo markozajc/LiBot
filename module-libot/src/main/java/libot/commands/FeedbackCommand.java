@@ -18,8 +18,7 @@ public class FeedbackCommand extends Command {
 	public FeedbackCommand() {
 		super(CommandMetadata.builder(LIBOT, "feedback")
 			.ratelimit(60, TimeUnit.SECONDS)
-			.description("Sends feedback to LiBot's developers.")
-			.build());
+			.description("Sends feedback to LiBot's developers."));
 	}
 
 	private static final int MAIL_WRAP = 70;

@@ -18,8 +18,7 @@ public class GlobalEnableCommand extends Command {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "globalenable")
 			.aliases("genable")
 			.parameters(COMMAND)
-			.description("Enables a command globally.")
-			.build());
+			.description("Enables a command globally."));
 	}
 
 	@Override

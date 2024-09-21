@@ -30,8 +30,7 @@ public class AutoRoleCommand extends Command {
 				Once enabled, every newly joined member will assigned the chosen role.
 
 				Run with no parameters to troubleshoot AutoRole.
-				Run with `disable` as the parameter to disable AutoRole.""")
-			.build());
+				Run with `disable` as the parameter to disable AutoRole."""));
 	}
 
 	@Override

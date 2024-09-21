@@ -22,8 +22,8 @@ public abstract class Command {
 
 	@Nonnull private final CommandMetadata meta;
 
-	protected Command(@Nonnull CommandMetadata meta) {
-		this.meta = meta;
+	protected Command(@Nonnull CommandMetadata.Builder meta) {
+		this.meta = meta.build();
 	}
 
 	public abstract void execute(@Nonnull CommandContext c) throws Exception;
@@ -108,10 +108,7 @@ public abstract class Command {
 		u.append(escape(ec.getEffectivePrefix(), true));
 		u.append(getName());
 
-		var parameters = getParameters().parameters()
-			.sorted(Comparator.<Parameter>comparingInt(p -> p.isMandatory() ? 0 : 1)
-				.thenComparingInt(p -> p.getType().ordinal()))
-			.toList();
+		var parameters = getParameters().parameters().toList();
 
 		if (!parameters.isEmpty()) {
 			u.append(parameters.stream().map(Parameter::toString).collect(joining("__ __", " __", "__")));

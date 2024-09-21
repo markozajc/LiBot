@@ -18,7 +18,7 @@ public class ShredsCommand extends Command {
 		super(CommandMetadata.builder(LIBOT, "shreds").aliases("shredder").description("""
 			Displays status information on LiBot's shreds, \
 			sub-units of the bot that allow it to exceed the 100 hard-limit on guilds imposed by Discord through the \
-			bot verification and privileged intents requirements.""").build());
+			bot verification and privileged intents requirements."""));
 	}
 
 	@Override

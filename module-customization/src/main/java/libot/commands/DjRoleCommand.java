@@ -33,8 +33,7 @@ public class DjRoleCommand extends Command {
 				can play music regardless of this.
 
 				Run with no parameters to troubleshoot DJ role.
-				Run with `disable` as the parameter to unset the DJ role (allow everyone to use music commands).""")
-			.build());
+				Run with `disable` as the parameter to unset the DJ role (allow everyone to use music commands)."""));
 	}
 
 	@Override

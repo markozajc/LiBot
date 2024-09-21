@@ -33,8 +33,7 @@ public class GreeterCommand extends Command {
 				Subcommands:
 				- `set   ` sets the message that will be sent for the welcome/goodbye event
 				- `remove` removes the message
-				- `test  ` tests the event message by sending it as if you were joining/leaving""")
-			.build());
+				- `test  ` tests the event message by sending it as if you were joining/leaving"""));
 	}
 
 	private static final String FORMAT_NOT_SET = "A %s message has not yet been configured for this guild.";

@@ -31,8 +31,7 @@ public class EvaluateCommand extends Command {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "evaluate")
 			.aliases("eval")
 			.parameters(SCRIPT)
-			.description("Runs a Groovy script.")
-			.build());
+			.description("Runs a Groovy script."));
 	}
 
 	private static final Logger LOG = getLogger(EvaluateCommand.class);

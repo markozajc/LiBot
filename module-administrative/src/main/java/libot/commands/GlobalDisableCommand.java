@@ -18,8 +18,7 @@ public class GlobalDisableCommand extends Command {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "globaldisable")
 			.aliases("gdisable")
 			.parameters(COMMAND)
-			.description("Disables a command globally.")
-			.build());
+			.description("Disables a command globally."));
 	}
 
 	@Override

@@ -27,13 +27,9 @@ public class HelpCommand extends Command {
 	@Nonnull private static final Parameter COMMAND = optional(POSITIONAL, "command", "The command to describe");
 
 	public HelpCommand() {
-		super(CommandMetadata.builder(LIBOT, "help")
-			.aliases("man", "manual")
-			.parameters(COMMAND)
-			.description("""
-				Direct-messages you a list of all commands. \
-				To get detailed information about a command, use help along with the command's name as a parameter.""")
-			.build());
+		super(CommandMetadata.builder(LIBOT, "help").aliases("man", "manual").parameters(COMMAND).description("""
+			Direct-messages you a list of all commands. \
+			To get detailed information about a command, use help along with the command's name as a parameter."""));
 	}
 
 	private static final int LIST_MAX_WIDTH = 70;

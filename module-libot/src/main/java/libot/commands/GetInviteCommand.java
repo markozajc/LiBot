@@ -11,8 +11,7 @@ public class GetInviteCommand extends Command {
 	public GetInviteCommand() {
 		super(CommandMetadata.builder(LIBOT, "getinvite")
 			.aliases("add", "invite", "getlibot")
-			.description("Displays LiBot's invite link.")
-			.build());
+			.description("Displays LiBot's invite link."));
 	}
 
 	@Override
