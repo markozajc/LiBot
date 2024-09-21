@@ -41,6 +41,7 @@
 		<maven.compiler.release>17</maven.compiler.release>
 		<logback.version>1.5.7</logback.version>
 		<eclipsecollections.version>11.1.0</eclipsecollections.version>
+		<junit.version>5.10.2</junit.version>
 	</properties>
 
 	<modules>
@@ -201,7 +202,22 @@
 			<url>https://m2.dv8tion.net/releases</url>
 		</repository>
 	</repositories>
-
+	
+	<dependencies>
+		<!-- Unit Tests -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 	<dependencyManagement>
 		<dependencies>
@@ -417,7 +433,7 @@
 				<version>4.8.6</version>
 				<scope>provided</scope>
 			</dependency>
-
+			
 		</dependencies>
 	</dependencyManagement>
 

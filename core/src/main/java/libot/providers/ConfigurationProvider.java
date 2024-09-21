@@ -18,17 +18,17 @@ public class ConfigurationProvider extends Provider<BotConfiguration> {
 
 	public static class BotConfiguration {
 
-		private final Set<Integer> disabledCommands;
+		private final Set<String> disabledCommands;
 
 		public BotConfiguration() {
 			this(new HashSet<>());
 		}
 
-		public BotConfiguration(Set<Integer> disabledCommands) {
+		public BotConfiguration(Set<String> disabledCommands) {
 			this.disabledCommands = synchronizedSet(disabledCommands);
 		}
 
-		public Set<Integer> getDisabledCommands() {
+		public Set<String> getDisabledCommands() {
 			return this.disabledCommands;
 		}
 

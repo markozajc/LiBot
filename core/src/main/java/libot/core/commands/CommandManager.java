@@ -6,9 +6,7 @@ import static libot.utils.ReflectionUtils.scanClasspath;
 
 import java.util.*;
 
-import javax.annotation.*;
-
-import org.apache.commons.lang3.ArrayUtils;
+import javax.annotation.Nonnull;
 
 public class CommandManager implements Iterable<Command> {
 
@@ -25,13 +23,13 @@ public class CommandManager implements Iterable<Command> {
 		this.commands = commands;
 	}
 
-	@Nullable
-	public Command get(@Nonnull String name) {
+	@Nonnull
+	@SuppressWarnings("null")
+	public Optional<Command> get(@Nonnull String name) {
 		var namel = name.toLowerCase();
 		return this.commands.stream()
-			.filter(cmd -> cmd.getName().equals(namel) || ArrayUtils.contains(cmd.getAliases(), namel))
-			.findAny()
-			.orElse(null);
+			.filter(cmd -> cmd.getName().equals(namel) || cmd.getAliases().contains(namel))
+			.findAny();
 	}
 
 	@Nonnull

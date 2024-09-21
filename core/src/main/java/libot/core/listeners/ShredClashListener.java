@@ -16,7 +16,7 @@ public class ShredClashListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildJoin(GuildJoinEvent event) {
-		this.bot.shredder().resolveClashes(event.getGuild());
+		this.bot.getShredder().resolveClashes(event.getGuild());
 	}
 
 }

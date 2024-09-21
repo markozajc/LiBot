@@ -2,7 +2,6 @@ package libot.core.commands.exceptions;
 
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
-import static libot.core.commands.exceptions.ExceptionHandler.ThrowableHandler.handleThrowable;
 import static libot.core.ratelimits.RatelimitsManager.getRatelimits;
 import static net.dv8tion.jda.api.Permission.MESSAGE_EMBED_LINKS;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
@@ -10,15 +9,17 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.*;
 import static org.apache.commons.text.WordUtils.capitalize;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.Arrays;
+import java.util.function.*;
 
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 
+import libot.core.argument.ArgumentParseException;
+import libot.core.commands.Command;
 import libot.core.commands.exceptions.runtime.*;
 import libot.core.commands.exceptions.startup.*;
-import libot.core.entities.CommandContext;
+import libot.core.entities.*;
 import libot.core.extensions.EmbedPrebuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
@@ -28,7 +29,36 @@ public class ExceptionHandler {
 
 	private static final Logger LOG = getLogger(ExceptionHandler.class);
 
-	public static final Throwable unpackThrowable(Throwable t) {
+	public static void handle(@Nonnull Throwable throwable, @Nonnull CommandContext ctx) {
+		handle(throwable, ctx.getCommand(), ctx);
+	}
+
+	public static void handle(@Nonnull Throwable throwable, @Nonnull Command command, @Nonnull EventContext ctx) {
+		var unpacked = unpackThrowable(throwable);
+		try {
+			var e = new ExceptionContext<>(throwable, command, ctx);
+			boolean handled = ThrowableHandler.handleThrowable(e);
+			if (!handled) {
+				reportException(e);
+
+				if (ctx.canTalk()) {
+					ctx.replyf("// FAILURE //", """
+						LiBot ran into an unknown error. If the issue persists, please report it via `%sfeedback`.""",
+							   FAILURE, ctx.getEffectivePrefix());
+				}
+			} else {
+				LOG.debug("Automatically handled an exception in {}", command.getName());
+			}
+
+			if (command.getRatelimit() != 0 && shouldRatelimit(unpacked))
+				getRatelimits(command).register(ctx.getUserIdLong());
+
+		} catch (Exception e) {
+			LOG.error("Got an exception while handling an error", e);
+		}
+	}
+
+	private static final Throwable unpackThrowable(Throwable t) {
 		Throwable unpacked = getRootCause(t);
 		if (unpacked == null)
 			return t;
@@ -36,85 +66,94 @@ public class ExceptionHandler {
 		return unpacked;
 	}
 
+	private static record ExceptionContext<T extends Throwable>(@Nonnull T ex, @Nonnull Command command,
+																@Nonnull EventContext ctx) {
+
+		@Nonnull
+		public String commandName() {
+			return this.command.getName();
+		}
+
+		public boolean canTalk() {
+			return this.ctx.canTalk();
+		}
+
+		public <E extends T> boolean runSpecialized(@Nonnull E specialized,
+													@Nonnull Predicate<ExceptionContext<E>> action) {
+			return action.test(specialize(specialized));
+		}
+
+		public <E extends T> boolean runSpecialized(@Nonnull E specialized,
+													@Nonnull Consumer<ExceptionContext<E>> action) {
+			action.accept(specialize(specialized));
+			return true;
+		}
+
+		@Nonnull
+		@SuppressWarnings("null")
+		private <E extends T> ExceptionContext<E> specialize(@Nonnull E specialized) {
+			if (specialized != this.ex)
+				throw new IllegalArgumentException("Can only specialize for the same throwable object");
+
+			return new ExceptionContext<>(specialized, this.command, this.ctx);
+		}
+
+	}
+
 	@SuppressWarnings("null")
-	public static void handle(CommandContext c, Throwable t) {
-		var unpacked = unpackThrowable(t);
-		try {
-			boolean handled = handleThrowable(c, unpacked);
-			if (!handled) {
-				reportException(c, t);
+	private static void reportException(@Nonnull ExceptionContext<Throwable> e) {
+		int maxTraceLength = Message.MAX_CONTENT_LENGTH - e.commandName().length() - 26;
+		var report = """
+			Failed to execute %s:```
+			%s```""".formatted(e.commandName(), abbreviate(getStackTrace(e.ex()), maxTraceLength));
 
-				if (c.canTalk())
-					c.replyf("// FAILURE //", """
-						LiBot ran into an unknown error. If the issue persists, please report it via `%sfeedback`.""",
-							 FAILURE, c.getEffectivePrefix());
-			} else {
-				LOG.debug("Automatically handled an exception in {}", c.getCommandName());
-			}
+		e.ctx().messageSysadmins(report);
 
-			if (c.getCommandRatelimit() != 0 && shouldRatelimit(unpacked))
-				getRatelimits(c.getCommand()).register(c.getUserIdLong());
-		} catch (Exception e) {
-			LOG.error("Got an exception while handling an error", e);
+		if (LOG.isErrorEnabled()) {
+			LOG.error("Unhandled exception in {}", e.commandName());
+			LOG.error("", e.ex());
 		}
 	}
 
-	@SuppressWarnings("null")
-	public static void reportException(@Nonnull CommandContext c, @Nonnull Throwable throwable) {
-		int maxTraceLength = Message.MAX_CONTENT_LENGTH - c.getCommandName().length() - 26;
-		var report = """
-			Failed to execute %s:```
-			%s```""".formatted(c.getCommandName(), abbreviate(getStackTrace(throwable), maxTraceLength));
-
-		c.messageSysadmins(report);
-
-		LOG.error("Unhandled exception in {}", c.getCommandName());
-		LOG.error("", throwable);
-	}
-
-	public static class ThrowableHandler {
+	private static class ThrowableHandler {
 
 		private ThrowableHandler() {}
 
-		public static boolean handleThrowable(CommandContext c, Throwable t) {
-			if (t instanceof Error e) {
-				return ErrorHandler.handleError(c, e);
+		public static boolean handleThrowable(ExceptionContext<Throwable> e) {
+			if (e.ex() instanceof Error s)
+				return e.runSpecialized(s, ErrorHandler::handleError);
 
-			} else if (t instanceof Exception ex) {
-				return PlainHandler.handleException(c, ex);
+			else if (e.ex() instanceof Exception s)
+				return e.runSpecialized(s, PlainHandler::handlePlain);
 
-			} else {
-				return true;
-			}
+			else
+				return false;
 		}
 
 		private static class ErrorHandler {
 
-			public static boolean handleError(CommandContext c, Error e) {
-				if (e instanceof VirtualMachineError vme) {
-					return VirtualMachineErrorHandler.handleVirtualMachineError(c, vme);
+			public static boolean handleError(ExceptionContext<Error> e) {
+				if (e.ex() instanceof VirtualMachineError s)
+					return e.runSpecialized(s, VirtualMachineErrorHandler::handleVirtualMachineError);
 
-				} else {
-					return false;
-				}
+				return false;
 			}
 
 			private static class VirtualMachineErrorHandler {
 
-				public static boolean handleVirtualMachineError(CommandContext c, VirtualMachineError e) {
-					if (e instanceof OutOfMemoryError) {
-						handleOutOfMemoryError(c);
-						return true;
+				public static boolean handleVirtualMachineError(ExceptionContext<VirtualMachineError> e) {
+					if (e.ex() instanceof OutOfMemoryError s)
+						return e.runSpecialized(s, VirtualMachineErrorHandler::handleOutOfMemoryError);
 
-					} else {
+					else
 						return false;
-					}
 				}
 
-				private static void handleOutOfMemoryError(CommandContext c) {
-					if (c.canTalk())
-						c.reply("// MEM LOW //",
-								"LiBot was unable to launch this command because it ran out of memory.", DISABLED);
+				private static void handleOutOfMemoryError(ExceptionContext<OutOfMemoryError> e) {
+					if (e.canTalk()) {
+						e.ctx().reply("// MEM LOW //", """
+							LiBot was unable to launch this command because it ran out of memory.""", DISABLED);
+					}
 				}
 
 			}
@@ -123,149 +162,156 @@ public class ExceptionHandler {
 
 		private static class PlainHandler {
 
-			public static boolean handleException(CommandContext c, Exception e) {
-				if (e instanceof InterruptedException) {
-					handleInterruptedException(c);
-					return true;
+			public static boolean handlePlain(ExceptionContext<Exception> e) {
+				if (e.ex() instanceof InterruptedException s)
+					return e.runSpecialized(s, PlainHandler::handleInterrupted);
 
-				} else if (e instanceof RuntimeException re) {
-					return RuntimeHandler.handleRuntimeException(c, re);
+				else if (e.ex() instanceof RuntimeException s)
+					return e.runSpecialized(s, RuntimeHandler::handleRuntime);
 
-				} else {
+				else
 					return false;
-				}
 			}
 
-			private static void handleInterruptedException(CommandContext c) {
-				if (c.canTalk())
-					c.replyf("%s has been killed.", DISABLED, capitalize(c.getCommandName()));
+			private static void handleInterrupted(ExceptionContext<InterruptedException> e) {
+				if (e.canTalk())
+					e.ctx().replyf("%s has been killed.", DISABLED, capitalize(e.commandName()));
 			}
 
 			private static class RuntimeHandler {
 
-				public static boolean handleRuntimeException(CommandContext c, RuntimeException e) {
-					if (e instanceof CommandException ce) {
-						CommandExceptionHandler.handleCommandException(c, ce);
-						return true;
+				public static boolean handleRuntime(ExceptionContext<RuntimeException> e) {
+					if (e.ex() instanceof ArgumentParseException s)
+						return e.runSpecialized(s, RuntimeHandler::handleArgumentParse);
 
-					} else if (e instanceof ContinuumException ce) {
-						handleContinuumException(c, ce);
+					else if (e.ex() instanceof CommandException s)
+						return e.runSpecialized(s, CommandExceptionHandler::handleCommand);
+
+					else if (e.ex() instanceof ErrorResponseException s)
+						return e.runSpecialized(s, RuntimeHandler::handleErrorResponse);
+
+					else if (e.ex() instanceof IllegalArgumentException s)
+						return e.runSpecialized(s, IllegalArgumentHandler::handleIllegalArgument);
+
+					else if (e.ex() instanceof PermissionException s)
+						return e.runSpecialized(s, PermissionExceptionHandler::handlePermission);
+
+					else
 						return false;
+				}
 
-					} else if (e instanceof ErrorResponseException ere) {
-						handleErrorResponseException(c, ere);
-						return true;
-
-					} else if (e instanceof IllegalArgumentException iae) {
-						return IllegalArgumentHandler.handleIllegalArgumentException(c, iae);
-
-					} else if (e instanceof PermissionException pe) {
-						return PermissionExceptionHandler.handlePermissionException(c, pe);
-
-					} else {
-						return false;
+				@SuppressWarnings("null")
+				private static void handleArgumentParse(ExceptionContext<ArgumentParseException> e) {
+					if (e.canTalk()) {
+						e.ctx().replyf("// USAGE INCORRECT //", """
+							%s
+							**Correct usage:** %s""", WARN, e.ex().getMessage(), e.command().getUsage(e.ctx()));
 					}
 				}
 
 				private static class CommandExceptionHandler {
 
-					public static void handleCommandException(CommandContext c, CommandException e) {
-						if (e instanceof CanceledException) {
-							// Nothing to do
+					public static void handleCommand(ExceptionContext<CommandException> e) {
+						boolean handled = false;
+						if (e.ex() instanceof CanceledException)
+							handled = true;
 
-						} else if (e instanceof NumberOverflowException) {
-							handleNumberOverflowException(c);
+						else if (e.ex() instanceof NumberOverflowException s)
+							handled = e.runSpecialized(s, CommandExceptionHandler::handleNumberOverflow);
 
-						} else if (e instanceof CommandStartupException cse) {
-							CommandStartupExceptionHandler.handleCommandStartupException(c, cse);
+						else if (e.ex() instanceof CommandStartupException s)
+							handled = e.runSpecialized(s, CommandStartupExceptionHandler::handleCommandStartup);
 
-						} else if (e instanceof TimeoutException) {
-							handleTimeoutException(c);
+						else if (e.ex() instanceof TimeoutException s)
+							handled = e.runSpecialized(s, CommandExceptionHandler::handleTimeout);
 
-						} else if (e instanceof TimeParseException) {
-							handleTimeParseException(c);
+						else if (e.ex() instanceof TimeParseException s)
+							handled = e.runSpecialized(s, CommandExceptionHandler::handleTimeParse);
 
-						} else {
-							e.sendMessage(c.getChannel());
-						}
+						if (!handled)
+							e.ex().sendMessage(e.ctx().getChannel());
 					}
 
-					private static void handleNumberOverflowException(CommandContext c) {
-						if (c.canTalk())
-							c.reply("// INTEGER OVERFLOW //", """
+					private static void handleNumberOverflow(ExceptionContext<NumberOverflowException> e) {
+						if (e.canTalk()) {
+							e.ctx().reply("// INTEGER OVERFLOW //", """
 								Looks like you provided a pretty large number. Don't do that.""", WARN);
+						}
 					}
 
 					private static class CommandStartupExceptionHandler {
 
-						public static void handleCommandStartupException(CommandContext c, CommandStartupException e) {
-							if (e instanceof CommandDisabledException cde) {
-								handleCommandDisabledException(c, cde);
+						public static boolean handleCommandStartup(ExceptionContext<CommandStartupException> e) {
+							if (e.ex() instanceof CommandDisabledException s)
+								return e.runSpecialized(s, CommandStartupExceptionHandler::handleCommandDisabled);
 
-							} else if (e instanceof CommandPermissionsException cpe) {
-								handleCommandPermissionsException(c, cpe);
+							else if (e.ex() instanceof CommandPermissionsException s)
+								return e.runSpecialized(s, CommandStartupExceptionHandler::handleCommandPermissions);
 
-							} else if (e instanceof NotDjException nde) {
-								handleNotDjException(c, nde);
+							else if (e.ex() instanceof NotDjException s)
+								return e.runSpecialized(s, CommandStartupExceptionHandler::handleNotDj);
 
-							} else if (e instanceof NotSysadminException) {
-								handleNotSysadminException(c);
+							else if (e.ex() instanceof NotSysadminException s)
+								return e.runSpecialized(s, CommandStartupExceptionHandler::handleNotSysadmin);
 
-							} else if (e instanceof RatelimitedException re) {
-								handleRatelimitedException(c, re);
+							else if (e.ex() instanceof RatelimitedException s)
+								return e.runSpecialized(s, CommandStartupExceptionHandler::handleRatelimited);
 
-							} else if (e instanceof UsageException) {
-								handleUsageException(c);
-							}
+							else
+								return false;
 						}
 
-						private static void handleCommandDisabledException(CommandContext c,
-																		   CommandDisabledException e) {
-							if (c.canTalk()) {
+						private static void handleCommandDisabled(ExceptionContext<CommandDisabledException> e) {
+							if (e.canTalk()) {
 								var b = new EmbedPrebuilder(DISABLED);
 								b.setTitle("// DISABLED //");
-								if (e.isGlobal()) {
+								if (e.ex().isGlobal()) {
 									b.setDescriptionf("""
 										%s has been globally disabled by LiBot developers. Please try again later""",
-													  c.getCommand().getName());
+													  e.commandName());
 
 								} else {
 									b.setDescriptionf("%s has been disabled by this guild's moderators.",
-													  c.getCommand().getName());
+													  e.commandName());
 								}
-								c.reply(b);
+								e.ctx().reply(b);
 							}
 						}
 
-						private static void handleCommandPermissionsException(CommandContext c,
-																			  CommandPermissionsException e) {
-							var missing = e.getPermissions().stream().map(Permission::getName).toList();
+						private static void handleCommandPermissions(ExceptionContext<CommandPermissionsException> e) {
+							var missing = e.ex().getPermissions().stream().map(Permission::getName).toList();
 
-							if (c.canTalk())
-								c.replyf("// ACCESS DENIED //", """
-									This action needs the following permission%s:
-									%s""", WARN, missing.size() == 1 ? "" : "s",
-										 missing.stream().collect(joining("\n", "- ", "")));
+							if (e.canTalk()) {
+								e.ctx()
+									.replyf("// ACCESS DENIED //", """
+										This action needs the following permission%s:
+										%s""", WARN, missing.size() == 1 ? "" : "s",
+											missing.stream().collect(joining("\n", "- ", "")));
+							}
 						}
 
-						private static void handleNotDjException(CommandContext c, NotDjException e) {
-							if (c.canTalk())
-								c.replyf("// DJ-ONLY //",
-										 "Only members of the DJ role (<@&%d>) can perform this action.", WARN,
-										 e.getDjRoleId());
+						private static void handleNotDj(ExceptionContext<NotDjException> e) {
+							if (e.canTalk()) {
+								e.ctx()
+									.replyf("// DJ-ONLY //",
+											"Only members of the DJ role (<@&%d>) can perform this action.", WARN,
+											e.ex().getDjRoleId());
+							}
 						}
 
-						private static void handleNotSysadminException(CommandContext c) {
-							if (c.canTalk())
-								c.replyf("// AUTHENTICATION REQUIRED //", """
-									This command is reserved for LiBot administrators and is probably not what you \
-									were looking for. To see the full list of commands, run `%shelp`""", DISABLED,
-										 c.getEffectivePrefix());
+						private static void handleNotSysadmin(ExceptionContext<NotSysadminException> e) {
+							if (e.canTalk()) {
+								e.ctx()
+									.replyf("// AUTHENTICATION REQUIRED //", """
+										This command is reserved for LiBot administrators and is probably not what you \
+										were looking for. To see the full list of commands, run `%shelp`""", DISABLED,
+											e.ctx().getEffectivePrefix());
+							}
 						}
 
-						private static void handleRatelimitedException(CommandContext c, RatelimitedException e) {
-							if (c.canTalk()) {
-								long seconds = e.getRemaining() / 1000;
+						private static void handleRatelimited(ExceptionContext<RatelimitedException> e) {
+							if (e.canTalk()) {
+								long seconds = e.ex().getRemaining() / 1000;
 								var time = new StringBuilder();
 								if (seconds == 0) {
 									time.append("less than a second");
@@ -275,113 +321,90 @@ public class ExceptionHandler {
 									if (seconds != 1)
 										time.append("s");
 								}
-								c.replyf("// RATELIMITED //", """
-									Not so fast! Please wait %s before running %s.""", DISABLED, time,
-										 c.getCommand().getName());
+								e.ctx().replyf("// RATELIMITED //", """
+									Not so fast! Please wait %s before running %s.""", DISABLED, time, e.commandName());
 							}
 						}
 
-						private static void handleUsageException(CommandContext c) {
-							if (c.canTalk())
-								c.replyf("// USAGE INCORRECT //", """
-									**Correct usage:** %s""", WARN, c.getCommandUsage());
-						}
-
 					}
 
-					private static void handleTimeoutException(CommandContext c) {
-						if (c.canTalk())
-							c.reply("Response time has run out.", DISABLED);
+					private static void handleTimeout(ExceptionContext<TimeoutException> e) {
+						if (e.canTalk())
+							e.ctx().reply("Response time has run out.", DISABLED);
 					}
 
-					private static void handleTimeParseException(CommandContext c) {
-						if (c.canTalk())
-							c.replyf("// TIME EXCEPTED //", """
+					private static void handleTimeParse(ExceptionContext<TimeParseException> e) {
+						if (e.canTalk()) {
+							e.ctx().replyf("// TIME EXCEPTED //", """
 								LiBot was expecting a \
 								[timestamp](https://libot.eu.org/doc/commands/parameter-types.html#time), but got \
-								something else. Correct usage:
-								%s""", WARN, c.getCommandUsage());
+								something else.""");
+						}
 					}
 
 				}
 
-				private static void handleContinuumException(CommandContext c, ContinuumException e) {
-					if (c.canTalk())
-						c.reply("""
-							**// ANOMALY DETECTED //**,
-							| LiBot has run into a non-fatal unpredictable state. Command execution can not \
-							proceed.""");
-					if (LOG.isErrorEnabled()) {
-						LOG.error("Unpredictable state: {}", Arrays.toString(e.getDebug()));
-						LOG.error("", e);
-					}
-				}
-
-				private static void handleErrorResponseException(CommandContext c, ErrorResponseException e) {
-					if (c.canTalk())
-						c.replyf("// DISCORD FAILED US //", """
+				private static void handleErrorResponse(ExceptionContext<ErrorResponseException> e) {
+					if (e.canTalk()) {
+						e.ctx().replyf("// DISCORD FAILED US //", """
 							Looks like Discord didn't like that for some reason.
-							Error: %s""", FAILURE, e.getMeaning());
+							Error: %s""", FAILURE, e.ex().getMeaning());
+					}
 				}
 
 				private static class IllegalArgumentHandler {
 
-					public static boolean handleIllegalArgumentException(CommandContext c, IllegalArgumentException e) {
-						if (e instanceof NumberFormatException) {
-							handleNumberFormatException(c);
-							return true;
+					public static boolean handleIllegalArgument(ExceptionContext<IllegalArgumentException> e) {
+						if (e.ex() instanceof NumberFormatException s)
+							return e.runSpecialized(s, IllegalArgumentHandler::handleNumberFormat);
 
-						} else {
+						else
 							return false;
-						}
 					}
 
-					private static void handleNumberFormatException(CommandContext c) {
-						if (c.canTalk())
-							c.replyf("// NOT AN INTEGER //", """
-								LiBot was expecting an integer input, but got text. Correct usage:
-								%s
-								""", WARN, c.getCommandUsage());
+					private static void handleNumberFormat(ExceptionContext<NumberFormatException> e) {
+						if (e.canTalk()) {
+							e.ctx().reply("// NOT AN INTEGER //", """
+								LiBot was expecting an integer input, but got text.""", WARN);
+						}
 					}
 				}
 
 				private static class PermissionExceptionHandler {
 
-					public static boolean handlePermissionException(CommandContext c, PermissionException e) {
-						if (e instanceof HierarchyException) {
-							handleHierarchyException(c);
-							return true;
+					public static boolean handlePermission(ExceptionContext<PermissionException> e) {
+						if (e.ex() instanceof HierarchyException s)
+							return e.runSpecialized(s, PermissionExceptionHandler::handleHierarchy);
 
-						} else if (e instanceof InsufficientPermissionException ipe) {
-							handleInsufficientPermissionException(c, ipe);
-							return true;
+						else if (e.ex() instanceof InsufficientPermissionException s)
+							return e.runSpecialized(s, PermissionExceptionHandler::handleInsufficientPermission);
 
-						} else {
+						else
 							return false;
-						}
 					}
 
-					private static void handleInsufficientPermissionException(CommandContext c,
-																			  InsufficientPermissionException e) {
-						if (e.getPermission() == MESSAGE_EMBED_LINKS) {
-							c.reply("""
+					private static void handleInsufficientPermission(ExceptionContext<InsufficientPermissionException> e) {
+						if (e.ex().getPermission() == MESSAGE_EMBED_LINKS) {
+							e.ctx().reply("""
 								```
 								// EMBED REQUIRED //
 								| You must grant LiBot the 'Embed Links' permission to perform this action.
 								```""");
 
-						} else if (c.canTalk()) {
-							c.replyf("// ACCESS DENIED //", """
-								You must grant LiBot the '%s' permission to perform this action.""", WARN,
-									 e.getPermission().getName());
+						} else if (e.canTalk()) {
+							e.ctx()
+								.replyf("// ACCESS DENIED //", """
+									You must grant LiBot the '%s' permission to perform this action.""", WARN,
+										e.ex().getPermission().getName());
 						}
 					}
 
-					private static void handleHierarchyException(CommandContext c) {
-						if (c.canTalk())
-							c.reply("// HIERARCHY ERROR //", """
+					private static void handleHierarchy(ExceptionContext<HierarchyException> e) {
+						if (e.canTalk()) {
+							e.ctx().reply("// HIERARCHY ERROR //", """
 								Looks like you tried to perform an audit action on a user that is in a role higher \
 								than LiBot, which you can't. Please move LiBot's role up or demote that user!""", WARN);
+						}
 					}
 
 				}

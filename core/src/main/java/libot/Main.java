@@ -96,7 +96,7 @@ public class Main {
 		var bot = new BotContext(config, commands, data, shredder, providers, ewl);
 		LOG.info("Context created, finalizing startup");
 
-		bot.cron().scheduleWithFixedDelay(providers::storeAll, 2, 2, MINUTES);
+		bot.getCron().scheduleWithFixedDelay(providers::storeAll, 2, 2, MINUTES);
 		getRuntime().addShutdownHook(new Thread(() -> stop(bot), "libot-shutdown"));
 
 		LOG.info("Loading providers");
@@ -136,11 +136,11 @@ public class Main {
 
 	public static void stop(@Nonnull BotContext bot) {
 		LOG.info("Shutting down providers");
-		bot.providers().shutdownAll();
+		bot.getProviders().shutdownAll();
 
 		LOG.info("Shutting down processes");
 		getProcesses().stream().forEach(ProcessManager::interrupt);
-		bot.shredder().getShreds().forEach(s -> {
+		bot.getShredder().getShreds().forEach(s -> {
 			LOG.info("Shutting down {}", s.name());
 			s.jda().shutdown();
 		});

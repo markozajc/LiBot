@@ -1,15 +1,15 @@
 package libot.core.listeners;
 
-import static libot.utils.ParseUtils.parseCommandName;
+import static java.util.regex.Pattern.*;
+
+import java.util.*;
+import java.util.regex.*;
 
 import javax.annotation.Nonnull;
 
-import libot.core.commands.Command;
 import libot.core.entities.*;
-import libot.core.processes.ProcessManager;
 import libot.providers.CustomizationsProvider;
-import libot.utils.ParseUtils.Prefix;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class MessageListener extends ListenerAdapter {
@@ -21,28 +21,61 @@ public class MessageListener extends ListenerAdapter {
 	}
 
 	@Override
+	@SuppressWarnings("null")
 	public void onMessageReceived(MessageReceivedEvent event) {
 		if (!event.isFromGuild() || event.getAuthor().isBot())
 			return;
 
-		var guild = event.getGuild();
+		var prefix = Prefix.resolve(event, this.bot);
+
 		var raw = event.getMessage().getContentRaw();
-		var prefixString = this.bot.provider(CustomizationsProvider.class)
-			.get(guild.getIdLong())
-			.getCustomPrefix()
-			.orElse(this.bot.config().defaultPrefix());
+		if (!prefix.isCommand(raw))
+			return;
 
+		var matcher = prefix.getCommandCallMatcher(raw);
+		if (matcher.matches())
+			throw new IllegalStateException("Message doesn't match the command regex, but isCommand() was true");
+
+		this.bot.getCommands()
+			.get(matcher.group(1))
+			.ifPresent(c -> c.run(new EventContext(this.bot, event), matcher.group(2)));
+	}
+
+	private static record Prefix(@Nonnull String string, long selfId) {
+
+		private static final Map<Prefix, Pattern> PATTERN_CACHE = new HashMap<>();
+
+		@Nonnull
 		@SuppressWarnings("null")
-		Prefix prefix = new Prefix(prefixString, event.getJDA().getSelfUser().getIdLong());
-		String commandName = parseCommandName(raw, prefix);
-		if (commandName == null)
-			return;
+		public static Prefix resolve(@Nonnull GenericMessageEvent event, @Nonnull BotContext bot) {
+			var prefixString = bot.getProvider(CustomizationsProvider.class)
+				.get(event.getGuild().getIdLong())
+				.getCustomPrefix()
+				.orElse(bot.getConfig().defaultPrefix());
 
-		Command command = this.bot.commands().get(commandName);
-		if (command == null)
-			return;
+			return new Prefix(prefixString, event.getJDA().getSelfUser().getIdLong());
+		}
 
-		ProcessManager.run(new CommandContext(event, command, this.bot, prefix));
+		public boolean isCommand(@Nonnull String rawContent) {
+			return startsWithAndOneMore(rawContent, string())
+				|| startsWithAndOneMore(rawContent, "<@!" + selfId() + ">")
+				|| startsWithAndOneMore(rawContent, "<@" + selfId() + ">");
+		}
+
+		private static boolean startsWithAndOneMore(String input, String prefix) {
+			return input.length() > prefix.length() && input.startsWith(prefix);
+		}
+
+		@Nonnull
+		@SuppressWarnings("null")
+		private Matcher getCommandCallMatcher(String input) {
+			return PATTERN_CACHE.computeIfAbsent(this, p -> {
+				return compile("(?:<@!?%d>|%s) *([^\\s]+)(?:\\s(.*))?".formatted(p.selfId(), quote(p.string())),
+							   DOTALL | UNICODE_CHARACTER_CLASS);
+			}).matcher(input);
+
+		}
+
 	}
 
 }

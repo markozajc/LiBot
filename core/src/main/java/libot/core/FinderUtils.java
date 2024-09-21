@@ -59,9 +59,9 @@ public final class FinderUtils {
 		String text = query.toLowerCase().strip();
 
 		List<User> found = SetUniqueList.setUniqueList(new ArrayList<>());
-		findUserById(c.shredder(), query).ifPresent(found::add);
-		findUsersFromMentions(c.shredder(), found, text);
-		findUsersFromText(c.shredder(), found, text);
+		findUserById(c.getShredder(), query).ifPresent(found::add);
+		findUsersFromMentions(c.getShredder(), found, text);
+		findUsersFromText(c.getShredder(), found, text);
 
 		return unmodifiableList(found);
 	}

@@ -7,11 +7,12 @@ import static libot.core.ratelimits.RatelimitsManager.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.*;
 
+import org.eu.zajc.ef.EHandle;
 import org.slf4j.Logger;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -19,7 +20,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import libot.core.commands.Command;
 import libot.core.commands.exceptions.ExceptionHandler;
 import libot.core.commands.exceptions.startup.*;
-import libot.core.entities.CommandContext;
+import libot.core.entities.*;
 import libot.core.ratelimits.RatelimitsManager;
 import libot.providers.ConfigurationProvider;
 
@@ -27,22 +28,62 @@ public class ProcessManager {
 
 	private static final String THREAD_NAME_PREFIX = "libot-proc-";
 
+	private static final Logger LOG = getLogger(ProcessManager.class);
+
+	public static final int MAX_COMMANDS_PER_USER = 5;
+	public static final int MAX_PID = 999;
+
+	private static final AtomicInteger COUNT = new AtomicInteger();
+	private static final Map<CommandProcess, Thread> PROCESSES = new HashMap<>();
+	private static final ExecutorService STARTUPS =
+		newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("startup-executor").build());
+
 	public static class CommandProcess {
 
 		private final int pid;
-		private final long userId;
-		private final long channelId;
-		private final long guildId;
-		@Nonnull private final Command command;
-		private Object data;
+		@Nonnull private final CommandContext ctx;
+		private Object data = null;
 
-		public CommandProcess(@Nonnull CommandContext c, int pid) {
+		private CommandProcess(int pid, @Nonnull CommandContext ctx) {
 			this.pid = pid;
-			this.userId = c.getUserIdLong();
-			this.channelId = c.getChannelIdLong();
-			this.guildId = c.getGuildIdLong();
-			this.command = c.getCommand();
-			this.data = null;
+			this.ctx = ctx;
+		}
+
+		@Nonnull
+		public static synchronized CommandProcess create(@Nonnull CommandContext ctx) {
+			int count = COUNT.getAndIncrement();
+			var proc = new CommandProcess(remainderUnsigned(count, MAX_PID + 1), ctx);
+
+			if (count > MAX_PID && PROCESSES.containsKey(proc))
+				throw new IllegalStateException("PID collision for " + proc.getPid());
+			else
+				return proc;
+		}
+
+		void start() {
+			var thread = new Thread(() -> {
+				try {
+					this.ctx.getCommand().execute(this.ctx);
+
+					if (this.ctx.getCommandRatelimit() != 0)
+						RatelimitsManager.getRatelimits(this.ctx.getCommand()).register(this.ctx.getUserIdLong());
+
+				} catch (Throwable t) { // NOSONAR no
+					ExceptionHandler.handle(t, this.ctx);
+
+				} finally {
+					PROCESSES.remove(this);
+				}
+			});
+			thread.setName(THREAD_NAME_PREFIX + toUnsignedString(this.pid));
+			thread.setUncaughtExceptionHandler((t, e) -> {
+				LOG.error("ExceptionHandler threw an exception", e);
+				var defaultExHandler = Thread.getDefaultUncaughtExceptionHandler();
+				if (defaultExHandler != null)
+					defaultExHandler.uncaughtException(t, e);
+			});
+			PROCESSES.put(this, thread);
+			thread.start();
 		}
 
 		public int getPid() {
@@ -50,20 +91,20 @@ public class ProcessManager {
 		}
 
 		public long getUserId() {
-			return this.userId;
+			return this.ctx.getUserIdLong();
 		}
 
 		public long getChannelId() {
-			return this.channelId;
+			return this.ctx.getChannelIdLong();
 		}
 
 		public long getGuildId() {
-			return this.guildId;
+			return this.ctx.getGuildIdLong();
 		}
 
 		@Nonnull
 		public Command getCommand() {
-			return this.command;
+			return this.ctx.getCommand();
 		}
 
 		public Object getData() {
@@ -89,87 +130,54 @@ public class ProcessManager {
 				return false;
 		}
 
+		@Override
+		public String toString() {
+			return "CommandProcess[%s@%d/%d/ by %d, pid %d]".formatted(getCommand().getName(), getGuildId(),
+																	   getChannelId(), getUserId(), this.pid);
+		}
+
 	}
 
-	private static final Logger LOG = getLogger(ProcessManager.class);
+	@SuppressWarnings("null")
+	public static void run(@Nonnull Command cmd, @Nonnull EventContext eventContext, @Nonnull String input) {
+		STARTUPS.submit(EHandle.handle(() -> {
+			doStartupCheck(cmd, eventContext);
+			killSuperfluousProcesses(eventContext);
 
-	public static final int MAX_COMMANDS_PER_USER = 5;
+			var args = cmd.getParameters().parse(input);
+			var context = new CommandContext(eventContext, cmd, args);
+			var process = CommandProcess.create(context);
 
-	private static final AtomicInteger COUNT = new AtomicInteger();
-	private static final Map<CommandProcess, Thread> PROCESSES = new ConcurrentHashMap<>(50);
-	private static final ExecutorService STARTUPS =
-		newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("startup-executor").build());
+			if (LOG.isTraceEnabled())
+				LOG.trace("Launching {}", process);
 
-	public static void run(@Nonnull CommandContext c) {
-		STARTUPS.submit(() -> runBlocking(c));
+			process.start();
+
+		}, e -> {
+			if (LOG.isTraceEnabled())
+				LOG.trace("Command execution failed: {}", e.toString());
+			ExceptionHandler.handle(e, cmd, eventContext);
+		}));
 	}
 
-	private static void runBlocking(@Nonnull CommandContext c) {
-		if (!checkStartup(c))
-			return;
-
+	private static void killSuperfluousProcesses(@Nonnull EventContext ctx) {
 		getProcesses().stream()
-			.filter(p -> p.getUserId() == c.getUserIdLong())
+			.filter(p -> p.getUserId() == ctx.getUserIdLong())
 			.skip(MAX_COMMANDS_PER_USER - 1L)
 			.forEach(ProcessManager::interrupt);
-
-		int pid = remainderUnsigned(COUNT.getAndIncrement(), 1000);
-		var process = new CommandProcess(c, pid);
-
-		if (LOG.isTraceEnabled())
-			LOG.trace("Launching a command: {}", process);
-
-		var thread = new Thread(() -> executeCommandBlocking(c, process));
-		thread.setName(THREAD_NAME_PREFIX + toUnsignedString(pid));
-		thread.setUncaughtExceptionHandler((t, e) -> {
-			PROCESSES.remove(process);
-			LOG.error("ExceptionHandler threw an exception", e);
-			var defaultUeh = Thread.getDefaultUncaughtExceptionHandler();
-			if (defaultUeh != null)
-				defaultUeh.uncaughtException(t, e);
-		});
-		PROCESSES.put(process, thread);
-		thread.start();
 	}
 
-	private static void executeCommandBlocking(@Nonnull CommandContext c, @Nonnull CommandProcess process) {
-		try {
-			c.getCommand().execute(c);
+	private static void doStartupCheck(@Nonnull Command cmd, @Nonnull EventContext ctx) {
+		if (ctx.getProvider(ConfigurationProvider.class).isDisabled(cmd))
+			throw new CommandDisabledException(true);
 
-			if (c.getCommandRatelimit() != 0)
-				RatelimitsManager.getRatelimits(c.getCommand()).register(c.getUserIdLong());
+		if (ctx.getGuildCustomization().isDisabled(cmd))
+			throw new CommandDisabledException(false);
 
-		} catch (Throwable t) { // NOSONAR no
-			ExceptionHandler.handle(c, t);
+		if (isRatelimited(cmd, ctx.getUserIdLong()))
+			throw new RatelimitedException(getRemaining(cmd, ctx.getUserIdLong()));
 
-		} finally {
-			PROCESSES.remove(process);
-		}
-	}
-
-	private static boolean checkStartup(@Nonnull CommandContext c) {
-		try {
-			if (c.provider(ConfigurationProvider.class).isDisabled(c.getCommand()))
-				throw new CommandDisabledException(true);
-
-			if (c.getGuildCustomization().isDisabled(c.getCommand()))
-				throw new CommandDisabledException(false);
-
-			if (!c.params().check(c.getCommand().getMinParameters() - 1))
-				throw new UsageException();
-
-			if (isRatelimited(c.getCommand(), c.getUserIdLong()))
-				throw new RatelimitedException(getRemaining(c.getCommand(), c.getUserIdLong()));
-
-			c.getCommand().startupCheck(c);
-			return true;
-
-		} catch (CommandStartupException t) {
-			if (LOG.isTraceEnabled())
-				LOG.trace("Command execution rejected: {}", t.toString());
-			ExceptionHandler.handle(c, t);
-			return false;
-		}
+		cmd.startupCheck(ctx);
 	}
 
 	@Nonnull

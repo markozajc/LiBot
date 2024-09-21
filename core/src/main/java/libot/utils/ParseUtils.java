@@ -1,30 +1,19 @@
 package libot.utils;
 
-import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.*;
-import static java.util.regex.Pattern.*;
 import static org.apache.commons.lang3.math.NumberUtils.isDigits;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.concurrent.*;
-import java.util.regex.*;
+import java.util.concurrent.TimeUnit;
 
-import javax.annotation.*;
+import javax.annotation.Nonnull;
 
 import libot.core.commands.exceptions.runtime.*;
 
 public class ParseUtils {
-
-	public static record Prefix(@Nonnull String string, long selfId) {}
-
-	private static final Map<Prefix, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
-
-	private static final Pattern SPACES = compile("\\s", UNICODE_CHARACTER_CLASS);
-	private static final String FORMAT_REGEX = "^(?:<@!?%d>|%s) *([^\\s]+)(?:\\s(.*))?$";
 
 	public static int parseInt(@Nonnull String s) {
 		try {
@@ -47,40 +36,6 @@ public class ParseUtils {
 			else
 				throw e;
 		}
-	}
-
-	@Nullable
-	public static String parseCommandName(@Nonnull String input, @Nonnull Prefix prefix) {
-		boolean isCommand = input.startsWith(prefix.string()) || input.startsWith("<@!" + prefix.selfId() + ">")
-			|| input.startsWith("<@" + prefix.selfId() + ">");
-		if (!isCommand)
-			return null;
-
-		var matcher = getMatcher(input, prefix);
-		if (matcher.find())
-			return matcher.group(1);
-		else
-			return null;
-	}
-
-	@Nonnull
-	@SuppressWarnings("null")
-	public static String[] parseParameters(@Nonnull String input, @Nonnull Prefix prefix, int limit) {
-		var matcher = getMatcher(input, prefix);
-		String group;
-		if (matcher.find() && (group = matcher.group(2)) != null)
-			return SPACES.split(group, limit);
-		else
-			return new String[0];
-	}
-
-	@Nonnull
-	@SuppressWarnings("null")
-	private static Matcher getMatcher(@Nonnull String input, @Nonnull Prefix prefix) {
-		var pattern =
-			PATTERN_CACHE.computeIfAbsent(prefix, p -> compile(format(FORMAT_REGEX, p.selfId(), quote(p.string())),
-															   DOTALL | UNICODE_CHARACTER_CLASS));
-		return pattern.matcher(input);
 	}
 
 	public static long parseTime(String input) {

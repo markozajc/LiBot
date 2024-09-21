@@ -1,5 +1,6 @@
 package libot.providers;
 
+import static java.util.Collections.synchronizedSet;
 import static net.dv8tion.jda.api.Permission.*;
 
 import java.util.*;
@@ -20,12 +21,12 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 
 	public static class Customization {
 
-		private List<Integer> disabledCommands;
+		private Set<String> disabledCommands;
 		private String commandPrefix;
 		private long djRoleId;
 
 		public Customization() {
-			this.disabledCommands = new ArrayList<>(5);
+			this.disabledCommands = synchronizedSet(new HashSet<>());
 			this.djRoleId = -1;
 		}
 
@@ -41,7 +42,7 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 			if (!isDisabled(command))
 				return false;
 
-			this.disabledCommands.remove((Integer) command.getId());
+			this.disabledCommands.remove(command.getId());
 			return true;
 		}
 

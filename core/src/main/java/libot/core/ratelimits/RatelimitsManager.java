@@ -16,7 +16,7 @@ public class RatelimitsManager {
 	@Nonnull
 	@SuppressWarnings("null")
 	public static Ratelimits getRatelimits(@Nonnull Command command) {
-		return RATELIMITS.computeIfAbsent(command.getRatelimitId(),
+		return RATELIMITS.computeIfAbsent(command.getRatelimitBucket(),
 										  k -> new Ratelimits(MILLISECONDS.toSeconds(command.getRatelimit())));
 	}
 
