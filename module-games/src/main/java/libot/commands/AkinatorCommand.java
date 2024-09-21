@@ -46,7 +46,7 @@ public class AkinatorCommand extends Command {
 	private static final String[] ANSWERS_BACK = { "b", "u", "back", "undo" };
 	private static final String ANSWER_EXIT = "exit";
 
-	private static final String AKITUDE_BASE_URL = "https://libot.eu.org/img/akitudes/%s.webp";
+	private static final String AKITUDE_BASE_URL = "https://libot.eu.org/img/akitudes/%s.png";
 	private static final Pattern AKITUDE_PATTERN = compile("/([^/]+)\\.png$");
 	private static final Set<String> AKITUDES = Set
 		.of("concentration_intense", "confiant", "deception", "etonnement", "inspiration_forte", "inspiration_legere",

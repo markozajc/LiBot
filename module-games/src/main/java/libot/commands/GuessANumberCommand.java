@@ -110,8 +110,8 @@ public class GuessANumberCommand extends Command {
 		e.setFooter(FOOTER);
 		e.setDescriptionf("My number is **%s** than your guess!", guess > number ? "lower" : "higher");
 		var guesses = history.primitiveStream().mapToObj(g -> {
-			return "`%s` - %s".formatted(rightPad(Integer.toString(guess), getDigits(bound)),
-										 guess > number ? "lower" : "higher");
+			return "`%s` - %s".formatted(rightPad(Integer.toString(g), getDigits(bound)),
+										 g > number ? "lower" : "higher");
 		}).collect(joining("\n"));
 		e.addField("Your guesses (%d)".formatted(count), guesses);
 

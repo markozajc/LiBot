@@ -53,10 +53,10 @@ public class BlackjackCommand extends BettableGame {
 
 	private enum Suit {
 
-		HEARTS("\u2665"),
-		CLUBS("\u2663"),
-		DIAMONDS("\u2666"),
-		SPADES("\u2660");
+		HEARTS("\u2665\uFE0F"),
+		CLUBS("\u2663\uFE0F"),
+		DIAMONDS("\u2666\uFE0F"),
+		SPADES("\u2660\uFE0F");
 
 		private final String emoji;
 
