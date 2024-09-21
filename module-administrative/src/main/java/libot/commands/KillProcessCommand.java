@@ -26,20 +26,22 @@ public class KillProcessCommand extends Command {
 
 	@Nonnull private static final Parameter PIDS =
 		Parameter.optional(POSITIONAL, "pids", "PIDs of the processes to kill");
-	@Nonnull private static final CommandMetadata META =
-		new CommandMetadata.Builder(ADMINISTRATIVE, "killprocess").description("""
-			Kills a running process.
-
-			If no PID is provided, a list of running processes is shown.
-			Process flags:
-			- `C`hannel/`G`uild matches
-			- `U`ser matches
-			- Has custom `D`ata
-			- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`
-			""").aliases("kill", "ps").parameters(PIDS).build();
 
 	public KillProcessCommand() {
-		super(META);
+		super(CommandMetadata.builder(ADMINISTRATIVE, "killprocess")
+			.aliases("kill", "ps")
+			.parameters(PIDS)
+			.description("""
+				Kills a running process.
+
+				If no PID is provided, a list of running processes is shown.
+				Process flags:
+				- `C`hannel/`G`uild matches
+				- `U`ser matches
+				- Has custom `D`ata
+				- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`
+				""")
+			.build());
 	}
 
 	@Override
@@ -94,7 +96,7 @@ public class KillProcessCommand extends Command {
 		}
 		t.addRule();
 
-		c.replyf(codeblock("Running processes\n" + t.render()));
+		c.reply(codeblock("Running processes\n" + t.render()));
 	}
 
 	@Nonnull

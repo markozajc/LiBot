@@ -26,11 +26,14 @@ import libot.core.extensions.EmbedPrebuilder;
 public class EvaluateCommand extends Command {
 
 	private static final Parameter SCRIPT = mandatory(POSITIONAL, "script");
-	@Nonnull private static final CommandMetadata META =
-		new CommandMetadata.Builder(ADMINISTRATIVE, "evaluate").description("Runs a Groovy script.")
+
+	public EvaluateCommand() {
+		super(CommandMetadata.builder(ADMINISTRATIVE, "evaluate")
 			.aliases("eval")
 			.parameters(SCRIPT)
-			.build();
+			.description("Runs a Groovy script.")
+			.build());
+	}
 
 	private static final Logger LOG = getLogger(EvaluateCommand.class);
 	private static final ScriptEngine ENGINE = new GroovyScriptEngineImpl();
@@ -44,10 +47,6 @@ public class EvaluateCommand extends Command {
 			LOG.warn("Could not load default imports", e);
 		}
 		IMPORTS = imports.toString();
-	}
-
-	public EvaluateCommand() {
-		super(META);
 	}
 
 	@Override

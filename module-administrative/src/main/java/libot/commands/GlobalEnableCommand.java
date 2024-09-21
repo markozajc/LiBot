@@ -5,8 +5,6 @@ import static libot.core.argument.ParameterList.Parameter.mandatory;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 
-import javax.annotation.Nonnull;
-
 import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
 import libot.core.entities.*;
@@ -15,14 +13,13 @@ import libot.providers.ConfigurationProvider;
 public class GlobalEnableCommand extends Command {
 
 	private static final MandatoryParameter COMMAND = mandatory(POSITIONAL, "command", "The command to enable");
-	@Nonnull private static final CommandMetadata META =
-		new CommandMetadata.Builder(ADMINISTRATIVE, "globalenable").description("Enables a command globally.")
-			.aliases("genable")
-			.parameters(COMMAND)
-			.build();
 
 	public GlobalEnableCommand() {
-		super(META);
+		super(CommandMetadata.builder(ADMINISTRATIVE, "globalenable")
+			.aliases("genable")
+			.parameters(COMMAND)
+			.description("Enables a command globally.")
+			.build());
 	}
 
 	@Override

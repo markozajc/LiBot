@@ -5,8 +5,6 @@ import static libot.core.argument.ParameterList.Parameter.mandatory;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 
-import javax.annotation.Nonnull;
-
 import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
 import libot.core.entities.*;
@@ -15,14 +13,13 @@ import libot.providers.ConfigurationProvider;
 public class GlobalDisableCommand extends Command {
 
 	private static final MandatoryParameter COMMAND = mandatory(POSITIONAL, "command", "The command to disable");
-	@Nonnull private static final CommandMetadata META =
-		new CommandMetadata.Builder(ADMINISTRATIVE, "globaldisable").description("Disables a command globally.")
-			.aliases("gdisable")
-			.parameters(COMMAND)
-			.build();
 
 	public GlobalDisableCommand() {
-		super(META);
+		super(CommandMetadata.builder(ADMINISTRATIVE, "globaldisable")
+			.aliases("gdisable")
+			.parameters(COMMAND)
+			.description("Disables a command globally.")
+			.build());
 	}
 
 	@Override

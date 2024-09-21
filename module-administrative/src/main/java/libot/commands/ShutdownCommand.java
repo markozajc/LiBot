@@ -15,13 +15,12 @@ import libot.core.entities.*;
 public class ShutdownCommand extends Command {
 
 	@Nonnull private static final Parameter EXIT_CODE = Parameter.optional(POSITIONAL, "exit code");
-	@Nonnull private static final CommandMetadata META =
-		new CommandMetadata.Builder(ADMINISTRATIVE, "killprocess").description("Shuts down the bot")
-			.parameters(EXIT_CODE)
-			.build();
 
 	public ShutdownCommand() {
-		super(META);
+		super(CommandMetadata.builder(ADMINISTRATIVE, "killprocess")
+			.description("Shuts down the bot")
+			.parameters(EXIT_CODE)
+			.build());
 	}
 
 	@Override
