@@ -65,7 +65,7 @@ public class ProcessManager {
 				try {
 					this.ctx.getCommand().execute(this.ctx);
 
-					if (this.ctx.getCommandRatelimit() != 0)
+					if (this.ctx.isCommandRatelimited())
 						RatelimitsManager.getRatelimits(this.ctx.getCommand()).register(this.ctx.getUserIdLong());
 
 				} catch (Throwable t) { // NOSONAR no

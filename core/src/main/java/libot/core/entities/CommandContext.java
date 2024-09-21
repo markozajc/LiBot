@@ -75,6 +75,17 @@ public class CommandContext extends EventContext {
 		return this.arguments.get(param);
 	}
 
+	// ===============* Utilities *===============
+
+	@Nonnull
+	public String getCommandWithPrefix() {
+		return getEffectivePrefix() + this.command.getName();
+	}
+
+	public boolean isCommandRatelimited() {
+		return this.command.getRatelimit() != 0;
+	}
+
 	// ===============* EventWaiter *===============
 
 	public boolean isWaiterInited() {

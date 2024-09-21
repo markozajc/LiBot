@@ -1,7 +1,5 @@
 package libot.core.ratelimits;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,8 +14,7 @@ public class RatelimitsManager {
 	@Nonnull
 	@SuppressWarnings("null")
 	public static Ratelimits getRatelimits(@Nonnull Command command) {
-		return RATELIMITS.computeIfAbsent(command.getRatelimitBucket(),
-										  k -> new Ratelimits(MILLISECONDS.toSeconds(command.getRatelimit())));
+		return RATELIMITS.computeIfAbsent(command.getRatelimitBucket(), k -> new Ratelimits(command.getRatelimit()));
 	}
 
 	public static long getRemaining(@Nonnull Command command, long user) {

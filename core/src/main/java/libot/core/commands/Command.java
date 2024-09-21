@@ -63,7 +63,7 @@ public abstract class Command {
 	}
 
 	public final long getRatelimit() {
-		return this.meta.ratelimit();
+		return this.meta.ratelimitMillis();
 	}
 
 	@Nonnull
