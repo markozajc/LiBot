@@ -1,62 +1,52 @@
 package libot.commands;
 
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 
+import javax.annotation.Nonnull;
+
+import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
-import libot.core.entities.CommandContext;
+import libot.core.entities.*;
 import libot.providers.ConfigurationProvider;
 
 public class GlobalEnableCommand extends Command {
 
-	private static final String FORMAT_NOT_FOUND = "`%s` does not exist.";
-	private static final String FORMAT_ALREADY_ENABLED = "%s is already enabled.";
+	private static final MandatoryParameter COMMAND = mandatory(POSITIONAL, "command", "The command to enable");
+	@Nonnull private static final CommandMetadata META =
+		new CommandMetadata.Builder(ADMINISTRATIVE, "globalenable").description("Enables a command globally.")
+			.aliases("genable")
+			.parameters(COMMAND)
+			.build();
+
+	public GlobalEnableCommand() {
+		super(META);
+	}
 
 	@Override
+	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
-		var cmd = c.getCommands().get(c.params().get(0));
-		var conf = c.provider(ConfigurationProvider.class);
-		if (cmd == null) {
-			c.replyf(FORMAT_NOT_FOUND, FAILURE, c.params().get(0));
+		c.getCommands().get(c.arg(COMMAND).value()).ifPresentOrElse(cmd -> {
+			var conf = c.getProvider(ConfigurationProvider.class);
+			if (!conf.isDisabled(cmd)) {
+				c.replyf("`%s` is already enabled.", DISABLED, cmd.getName());
 
-		} else if (!conf.isDisabled(cmd)) {
-			c.replyf(FORMAT_ALREADY_ENABLED, DISABLED, cmd.getName());
+			} else {
+				conf.enable(cmd);
+				c.react(ACCEPT_EMOJI);
+			}
 
-		} else {
-			conf.enable(cmd);
-			c.react(ACCEPT_EMOJI);
-		}
+		}, () -> {
+			c.replyf("`%s` does not exist.", FAILURE, c.arg(COMMAND).value());
+		});
 	}
 
 	@Override
-	public String getName() {
-		return "globalenablecommand";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "genable" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Enables a command globally.";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "command" };
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireSysadmin();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return ADMINISTRATIVE;
+	public void startupCheck(EventContext ec) {
+		super.startupCheck(ec);
+		ec.requireSysadmin();
 	}
 
 }

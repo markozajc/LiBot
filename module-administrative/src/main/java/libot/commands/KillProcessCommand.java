@@ -2,13 +2,20 @@ package libot.commands;
 
 import static java.lang.Integer.toUnsignedString;
 import static java.util.Arrays.stream;
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
+
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
 import de.vandermeer.asciitable.AsciiTable;
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.processes.ProcessManager;
@@ -17,28 +24,42 @@ import libot.utils.ParseUtils;
 
 public class KillProcessCommand extends Command {
 
-	private static final String FORMAT_NOT_FOUND = """
-		PID %d not found""";
-	private static final String FORMAT_TABLE = """
-		```
-		Running processes
-		%s
-		```""";
+	@Nonnull private static final Parameter PIDS =
+		Parameter.optional(POSITIONAL, "pids", "PIDs of the processes to kill");
+	@Nonnull private static final CommandMetadata META =
+		new CommandMetadata.Builder(ADMINISTRATIVE, "killprocess").description("""
+			Kills a running process.
 
-	@Override
-	public void execute(CommandContext c) {
-		if (c.params().check(0)) {
-			c.requireSysadmin();
-			killProcesses(c);
+			If no PID is provided, a list of running processes is shown.
+			Process flags:
+			- `C`hannel/`G`uild matches
+			- `U`ser matches
+			- Has custom `D`ata
+			- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`
+			""").aliases("kill", "ps").parameters(PIDS).build();
 
-		} else {
-			listProcesses(c);
-		}
+	public KillProcessCommand() {
+		super(META);
 	}
 
+	@Override
 	@SuppressWarnings("null")
-	private static void killProcesses(@Nonnull CommandContext c) {
-		var missing = stream(c.params().getArray()).mapToInt(ParseUtils::parseInt)
+	public void execute(CommandContext c) {
+		c.arg(PIDS).ifPresentOrElse(pids -> {
+			c.requireSysadmin();
+			killProcesses(c, pids);
+
+		}, () -> {
+			listProcesses(c);
+		});
+	}
+
+	private static final Pattern SPLIT = Pattern.compile("[\\s,]+", UNICODE_CHARACTER_CLASS);
+
+	@SuppressWarnings("null")
+	private static void killProcesses(@Nonnull CommandContext c, @Nonnull Argument pids) {
+		var missing = SPLIT.splitAsStream(pids.value())
+			.mapToInt(ParseUtils::parseInt)
 			.sorted()
 			.distinct()
 			.filter(KillProcessCommand::killProcess)
@@ -47,7 +68,7 @@ public class KillProcessCommand extends Command {
 		if (missing.length == 0)
 			c.react(ACCEPT_EMOJI);
 		else
-			c.reply(stream(missing).mapToObj(FORMAT_NOT_FOUND::formatted).collect(joining("\n")), DISABLED);
+			c.reply(stream(missing).mapToObj("PID %d not found"::formatted).collect(joining("\n")), DISABLED);
 	}
 
 	private static boolean killProcess(int pid) {
@@ -73,7 +94,7 @@ public class KillProcessCommand extends Command {
 		}
 		t.addRule();
 
-		c.replyf(FORMAT_TABLE, t.render());
+		c.replyf(codeblock("Running processes\n" + t.render()));
 	}
 
 	@Nonnull
@@ -103,55 +124,6 @@ public class KillProcessCommand extends Command {
 			}
 		}
 		return flags.toString();
-	}
-
-	@Override
-	public String getName() {
-		return "killprocess";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "kill", "ps" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Kills a running process.
-
-			If no PID is provided, a list of running processes is shown.
-			Process flags:
-			- `C`hannel/`G`uild matches
-			- `U`ser matches
-			- Has custom `D`ata
-			- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`
-			""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[pid]" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "PID of the process to kill" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public int getMaxParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return ADMINISTRATIVE;
 	}
 
 }

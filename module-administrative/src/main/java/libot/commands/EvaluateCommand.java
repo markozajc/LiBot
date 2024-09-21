@@ -2,6 +2,8 @@ package libot.commands;
 
 import static javax.script.ScriptContext.ENGINE_SCOPE;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 import static libot.utils.ResourceUtils.resourceAsString;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
@@ -16,16 +18,21 @@ import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
-import libot.core.entities.CommandContext;
+import libot.core.entities.*;
 import libot.core.extensions.EmbedPrebuilder;
 
 public class EvaluateCommand extends Command {
 
-	public record EvalResult(@Nonnull String stdout, @Nonnull String stderr, @Nullable Object returned) {}
+	private static final Parameter SCRIPT = mandatory(POSITIONAL, "script");
+	@Nonnull private static final CommandMetadata META =
+		new CommandMetadata.Builder(ADMINISTRATIVE, "evaluate").description("Runs a Groovy script.")
+			.aliases("eval")
+			.parameters(SCRIPT)
+			.build();
 
 	private static final Logger LOG = getLogger(EvaluateCommand.class);
-
 	private static final ScriptEngine ENGINE = new GroovyScriptEngineImpl();
 	private static final String IMPORTS;
 	static {
@@ -37,6 +44,10 @@ public class EvaluateCommand extends Command {
 			LOG.warn("Could not load default imports", e);
 		}
 		IMPORTS = imports.toString();
+	}
+
+	public EvaluateCommand() {
+		super(META);
 	}
 
 	@Override
@@ -87,39 +98,16 @@ public class EvaluateCommand extends Command {
 		bindings.put("c", c);
 		ENGINE.setBindings(bindings, ENGINE_SCOPE);
 
-		var result = ENGINE.eval(IMPORTS + c.params().get(0));
+		var result = ENGINE.eval(IMPORTS + c.arg(SCRIPT));
 		return new EvalResult(stdout.toString(), stderr.toString(), result);
 	}
 
 	@Override
-	public String getName() {
-		return "evaluate";
+	public void startupCheck(EventContext ec) {
+		super.startupCheck(ec);
+		ec.requireSysadmin();
 	}
 
-	@Override
-	public String[] getAliases() {
-		return new String[] { "eval" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Runs a Groovy script.";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "script" };
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireSysadmin();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return ADMINISTRATIVE;
-	}
+	public record EvalResult(@Nonnull String stdout, @Nonnull String stderr, @Nullable Object returned) {}
 
 }
