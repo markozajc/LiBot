@@ -18,14 +18,14 @@ import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import libot.core.argument.ParameterList.Parameter;
+import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
 import libot.core.entities.*;
 import libot.core.extensions.EmbedPrebuilder;
 
 public class EvaluateCommand extends Command {
 
-	private static final Parameter SCRIPT = mandatory(POSITIONAL, "script");
+	private static final MandatoryParameter SCRIPT = mandatory(POSITIONAL, "script");
 
 	public EvaluateCommand() {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "evaluate")
@@ -97,7 +97,7 @@ public class EvaluateCommand extends Command {
 		bindings.put("c", c);
 		ENGINE.setBindings(bindings, ENGINE_SCOPE);
 
-		var result = ENGINE.eval(IMPORTS + c.arg(SCRIPT));
+		var result = ENGINE.eval(IMPORTS + c.arg(SCRIPT).value());
 		return new EvalResult(stdout.toString(), stderr.toString(), result);
 	}
 

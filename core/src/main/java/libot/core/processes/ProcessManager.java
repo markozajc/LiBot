@@ -139,7 +139,7 @@ public class ProcessManager {
 	}
 
 	@SuppressWarnings("null")
-	public static void run(@Nonnull Command cmd, @Nonnull EventContext eventContext, @Nonnull String input) {
+	public static void run(@Nonnull Command cmd, @Nonnull EventContext eventContext, @Nullable String input) {
 		STARTUPS.submit(EHandle.handle(() -> {
 			doStartupCheck(cmd, eventContext);
 			killSuperfluousProcesses(eventContext);

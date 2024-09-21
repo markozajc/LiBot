@@ -28,7 +28,7 @@ public abstract class Command {
 
 	public abstract void execute(@Nonnull CommandContext c) throws Exception;
 
-	public final void run(@Nonnull EventContext eventContext, @Nonnull String input) {
+	public final void run(@Nonnull EventContext eventContext, @Nullable String input) {
 		ProcessManager.run(this, eventContext, input);
 	}
 

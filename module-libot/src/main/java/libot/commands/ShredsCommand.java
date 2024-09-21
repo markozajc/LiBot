@@ -49,7 +49,7 @@ public class ShredsCommand extends Command {
 		t.addRow(null, null, "", "%d / %d".formatted(totalGuilds, c.getShredder().getShreds().size() * 100))
 			.setPaddingLeftRight(1);
 		t.addRule();
-		c.reply(codeblock("Registered shreds" + t.render()));
+		c.reply(codeblock("Registered shreds\n" + t.render()));
 	}
 
 }

@@ -1,6 +1,7 @@
 import libot.*;
 import libot.commands.*;
 import libot.core.*;
+import libot.core.argument.*;
 import libot.core.commands.*;
 import libot.core.commands.exceptions.*;
 import libot.core.commands.exceptions.runtime.*;

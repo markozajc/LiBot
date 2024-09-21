@@ -1,7 +1,6 @@
 package libot.core.argument;
 
 import static com.google.common.collect.Streams.concat;
-import static java.lang.Math.max;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.NAMED;
@@ -9,7 +8,7 @@ import static libot.core.argument.ParameterList.Parameter.ParameterType.NAMED;
 import java.util.*;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import javax.annotation.*;
 
 import org.apache.commons.lang3.mutable.*;
 
@@ -20,7 +19,7 @@ import libot.core.argument.ArgumentList.Argument;
 public class ParameterList {
 
 	@SuppressWarnings("null")
-	@Nonnull static final ParameterList EMPTY = new ParameterList(new Parameter[0], emptyMap(), 0, new Parameter[0]);
+	@Nonnull static final ParameterList EMPTY = new ParameterList(new Parameter[0], emptyMap(), -1, new Parameter[0]);
 
 	@Nonnull private final Parameter[] positional;
 	@Nonnull private final Map<String, Parameter> named;
@@ -63,31 +62,51 @@ public class ParameterList {
 		positional.trimToSize();
 		namedRequired.trimToSize();
 
-		int positionalRequired = 0;
+		int positionalRequiredIndex = -1;
 		for (int i = positional.size(); i-- > 0;) {
 			if (positional.get(i).isMandatory()) {
-				positionalRequired = i;
+				positionalRequiredIndex = i;
 				break;
 			}
 		}
 
-		return new ParameterList(positional.toArray(Parameter[]::new), new HashMap<>(named), positionalRequired,
+		return new ParameterList(positional.toArray(Parameter[]::new), new HashMap<>(named), positionalRequiredIndex,
 								 namedRequired.toArray(Parameter[]::new));
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public ArgumentList parse(@Nonnull String input) {
-		if (input.length() == 0)
-			return ArgumentList.EMPTY;
+	public ArgumentList parse(@Nullable String input) {
+		var positionalIndex = new MutableInt(0);
 
+		Map<Parameter, Argument> arguments;
+		if (input == null || input.length() == 0)
+			arguments = emptyMap();
+		else
+			arguments = parseArgumentMap(input, positionalIndex);
+
+		if (positionalIndex.intValue() - 1 < this.positionalRequiredIndex)
+			throw new UsageException("Missing argument: " + this.positional[this.positionalRequiredIndex].getName());
+
+		for (var required : this.namedRequired) {
+			if (!arguments.containsKey(required))
+				throw new UsageException("Missing argument: --" + required.getName());
+		}
+
+		if (arguments.isEmpty())
+			return ArgumentList.EMPTY;
+		else
+			return new ArgumentList(arguments);
+	}
+
+	@Nonnull
+	@SuppressWarnings("null")
+	private Map<Parameter, Argument> parseArgumentMap(@Nonnull String input, @Nonnull MutableInt positionalIndex) {
 		if (this == EMPTY)
 			throw new UsageException("Too many arguments");
 
 		var arguments =
 			Maps.<Parameter, Argument>newHashMapWithExpectedSize(this.positional.length + this.named.size());
-
-		var positionalIndex = new MutableInt(0);
 		var name = new MutableObject<String>(null);
 		var argumentBuffer = new StringBuilder(input.length());
 
@@ -107,17 +126,7 @@ public class ParameterList {
 
 		if (!argumentBuffer.isEmpty() && !foldPositionalParameter(arguments, positionalIndex, argumentBuffer))
 			throw new UsageException("Too many arguments"); // positional argument out of bounds
-
-		if (max(0, positionalIndex.intValue() - 1) < this.positionalRequiredIndex) {
-			throw new UsageException("Missing argument: " + this.positional[this.positionalRequiredIndex].getName());
-		}
-
-		for (var required : this.namedRequired) {
-			if (!arguments.containsKey(required))
-				throw new UsageException("Missing argument: --" + required.getName());
-		}
-
-		return new ArgumentList(arguments);
+		return arguments;
 	}
 
 	@SuppressWarnings("null")

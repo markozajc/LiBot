@@ -1,6 +1,7 @@
 package libot.core.argument;
 
-import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.*;
 
 import javax.annotation.Nonnull;
 
@@ -8,17 +9,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import libot.core.argument.ParameterList.MandatoryParameter;
-import libot.core.argument.ParameterList.Parameter.ParameterType;
+import libot.core.argument.ParameterList.*;
 
 class ParameterListTest {
 
-	@Nonnull private static final MandatoryParameter POS_FIRST = mandatory(ParameterType.POSITIONAL, "p1", "");
-	@Nonnull private static final MandatoryParameter POS_SECOND = mandatory(ParameterType.POSITIONAL, "p2", "");
-	@Nonnull private static final MandatoryParameter POS_THIRD = mandatory(ParameterType.POSITIONAL, "p3", "");
-	@Nonnull private static final MandatoryParameter NAM_FIRST = mandatory(ParameterType.NAMED, "n1", "");
-	@Nonnull private static final MandatoryParameter NAM_SECOND = mandatory(ParameterType.NAMED, "n2", "");
-	@Nonnull private static final MandatoryParameter NAM_THIRD = mandatory(ParameterType.NAMED, "n3", "");
+	@Nonnull private static final Parameter POS_OPT = optional(POSITIONAL, "po", "");
+	@Nonnull private static final MandatoryParameter POS_FIRST = mandatory(POSITIONAL, "p1", "");
+	@Nonnull private static final MandatoryParameter POS_SECOND = mandatory(POSITIONAL, "p2", "");
+	@Nonnull private static final MandatoryParameter POS_THIRD = mandatory(POSITIONAL, "p3", "");
+	@Nonnull private static final MandatoryParameter NAM_FIRST = mandatory(NAMED, "n1", "");
+	@Nonnull private static final MandatoryParameter NAM_SECOND = mandatory(NAMED, "n2", "");
+	@Nonnull private static final MandatoryParameter NAM_THIRD = mandatory(NAMED, "n3", "");
 
 	@Test
 	void testEmptyOf() {
@@ -27,7 +28,8 @@ class ParameterListTest {
 
 	@Test
 	void testEmpty() {
-		assertSame(ArgumentList.EMPTY, ParameterList.of(POS_FIRST).parse(""));
+		assertSame(ArgumentList.EMPTY, ParameterList.of(POS_OPT).parse(""));
+		assertSame(ArgumentList.EMPTY, ParameterList.of(POS_OPT).parse(null));
 	}
 
 	@Test
@@ -211,7 +213,13 @@ class ParameterListTest {
 	}
 
 	@Test
-	void testMissingPositional() {
+	void testMissingPositionalSingle() {
+		var params = ParameterList.of(POS_FIRST);
+		assertThrows(UsageException.class, () -> params.parse(null));
+	}
+
+	@Test
+	void testMissingPositionalDouble() {
 		var params = ParameterList.of(POS_FIRST, POS_SECOND);
 		assertThrows(UsageException.class, () -> params.parse("argument"));
 	}

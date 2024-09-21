@@ -33,7 +33,7 @@ public class MessageListener extends ListenerAdapter {
 			return;
 
 		var matcher = prefix.getCommandCallMatcher(raw);
-		if (matcher.matches())
+		if (!matcher.matches())
 			throw new IllegalStateException("Message doesn't match the command regex, but isCommand() was true");
 
 		this.bot.getCommands()
