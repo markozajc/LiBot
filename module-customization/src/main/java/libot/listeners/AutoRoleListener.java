@@ -20,7 +20,7 @@ public class AutoRoleListener extends ListenerAdapter {
 		if (event.getUser().isBot())
 			return;
 
-		this.bot.provider(AutoRoleProvider.class).get(event.getGuild().getIdLong()).ifPresent(roleid -> {
+		this.bot.getProvider(AutoRoleProvider.class).get(event.getGuild().getIdLong()).ifPresent(roleid -> {
 			var role = event.getGuild().getRoleById(roleid);
 			if (role == null)
 				return;

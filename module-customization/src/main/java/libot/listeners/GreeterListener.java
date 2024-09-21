@@ -29,7 +29,7 @@ public class GreeterListener extends ListenerAdapter {
 	}
 
 	private void run(@Nonnull GenericGuildEvent event) {
-		var config = this.bot.provider(GreeterProvider.class).get(event.getGuild().getIdLong());
+		var config = this.bot.getProvider(GreeterProvider.class).get(event.getGuild().getIdLong());
 		var channel = (MessageChannelUnion) event.getGuild()
 			.getChannelCache()
 			.getElementById(config.getChannelType(), config.getChannelId());
@@ -42,9 +42,11 @@ public class GreeterListener extends ListenerAdapter {
 		if (event instanceof GuildMemberJoinEvent gmje) {
 			message = config.getWelcomeMessage();
 			user = gmje.getUser();
+
 		} else if (event instanceof GuildMemberRemoveEvent gmre) {
 			message = config.getGoodbyeMessage();
 			user = gmre.getUser();
+
 		} else {
 			return;
 		}
@@ -53,8 +55,8 @@ public class GreeterListener extends ListenerAdapter {
 			channel.sendMessage(parseMessage(message, user, event.getGuild())).queue();
 	}
 
-	@SuppressWarnings("null")
 	@Nonnull
+	@SuppressWarnings("null")
 	public static String parseMessage(@Nonnull String message, @Nonnull User user, @Nonnull Guild guild) {
 		return message.replace("{name}", user.getName())
 			.replace("{discrim}", user.getDiscriminator())

@@ -1,97 +1,72 @@
 package libot.commands;
 
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.optional;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.CUSTOMIZATION;
 import static net.dv8tion.jda.api.Permission.MANAGE_SERVER;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
 
 import javax.annotation.Nonnull;
 
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.providers.CustomizationsProvider;
-import net.dv8tion.jda.api.Permission;
 
 public class SetPrefixCommand extends Command {
 
-	private static final String FORMAT_LENGTH_EXCEEDED = """
-		The maximum length of a prefix is %d characters, but yours is %d characters long!""";
-	private static final String FORMAT_CONFIRM_CHANGE = """
-		Are you sure you want to change LiBot's command prefix for this guild to %s?""";
-	private static final String FORMAT_CONFIRM_RESET = """
-		Are you sure you want remove custom command prefix and revert it to the default one (%s)?""";
-	private static final String FORMAT_NO_PREFIX = """
-		A custom prefix is not set""";
+	@Nonnull private static final Parameter PREFIX =
+		optional(POSITIONAL, "prefix", "prefix to use (leave empty to reset to default)");
+
+	public SetPrefixCommand() {
+		super(CommandMetadata.builder(CUSTOMIZATION, "setprefix")
+			.aliases("prefix")
+			.permissions(MANAGE_SERVER)
+			.parameters(PREFIX)
+			.description("""
+				Changes LiBot's command prefix.""")
+			.build());
+	}
 
 	@Override
+	@SuppressWarnings("null")
 	public void execute(CommandContext c) throws Exception {
-		if (c.params().check(0))
-			change(c);
-		else
+		c.arg(PREFIX).map(Argument::value).ifPresentOrElse(prefix -> {
+			change(c, prefix);
+		}, () -> {
 			reset(c);
+		});
 		c.react(ACCEPT_EMOJI);
 	}
 
+	@SuppressWarnings("null")
 	private static void reset(@Nonnull CommandContext c) {
-		var prov = c.provider(CustomizationsProvider.class);
+		var prov = c.getProvider(CustomizationsProvider.class);
 		if (prov.get(c).getCustomPrefix().isEmpty())
-			throw c.error(FORMAT_NO_PREFIX, DISABLED);
+			throw c.error("A custom prefix is not set", DISABLED);
 
-		if (!c.confirmf(FORMAT_CONFIRM_RESET, LITHIUM, monospace(c.getConfig().defaultPrefix())))
+		if (!c.confirmf("Are you sure you want remove custom command prefix and revert it to the default one (%s)?",
+						LITHIUM, monospace(c.getConfig().defaultPrefix()))) {
 			throw c.cancel();
+		}
 
 		prov.get(c).setCommandPrefix(null);
 	}
 
-	private static void change(@Nonnull CommandContext c) {
-		var prefix = c.params().get(0);
-		if (prefix.length() > MAX_CUSTOM_PREFIX_LENGTH)
-			throw c.errorf(FORMAT_LENGTH_EXCEEDED, MAX_CUSTOM_PREFIX_LENGTH, prefix.length());
+	private static void change(@Nonnull CommandContext c, @Nonnull String prefix) {
+		if (prefix.length() > MAX_CUSTOM_PREFIX_LENGTH) {
+			throw c.errorf("The maximum length of a prefix is %d characters, but yours is %d characters long!",
+						   MAX_CUSTOM_PREFIX_LENGTH, prefix.length());
+		}
 
-		if (!c.confirmf(FORMAT_CONFIRM_CHANGE, LITHIUM, monospace(prefix)))
+		if (!c.confirmf("Are you sure you want to change LiBot's command prefix for this guild to %s?", LITHIUM,
+						monospace(prefix))) {
 			throw c.cancel();
+		}
 
-		c.provider(CustomizationsProvider.class).get(c.getGuildIdLong()).setCommandPrefix(prefix);
+		c.getProvider(CustomizationsProvider.class).get(c.getGuildIdLong()).setCommandPrefix(prefix);
 	}
 
-	@Override
-	public String getName() {
-		return "setprefix";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "prefix" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Changes LiBot's command prefix.""";
-	}
-
-	@Override
-	public Permission[] getPermissions() {
-		return new Permission[] { MANAGE_SERVER };
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[prefix]" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "prefix to use (leave empty to reset to default)" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return CUSTOMIZATION;
-	}
 }

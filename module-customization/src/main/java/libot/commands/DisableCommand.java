@@ -1,34 +1,50 @@
 package libot.commands;
 
-import static java.lang.String.format;
+import static java.lang.String.join;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.CUSTOMIZATION;
 import static net.dv8tion.jda.api.Permission.MANAGE_SERVER;
 
 import javax.annotation.Nonnull;
 
+import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.providers.CustomizationsProvider.Customization;
-import net.dv8tion.jda.api.Permission;
 
 public class DisableCommand extends Command {
 
+	private static final MandatoryParameter NAME = mandatory(POSITIONAL, "name", "The command or category to disable");
+
+	public DisableCommand() {
+		super(CommandMetadata.builder(CUSTOMIZATION, "disable")
+			.aliases("disablecommand")
+			.permissions(MANAGE_SERVER)
+			.parameters(NAME)
+			.description("""
+				Disables a command or category. \
+				It will not be possible to use it until it is reenabled with the `enable` command.""")
+			.build());
+	}
+
 	@Override
+	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
-		var name = c.params().get(0);
+		var name = c.arg(NAME).value();
 		var cust = c.getGuildCustomization();
-		Command cmd;
-		CommandCategory category;
-		if ((cmd = c.getCommands().get(name)) != null) {
+		c.getCommands().get(name).ifPresentOrElse(cmd -> {
 			disableSingle(c, cust, cmd);
 
-		} else if ((category = CommandCategory.getCategory(name)) != null) {
-			disableCategory(c, cust, category);
+		}, () -> {
+			CommandCategory.getCategory(name).ifPresentOrElse(cat -> {
+				disableCategory(c, cust, cat);
 
-		} else {
-			c.replyf("%s is not a command or a category.", FAILURE, name);
-		}
+			}, () -> {
+				throw c.errorf("%s is not a command or a category.", FAILURE, name);
+			});
+		});
 	}
 
 	@SuppressWarnings("null")
@@ -41,53 +57,18 @@ public class DisableCommand extends Command {
 			.filter(cust::disable)
 			.map(Command::getName)
 			.toList();
-		c.replyf(format("Successfully disabled %d commands", disabled.size()), String.join(", ", disabled), SUCCESS);
+
+		c.reply("Successfully disabled %d commands".formatted(disabled.size()), join(", ", disabled), SUCCESS);
 	}
 
 	private static void disableSingle(@Nonnull CommandContext c, @Nonnull Customization cust, @Nonnull Command cmd) {
 		if (cmd instanceof EnableCommand)
-			c.replyf("You may not disable that", DISABLED);
-		else if (cust.disable(cmd))
-			c.replyf("Successfully disabled `%s`", SUCCESS, cmd.getName());
-		else
-			c.replyf("`%s` is already disabled", DISABLED, cmd.getName());
-	}
+			throw c.errorf("You may not disable that", DISABLED);
 
-	@Override
-	public String getName() {
-		return "disablecommand";
-	}
+		if (!cust.disable(cmd))
+			throw c.errorf("`%s` is already disabled", DISABLED, cmd.getName());
 
-	@Override
-	public String[] getAliases() {
-		return new String[] { "disable" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Disables a command or a category. \
-			It will not be possible to use it until it is reenabled with the `enable` command.""";
-	}
-
-	@Override
-	public Permission[] getPermissions() {
-		return new Permission[] { MANAGE_SERVER };
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "name" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "name/alias of command or category" };
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return CUSTOMIZATION;
+		c.replyf("Successfully disabled `%s`", SUCCESS, cmd.getName());
 	}
 
 }
