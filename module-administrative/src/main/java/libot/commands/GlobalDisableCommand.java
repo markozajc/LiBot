@@ -12,7 +12,7 @@ import libot.providers.ConfigurationProvider;
 
 public class GlobalDisableCommand extends Command {
 
-	private static final MandatoryParameter COMMAND = mandatory(POSITIONAL, "command", "The command to disable");
+	private static final MandatoryParameter COMMAND = mandatory(POSITIONAL, "command", "command to disable");
 
 	public GlobalDisableCommand() {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "globaldisable")

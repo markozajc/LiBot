@@ -16,7 +16,7 @@ import libot.providers.CustomizationsProvider.Customization;
 
 public class DisableCommand extends Command {
 
-	private static final MandatoryParameter NAME = mandatory(POSITIONAL, "name", "The command or category to disable");
+	private static final MandatoryParameter NAME = mandatory(POSITIONAL, "name", "command or category to disable");
 
 	public DisableCommand() {
 		super(CommandMetadata.builder(CUSTOMIZATION, "disable")

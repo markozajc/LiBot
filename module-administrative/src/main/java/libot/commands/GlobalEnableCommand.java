@@ -12,7 +12,7 @@ import libot.providers.ConfigurationProvider;
 
 public class GlobalEnableCommand extends Command {
 
-	private static final MandatoryParameter COMMAND = mandatory(POSITIONAL, "command", "The command to enable");
+	private static final MandatoryParameter COMMAND = mandatory(POSITIONAL, "command", "command to enable");
 
 	public GlobalEnableCommand() {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "globalenable")
