@@ -20,6 +20,12 @@ import net.dv8tion.jda.api.entities.Guild.*;
 
 public class GuildInfoCommand extends Command {
 
+	public GuildInfoCommand() {
+		super(CommandMetadata.builder(INFORMATIVE, "guildinfo")
+			.aliases("server", "serverinfo", "guild", "gi", "si")
+			.description("Displays some information and statistics for the current guild."));
+	}
+
 	private static final String FORMAT_MEMBERS_WITH_BOTS = " humans + %d bots";
 	private static final String FORMAT_MEMBERS = "%d%s ";
 	private static final String FORMAT_MEMBERS_ONLINE = "(%d online)";
@@ -31,9 +37,8 @@ public class GuildInfoCommand extends Command {
 			case NONE -> "None";
 			case LOW -> "Low";
 			case MEDIUM -> "Medium";
-			case HIGH -> "\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35 \u253B\u2501\u253B (high)";
-			case VERY_HIGH -> """
-				\u253B\u2501\u253B \uFF90\u30FD(\u0CA0\u76CA\u0CA0)\u30CE\u5F61\u253B\u2501\u253B (very high)""";
+			case HIGH -> "High";
+			case VERY_HIGH -> "Highest";
 			default -> capitalize(vl.name().toLowerCase());
 		});
 	}
@@ -73,26 +78,6 @@ public class GuildInfoCommand extends Command {
 			.thenApply(MetaData::getApproximatePresences)
 			.thenApply(online -> members + format(FORMAT_MEMBERS_ONLINE, online))
 			.thenAccept(data -> builder.addField("Members", codeblock(data), false));
-	}
-
-	@Override
-	public String getName() {
-		return "guildinfo";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "server", "serverinfo", "guild", "gi", "si" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Displays some information and statistics for the current guild.";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return INFORMATIVE;
 	}
 
 }

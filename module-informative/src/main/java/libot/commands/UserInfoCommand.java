@@ -3,6 +3,8 @@ package libot.commands;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.LITHIUM;
+import static libot.core.argument.ParameterList.Parameter.optional;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.utils.CommandUtils.findMemberOrAuthor;
 import static net.dv8tion.jda.api.Permission.ADMINISTRATOR;
@@ -11,6 +13,7 @@ import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
 
 import javax.annotation.Nonnull;
 
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
@@ -19,19 +22,24 @@ import net.dv8tion.jda.api.utils.TimeFormat;
 
 public class UserInfoCommand extends Command {
 
+	@Nonnull private static final Parameter USER = optional(POSITIONAL, "user");
+
+	public UserInfoCommand() {
+		super(CommandMetadata.builder(INFORMATIVE, "userinfo").aliases("user", "ui").parameters(USER).description("""
+			Retrieves some of the 'hidden' data about a user. If no one is mentioned, information about you will be \
+			displayed."""));
+	}
+
 	private static final String FORMAT_PERMISSIONS = "To get %s's permissions for this guild, use %sperms @%s.";
 	private static final String FORMAT_TITLE = "Info about %s";
-	private static final String FORMAT_CODEBLOCK = """
-		```
-		%s```""";
 
 	@Override
 	public void execute(CommandContext c) {
-		var member = findMemberOrAuthor(c);
+		var member = findMemberOrAuthor(c, c.arg(USER));
 		var e = new EmbedPrebuilder(LITHIUM);
 		e.setThumbnail(member.getEffectiveAvatarUrl());
 		e.setTitle(getTitle(member));
-		e.addFieldf("ID", FORMAT_CODEBLOCK, member.getId(), true);
+		e.addField("ID", codeblock(member.getId()), true);
 		e.addField("Account creation date", TimeFormat.DATE_TIME_LONG.format(member.getTimeCreated()), true);
 		e.addField("Server join date", TimeFormat.DATE_TIME_LONG.format(member.getTimeJoined()), true);
 		e.addField("Roles", getRoles(member), true);
@@ -73,43 +81,6 @@ public class UserInfoCommand extends Command {
 		else
 			roles = member.getRoles().stream().map(Role::getAsMention).collect(joining(", "));
 		return codeblock(roles);
-	}
-
-	@Override
-	public String getName() {
-		return "userinfo";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "user", "ui" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Retrieves some of the 'hidden' data about a user. If no one is mentioned, information about you will be \
-			displayed.""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[user]" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "user to get information about" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return INFORMATIVE;
 	}
 
 }

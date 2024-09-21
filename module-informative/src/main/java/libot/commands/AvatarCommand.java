@@ -2,9 +2,10 @@ package libot.commands;
 
 import static javax.imageio.ImageIO.*;
 import static libot.core.Constants.LITHIUM;
+import static libot.core.argument.ParameterList.Parameter.optional;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.utils.CommandUtils.findUserOrAuthor;
-import static libot.utils.ParseUtils.parseLong;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
@@ -17,6 +18,7 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import kong.unirest.Unirest;
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
@@ -26,29 +28,42 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class AvatarCommand extends Command {
 
+	@Nonnull private static final Parameter USER = optional(POSITIONAL, "user or ID", "user to get avatar of");
+
+	public AvatarCommand() {
+		super(CommandMetadata.builder(INFORMATIVE, "avatar").parameters(USER).description("""
+			Displays a link to the mentioned user's avatar (profile picture). \
+			If no user is mentioned and no user ID is provided, your avatar will be displayed."""));
+	}
+
 	private static final Logger LOG = getLogger(AvatarCommand.class);
 
 	@Override
 	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
-		if (c.params().check(0) && !MentionType.USER.getPattern().matcher(c.params().get(0)).matches()) {
-			long id = parseLong(c.params().get(0));
-			var user = c.shredder().getUserById(id);
-			if (user != null) {
-				downloadAndSendAvatar(c, user);
+		c.arg(USER).ifPresentOrElse(param -> {
+			if (MentionType.USER.getPattern().matcher(param.value()).matches()) {
+				downloadAndSendAvatar(c, findUserOrAuthor(c, param));
+
 			} else {
-				c.jda().retrieveUserById(id).queue(u -> downloadAndSendAvatar(c, u), e -> {
-					if (e instanceof ErrorResponseException ere && ere.getErrorResponse() == UNKNOWN_USER) {
-						c.reply("Couldn't find a user with that ID.");
-					} else {
-						getDefaultFailure().accept(e);
-					}
-				});
+				var user = c.getShredder().getUserById(param.valueAsLong());
+				if (user != null) {
+					downloadAndSendAvatar(c, user);
+				} else {
+					c.getJda().retrieveUserById(param.valueAsLong()).queue(u -> downloadAndSendAvatar(c, u), e -> {
+						if (e instanceof ErrorResponseException ere && ere.getErrorResponse() == UNKNOWN_USER) {
+							c.reply("Couldn't find a user with that ID.");
+						} else {
+							getDefaultFailure().accept(e);
+						}
+					});
+				}
 			}
 
-		} else {
-			downloadAndSendAvatar(c, findUserOrAuthor(c));
-		}
+		}, () -> {
+			downloadAndSendAvatar(c, c.getUser());
+		});
+
 	}
 
 	@SuppressWarnings({ "null", "resource" })
@@ -94,38 +109,6 @@ public class AvatarCommand extends Command {
 			}
 		}
 		return -1;
-	}
-
-	@Override
-	public String getName() {
-		return "avatar";
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Displays a link to the mentioned user's avatar (profile picture). \
-			If no user is mentioned and no user ID is provided, your avatar will be displayed.""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[user or ID]" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "user to get avatar of" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return INFORMATIVE;
 	}
 
 }

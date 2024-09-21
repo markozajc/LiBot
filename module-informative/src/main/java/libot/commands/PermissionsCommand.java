@@ -2,6 +2,8 @@ package libot.commands;
 
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.LITHIUM;
+import static libot.core.argument.ParameterList.Parameter.optional;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.utils.CommandUtils.findMemberOrAuthor;
 
@@ -9,6 +11,7 @@ import java.util.EnumSet;
 
 import javax.annotation.Nonnull;
 
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
@@ -17,6 +20,14 @@ import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 
 public class PermissionsCommand extends Command {
 
+	@Nonnull private static final Parameter USER = optional(POSITIONAL, "user", "user to get permissions of");
+
+	public PermissionsCommand() {
+		super(CommandMetadata.builder(INFORMATIVE, "permissions").aliases("perms").parameters(USER).description("""
+			Lists someone's permissions and roles they inherited them from. This command will NOT list any \
+			channel-specific permission overrides. If no member is mentioned, your permissions will be listed."""));
+	}
+
 	private static final String FORMAT_OWNER_NOTICE = """
 		%s %s. They have all permissions and bypass channel overrides.""";
 	private static final String FORMAT_TITLE = "%s's permissions";
@@ -24,7 +35,7 @@ public class PermissionsCommand extends Command {
 	@SuppressWarnings("null")
 	@Override
 	public void execute(CommandContext c) {
-		var member = findMemberOrAuthor(c);
+		var member = findMemberOrAuthor(c, c.arg(USER));
 		var listed = EnumSet.noneOf(Permission.class);
 		var e = new EmbedPrebuilder(LITHIUM);
 		member.getRoles()
@@ -60,40 +71,4 @@ public class PermissionsCommand extends Command {
 		return new Field(roleName, b.toString(), false);
 	}
 
-	@Override
-	public String getName() {
-		return "permissions";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "perms" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Lists someone's permissions and roles they inherited them from. This command will NOT list any \
-			channel-specific permission overrides. If no member is mentioned, your permissions will be listed.""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[user]" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "user to get permissions of" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return INFORMATIVE;
-	}
 }
