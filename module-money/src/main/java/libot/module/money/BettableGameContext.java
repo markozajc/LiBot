@@ -52,13 +52,13 @@ public class BettableGameContext extends CommandContext {
 
 	@Nonnull
 	@CheckReturnValue
-	public GameEndedException greturn(boolean ratelimit) {
+	public GameEndedException grefund(boolean ratelimit) {
 		throw new GameEndedException(GameResult.REFUND, ratelimit);
 	}
 
 	@Nonnull
 	@CheckReturnValue
-	public GameEndedException greturn() {
+	public GameEndedException grefund() {
 		throw new GameEndedException(GameResult.REFUND, false);
 	}
 
