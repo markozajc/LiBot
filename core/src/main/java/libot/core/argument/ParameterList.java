@@ -136,7 +136,6 @@ public class ParameterList {
 		return arguments;
 	}
 
-	@SuppressWarnings("null")
 	private void parsePart(@Nonnull String input, @Nonnull Map<Parameter, Argument> arguments,
 						   @Nonnull MutableInt positionalIndex, @Nonnull MutableObject<String> name,
 						   @Nonnull StringBuilder argumentBuffer, int i, int next) {
@@ -184,7 +183,6 @@ public class ParameterList {
 		return concat(stream(this.positional), this.named.values().stream());
 	}
 
-	@SuppressWarnings("null")
 	private boolean foldPositionalParameter(@Nonnull Map<Parameter, Argument> arguments, MutableInt positionalIndex,
 											@Nonnull StringBuilder argumentBuffer) {
 		if (positionalIndex.intValue() >= this.positional.length)
