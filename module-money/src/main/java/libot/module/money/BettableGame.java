@@ -1,12 +1,19 @@
 package libot.module.money;
 
 import static libot.core.Constants.*;
-import static libot.core.commands.CommandCategory.GAMES;
+import static libot.core.argument.ParameterList.Parameter.optional;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.processes.ProcessManager.getProcesses;
 import static libot.module.money.BettableGame.GameResult.*;
 
-import javax.annotation.*;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
+import libot.commands.MoneyCommand;
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.processes.ProcessManager;
@@ -14,9 +21,33 @@ import libot.providers.MoneyProvider;
 
 public abstract class BettableGame extends Command {
 
+	@Nonnull private static final Parameter BET =
+		optional(POSITIONAL, "bet", "amount of Ł to bet (leave empty to play without betting)");
+
+	protected BettableGame(@Nonnull CommandMetadata.Builder meta) {
+		super(patchMeta(meta));
+	}
+
+	@Nonnull
+	@SuppressWarnings("null")
+	private static CommandMetadata.Builder patchMeta(@Nonnull CommandMetadata.Builder meta) {
+		var newDescription = meta.getDescription()
+			.orElse("") + """
+
+				**You can bet your LiBot cash on this game.**
+				If you win, your bet will be doubled, and if you lose, you'll lose the bet. You can still play the game \
+				without betting anything.
+				Note that LiBot cash (Ł) is a virtual currency and has no real use. Please do not attempt to buy sandwiches \
+				with it.""";
+
+		var newParameters = Stream.concat(meta.getParameters().parameters(), Stream.of(BET)).toList();
+
+		return meta.description(newDescription).parameters(newParameters);
+	}
+
 	public enum GameResult {
 		WIN,
-		RETURN,
+		REFUND,
 		QUIT,
 		LOSE
 	}
@@ -41,7 +72,7 @@ public abstract class BettableGame extends Command {
 			return this.killed;
 		}
 
-		public boolean isReturned() {
+		public boolean isBetRefunded() {
 			return this.returned;
 		}
 
@@ -49,69 +80,51 @@ public abstract class BettableGame extends Command {
 			this.killed = true;
 		}
 
-		public void markReturned() {
+		public void markBetRefunded() {
 			this.returned = true;
 		}
 
 	}
 
-	private static final String FORMAT_DESCRIPTION = """
-
-
-		**You can bet your LiBot cash on this game.**
-		If you win, your bet will be doubled, and if you lose, you'll lose the bet. You can still play the game \
-		without betting anything.
-		Note that LiBot cash (Ł) is a virtual currency and has no real use. Please do not attempt to buy sandwiches \
-		with it.""";
-	private static final String FORMAT_ALREADY_RUNNING = """
-		You have already placed a bet on **%s**. Would you like to kill it (and lose the bet) before proceeding?""";
-	private static final String FORMAT_BET_NEGATIVE = """
-		The bet must be positive!""";
-	private static final String FORMAT_INSUFFICIENT_BALANCE =
-		"You don't have that much money! Check your balance with `%smoney`.";
-
 	@Nonnull
 	public abstract GameResult play(@Nonnull BettableGameContext c) throws Exception;
 
-	@Nonnull
-	public abstract String getGameInfo();
-
 	@Override
-	public void execute(CommandContext c) throws Exception {
-		int bet = getBet(c);
-		var result = playRaw(new BettableGameContext(c, bet));
-		if (bet != 0 && result != null)
-			cashout(c, bet, result);
-	}
+	@SuppressWarnings("null")
+	public final void execute(CommandContext c) throws Exception {
+		int bet = c.arg(BET).map(Argument::valueAsInt).orElse(0);
 
-	private static int getBet(@Nonnull CommandContext c) {
-		if (c.params().check(0)) {
-			var provider = c.provider(MoneyProvider.class);
-			int bet = c.params().getInt(0);
-			checkArgument(c, provider, bet);
-			checkIfAlreadyRunning(c);
-			initializeBettable(c, provider, bet);
-			return bet;
+		if (bet < 0) {
+			throw c.error("The bet must not be a negative number.", FAILURE);
+
+		} else if (bet == 0) {
+			playRaw(new BettableGameContext(c, bet));
+
 		} else {
-			return 0;
+			var provider = c.getProvider(MoneyProvider.class);
+			if (bet > provider.getBalance(c.getUserIdLong())) {
+				throw c.errorf("You don't have that much money! Check your balance with `%s`.", FAILURE,
+							   c.getCommandWithPrefix(MoneyCommand.class));
+			}
+
+			killExistingBets(c);
+
+			provider.takeMoney(c.getUserIdLong(), bet);
+			ProcessManager.getCurrentProcess().setData(new BettableProcessData(bet));
+
+			playRaw(new BettableGameContext(c, bet)).ifPresent(result -> cashout(c, bet, result));
 		}
 	}
 
-	private static void checkArgument(@Nonnull CommandContext c, @Nonnull MoneyProvider provider, long bet) {
-		if (bet < 0)
-			throw c.error(FORMAT_BET_NEGATIVE, FAILURE);
-
-		if (bet > provider.getBalance(c.getUserIdLong()))
-			throw c.errorf(FORMAT_INSUFFICIENT_BALANCE, FAILURE, c.getEffectivePrefix());
-	}
-
-	private static void checkIfAlreadyRunning(@Nonnull CommandContext c) {
+	private static void killExistingBets(CommandContext c) {
 		getProcesses().stream()
 			.filter(p -> p.getUserId() == c.getUserIdLong())
 			.filter(p -> p.getData() instanceof BettableProcessData)
 			.findAny()
 			.ifPresent(p -> {
-				boolean kill = c.confirmf(FORMAT_ALREADY_RUNNING, FAILURE, p.getCommand().getName());
+				boolean kill = c.confirmf("""
+					You have already placed a bet on **%s**. Would you like to kill it (and lose the bet) before \
+					proceeding?""", FAILURE, p.getCommand().getName());
 				if (kill) {
 					((BettableProcessData) p.getData()).markKilled();
 					ProcessManager.interrupt(p);
@@ -121,29 +134,26 @@ public abstract class BettableGame extends Command {
 			});
 	}
 
-	private static void initializeBettable(@Nonnull CommandContext c, @Nonnull MoneyProvider provider, int bet) {
-		provider.takeMoney(c.getUserIdLong(), bet);
-		ProcessManager.getCurrentProcess().setData(new BettableProcessData(bet));
-	}
-
-	@Nullable
-	private GameResult playRaw(@Nonnull BettableGameContext c) throws Exception {
+	@Nonnull
+	@SuppressWarnings("null")
+	private Optional<GameResult> playRaw(@Nonnull BettableGameContext c) throws Exception {
 		try {
-			return play(c);
+			return Optional.of(play(c));
 
 		} catch (GameEndedException e) {
-			return e.getResult();
+			return Optional.of(e.getResult());
 
-		} catch (InterruptedException e) { // NOSONAR no
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			if (ProcessManager.getCurrentProcess().getData() instanceof BettableProcessData data) {
 				if (data.isKilled())
-					return QUIT;
-				else if (data.isReturned())
-					return null;
+					return Optional.of(QUIT);
+				else if (data.isBetRefunded())
+					return Optional.empty();
 				else
-					return RETURN;
+					return Optional.of(REFUND);
 			} else {
-				return null;
+				return Optional.empty();
 			}
 		}
 	}
@@ -154,8 +164,8 @@ public abstract class BettableGame extends Command {
 				c.replyf("You won! **(+%dŁ)**", SUCCESS, bet);
 				yield bet * 2;
 			}
-			case RETURN -> {
-				c.replyf("Your bet has been returned.", DISABLED, bet);
+			case REFUND -> {
+				c.replyf("Your bet has been refunded.", DISABLED, bet);
 				yield bet;
 			}
 			case QUIT -> {
@@ -168,32 +178,7 @@ public abstract class BettableGame extends Command {
 			}
 		};
 
-		c.provider(MoneyProvider.class).addMoney(c.getUserIdLong(), earned);
-	}
-
-	@Override
-	public String getInfo() {
-		return getGameInfo() + FORMAT_DESCRIPTION;
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "bet" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "amount of Ł to bet (leave empty to play without betting)" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return GAMES;
+		c.getProvider(MoneyProvider.class).addMoney(c.getUserIdLong(), earned);
 	}
 
 }

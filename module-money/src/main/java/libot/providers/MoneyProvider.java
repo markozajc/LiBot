@@ -46,7 +46,7 @@ public class MoneyProvider extends SnowflakeProvider<Long> {
 		getProcesses().stream().filter(p -> p.getData() instanceof BettableProcessData).forEach(p -> {
 			var data = (BettableProcessData) p.getData();
 			addMoney(p.getUserId(), data.getBet());
-			data.markReturned();
+			data.markBetRefunded();
 		});
 	}
 
