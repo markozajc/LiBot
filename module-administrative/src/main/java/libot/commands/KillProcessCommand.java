@@ -5,6 +5,7 @@ import static java.util.Arrays.stream;
 import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.optional;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
@@ -24,8 +25,7 @@ import libot.utils.ParseUtils;
 
 public class KillProcessCommand extends Command {
 
-	@Nonnull private static final Parameter PIDS =
-		Parameter.optional(POSITIONAL, "pids", "PIDs of the processes to kill");
+	@Nonnull private static final Parameter PIDS = optional(POSITIONAL, "pids", "PIDs of the processes to kill");
 
 	public KillProcessCommand() {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "killprocess")
@@ -39,8 +39,7 @@ public class KillProcessCommand extends Command {
 				- `C`hannel/`G`uild matches
 				- `U`ser matches
 				- Has custom `D`ata
-				- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`
-				""")
+				- Thread state: `N`ew, `R`unnable, `W`aiting, `B`locked, `T`imed waiting, terminate`D`""")
 			.build());
 	}
 

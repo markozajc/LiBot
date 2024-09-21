@@ -7,8 +7,8 @@ import static libot.utils.Utilities.getenvOrThrow;
 
 import javax.annotation.Nonnull;
 
-public record BotConfiguration(@Nonnull String defaultPrefix, @Nonnull long[] sysadminIds) { // NOSONAR [java:S6218]
-																							 // equals not used
+public record BotConfiguration(String defaultPrefix, @Nonnull long[] sysadminIds) { // NOSONAR [java:S6218] equals not
+																					// used
 
 	@SuppressWarnings("null")
 	public static BotConfiguration fromEnvironment() {

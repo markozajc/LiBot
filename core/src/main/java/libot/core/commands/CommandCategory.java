@@ -1,5 +1,9 @@
 package libot.core.commands;
 
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+
 public enum CommandCategory {
 
 	ADMINISTRATIVE,
@@ -13,14 +17,14 @@ public enum CommandCategory {
 	SEARCH,
 	UTILITIES;
 
-	public static CommandCategory getCategory(String categoryName) {
+	public static Optional<CommandCategory> getCategory(@Nonnull String categoryName) {
 		String categoryNameUpper = categoryName.toUpperCase();
 		for (CommandCategory category : CommandCategory.values()) {
 			if (category.name().equals(categoryNameUpper))
-				return category;
+				Optional.of(category);
 		}
 
-		return null;
+		return Optional.empty();
 
 	}
 

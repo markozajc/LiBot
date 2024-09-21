@@ -3,6 +3,7 @@ package libot.commands;
 import static java.util.regex.Pattern.compile;
 import static libot.commands.AboutCommand.LINKS;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.optional;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.*;
 import static libot.module.ModuleLibotShared.sendUsage;
@@ -23,8 +24,7 @@ import libot.core.extensions.EmbedPrebuilder;
 
 public class HelpCommand extends Command {
 
-	@Nonnull private static final Parameter COMMAND =
-		Parameter.optional(POSITIONAL, "command", "The command to describe");
+	@Nonnull private static final Parameter COMMAND = optional(POSITIONAL, "command", "The command to describe");
 
 	public HelpCommand() {
 		super(CommandMetadata.builder(LIBOT, "help")

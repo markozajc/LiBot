@@ -1,6 +1,7 @@
 package libot.commands;
 
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.optional;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
 
@@ -14,7 +15,7 @@ import libot.core.entities.*;
 
 public class ShutdownCommand extends Command {
 
-	@Nonnull private static final Parameter EXIT_CODE = Parameter.optional(POSITIONAL, "exit code");
+	@Nonnull private static final Parameter EXIT_CODE = optional(POSITIONAL, "exit code");
 
 	public ShutdownCommand() {
 		super(CommandMetadata.builder(ADMINISTRATIVE, "shutdown")
