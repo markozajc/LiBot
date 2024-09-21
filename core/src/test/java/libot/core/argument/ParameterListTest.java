@@ -177,49 +177,49 @@ class ParameterListTest {
 	@Test
 	void testInvalidPositionalSplit() {
 		var params = ParameterList.of(NAM_FIRST, POS_FIRST);
-		assertThrows(ArgumentParseException.class, () -> params.parse("argu ment --n1 argument argu ment"));
+		assertThrows(UsageException.class, () -> params.parse("argu ment --n1 argument argu ment"));
 	}
 
 	@Test
 	void testInvalidPositionalSplitBeforeNamed() {
 		var params = ParameterList.of(NAM_FIRST, NAM_SECOND, POS_FIRST);
-		assertThrows(ArgumentParseException.class, () -> params.parse("argu ment --n1 argument argu ment --n2 arg"));
+		assertThrows(UsageException.class, () -> params.parse("argu ment --n1 argument argu ment --n2 arg"));
 	}
 
 	@Test
 	void testInvalidUnknownNamed() {
 		var params = ParameterList.of(NAM_FIRST, POS_FIRST);
-		assertThrows(ArgumentParseException.class, () -> params.parse("--invalid argument"));
+		assertThrows(UsageException.class, () -> params.parse("--invalid argument"));
 	}
 
 	@Test
 	void testInvalidUnknownPositional() {
 		var params = ParameterList.of(NAM_FIRST);
-		assertThrows(ArgumentParseException.class, () -> params.parse("argument"));
+		assertThrows(UsageException.class, () -> params.parse("argument"));
 	}
 
 	@Test
 	void testInvalidNamedNoValue() {
 		var params = ParameterList.of(NAM_FIRST);
-		assertThrows(ArgumentParseException.class, () -> params.parse("--n1"));
+		assertThrows(UsageException.class, () -> params.parse("--n1"));
 	}
 
 	@Test
 	void testInvalidEmpty() {
 		var params = ParameterList.of();
-		assertThrows(ArgumentParseException.class, () -> params.parse("argument"));
+		assertThrows(UsageException.class, () -> params.parse("argument"));
 	}
 
 	@Test
 	void testMissingPositional() {
 		var params = ParameterList.of(POS_FIRST, POS_SECOND);
-		assertThrows(ArgumentParseException.class, () -> params.parse("argument"));
+		assertThrows(UsageException.class, () -> params.parse("argument"));
 	}
 
 	@Test
 	void testMissingNamed() {
 		var params = ParameterList.of(POS_FIRST, NAM_FIRST);
-		assertThrows(ArgumentParseException.class, () -> params.parse("argument"));
+		assertThrows(UsageException.class, () -> params.parse("argument"));
 	}
 
 }

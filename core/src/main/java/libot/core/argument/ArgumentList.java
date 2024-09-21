@@ -33,13 +33,6 @@ public class ArgumentList {
 
 	public static record Argument(@Nonnull String value) {
 
-		public static Argument getDefault(Parameter parameter) {
-			var value = parameter.getDefaultValue();
-			if (value == null)
-				throw new IllegalArgumentException("Parameter doesn't define a default value");
-			return new Argument(value);
-		}
-
 		@SuppressWarnings("null")
 		public int valueAsInt() {
 			return ParseUtils.parseInt(this.value);

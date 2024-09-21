@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 
-import libot.core.argument.ArgumentParseException;
+import libot.core.argument.UsageException;
 import libot.core.commands.Command;
 import libot.core.commands.exceptions.runtime.*;
 import libot.core.commands.exceptions.startup.*;
@@ -181,7 +181,7 @@ public class ExceptionHandler {
 			private static class RuntimeHandler {
 
 				public static boolean handleRuntime(ExceptionContext<RuntimeException> e) {
-					if (e.ex() instanceof ArgumentParseException s)
+					if (e.ex() instanceof UsageException s)
 						return e.runSpecialized(s, RuntimeHandler::handleArgumentParse);
 
 					else if (e.ex() instanceof CommandException s)
@@ -201,7 +201,7 @@ public class ExceptionHandler {
 				}
 
 				@SuppressWarnings("null")
-				private static void handleArgumentParse(ExceptionContext<ArgumentParseException> e) {
+				private static void handleArgumentParse(ExceptionContext<UsageException> e) {
 					if (e.canTalk()) {
 						e.ctx().replyf("// USAGE INCORRECT //", """
 							%s

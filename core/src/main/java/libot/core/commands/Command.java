@@ -124,7 +124,12 @@ public abstract class Command {
 				u.append("\n` ");
 				if (p.getType() == NAMED)
 					u.append("--");
-				u.append(rightPad(p.getName(), maxLength) + " ` " + p.getDescription());
+				u.append(rightPad(p.getName(), maxLength) + " `");
+
+				p.getDescription().ifPresent(description -> {
+					u.append(" ");
+					u.append(description);
+				});
 			});
 		}
 

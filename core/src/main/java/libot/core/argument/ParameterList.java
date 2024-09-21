@@ -9,7 +9,7 @@ import static libot.core.argument.ParameterList.Parameter.ParameterType.NAMED;
 import java.util.*;
 import java.util.stream.Stream;
 
-import javax.annotation.*;
+import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.mutable.*;
 
@@ -82,7 +82,7 @@ public class ParameterList {
 			return ArgumentList.EMPTY;
 
 		if (this == EMPTY)
-			throw new ArgumentParseException("Too many arguments");
+			throw new UsageException("Too many arguments");
 
 		var arguments =
 			Maps.<Parameter, Argument>newHashMapWithExpectedSize(this.positional.length + this.named.size());
@@ -103,19 +103,18 @@ public class ParameterList {
 		}
 
 		if (name.getValue() != null)
-			throw new ArgumentParseException("Argument without value: --" + name);
+			throw new UsageException("Argument without value: --" + name);
 
 		if (!argumentBuffer.isEmpty() && !foldPositionalParameter(arguments, positionalIndex, argumentBuffer))
-			throw new ArgumentParseException("Too many arguments"); // positional argument out of bounds
+			throw new UsageException("Too many arguments"); // positional argument out of bounds
 
 		if (max(0, positionalIndex.intValue() - 1) < this.positionalRequiredIndex) {
-			throw new ArgumentParseException("Missing argument: " +
-				this.positional[this.positionalRequiredIndex].getName());
+			throw new UsageException("Missing argument: " + this.positional[this.positionalRequiredIndex].getName());
 		}
 
 		for (var required : this.namedRequired) {
 			if (!arguments.containsKey(required))
-				throw new ArgumentParseException("Missing argument: --" + required.getName());
+				throw new UsageException("Missing argument: --" + required.getName());
 		}
 
 		return new ArgumentList(arguments);
@@ -136,7 +135,7 @@ public class ParameterList {
 				// fold argumentBuffer into named parameter
 				var parameter = this.named.get(name.getValue());
 				if (parameter == null)
-					throw new ArgumentParseException("Invalid argument: --" + name);
+					throw new UsageException("Invalid argument: --" + name);
 
 				arguments.put(parameter, new Argument(part));
 				name.setValue(null);
@@ -145,7 +144,7 @@ public class ParameterList {
 				// start named argument (and fold previous positional argument if one exists)
 				if (!argumentBuffer.isEmpty()) {
 					if (!foldPositionalParameter(arguments, positionalIndex, argumentBuffer))
-						throw new ArgumentParseException("Too many arguments");
+						throw new UsageException("Too many arguments");
 
 					positionalIndex.increment();
 				}
@@ -187,35 +186,41 @@ public class ParameterList {
 
 		@Nonnull private final ParameterType type;
 		@Nonnull private final String name;
-		@Nonnull private final String description;
-		@Nullable private final String defaultValue;
+		@Nonnull private final Optional<String> description;
 		private final boolean mandatory;
 
-		private Parameter(@Nonnull ParameterType type, @Nonnull String name, @Nonnull String description,
-						  @Nullable String defaultValue, boolean mandatory) {
+		private Parameter(@Nonnull ParameterType type, @Nonnull String name, @Nonnull Optional<String> description,
+						  boolean mandatory) {
 			this.type = type;
 			this.name = name;
 			this.description = description;
-			this.defaultValue = defaultValue;
 			this.mandatory = mandatory;
 		}
 
 		@Nonnull
+		@SuppressWarnings("null")
 		public static MandatoryParameter mandatory(@Nonnull ParameterType type, @Nonnull String name,
 												   @Nonnull String description) {
-			return new MandatoryParameter(type, name, description, null);
+			return new MandatoryParameter(type, name, Optional.of(description));
 		}
 
 		@Nonnull
-		public static Parameter optional(@Nonnull ParameterType type, @Nonnull String name, @Nonnull String description,
-										 @Nullable String defaultValue) {
-			return new Parameter(type, name, description, defaultValue, false);
+		@SuppressWarnings("null")
+		public static MandatoryParameter mandatory(@Nonnull ParameterType type, @Nonnull String name) {
+			return new MandatoryParameter(type, name, Optional.empty());
 		}
 
 		@Nonnull
+		@SuppressWarnings("null")
 		public static Parameter optional(@Nonnull ParameterType type, @Nonnull String name,
 										 @Nonnull String description) {
-			return optional(type, name, description, null);
+			return new Parameter(type, name, Optional.of(description), false);
+		}
+
+		@Nonnull
+		@SuppressWarnings("null")
+		public static Parameter optional(@Nonnull ParameterType type, @Nonnull String name) {
+			return new Parameter(type, name, Optional.empty(), false);
 		}
 
 		@Nonnull
@@ -229,13 +234,8 @@ public class ParameterList {
 		}
 
 		@Nonnull
-		public String getDescription() {
+		public Optional<String> getDescription() {
 			return this.description;
-		}
-
-		@Nullable
-		public String getDefaultValue() {
-			return this.defaultValue;
 		}
 
 		public boolean isMandatory() {
@@ -284,9 +284,8 @@ public class ParameterList {
 
 	public static class MandatoryParameter extends Parameter {
 
-		MandatoryParameter(@Nonnull ParameterType type, @Nonnull String name, @Nonnull String description,
-						   @Nullable String defaultValue) {
-			super(type, name, description, defaultValue, true);
+		MandatoryParameter(@Nonnull ParameterType type, @Nonnull String name, @Nonnull Optional<String> description) {
+			super(type, name, description, true);
 		}
 
 	}
