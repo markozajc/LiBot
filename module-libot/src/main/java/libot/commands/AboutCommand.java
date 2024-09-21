@@ -16,15 +16,14 @@ import libot.module.music.GlobalMusicManager.MusicManager;
 
 public class AboutCommand extends Command {
 
-	private static final String FORMAT_STATISTICS = """
-		Guild count: **%d**,
-		Total of **%d** commands launched,
-		Currently playing music on **%d** guild%s.""";
-	private static final String FORMAT_DESCRIPTION = """
-		[LiBot](https://libot.eu.org/) is a Discord multi-purpose bot written by [Marko Zajc](https://zajc.tel/) in \
-		[Java](https://openjdk.java.net/) using [JDA](https://github.com/DV8FromTheWorld/JDA/).
-		%s""";
-	static final String LINKS = """
+	public AboutCommand() {
+		super(CommandMetadata.builder(LIBOT, "about")
+			.aliases("info", "botinfo", "stats")
+			.description("Displays information about the bot.")
+			.build());
+	}
+
+	public static final String LINKS = """
 		**[Get LiBot](https://libot.eu.org/get/)** - \
 		**[Website](https://libot.eu.org/)** - \
 		**[Support guild](https://discord.gg/asDUrbR)** - \
@@ -34,7 +33,10 @@ public class AboutCommand extends Command {
 	public void execute(CommandContext c) {
 		var b = new EmbedPrebuilder(LITHIUM);
 		b.setTitle("About LiBot");
-		b.setDescriptionf(FORMAT_DESCRIPTION, LINKS);
+		b.setDescriptionf("""
+			[LiBot](https://libot.eu.org/) is a Discord multi-purpose bot written by [Marko Zajc](https://zajc.tel/) in \
+			[Java](https://openjdk.java.net/) using [JDA](https://github.com/DV8FromTheWorld/JDA/).
+			%s""", LINKS);
 		b.setThumbnail(c.getSelfUser().getAvatarUrl());
 		appendStatistics(c, b);
 		b.setFooterf("v%s | Last reboot ", VERSION);
@@ -44,28 +46,11 @@ public class AboutCommand extends Command {
 
 	private static void appendStatistics(@Nonnull CommandContext c, @Nonnull EmbedPrebuilder b) {
 		long playing = GlobalMusicManager.getManagers().values().stream().filter(MusicManager::isPlayingTrack).count();
-		b.addFieldf("Statistics", FORMAT_STATISTICS, c.shredder().getGuildCount(), ProcessManager.getCount(), playing,
-					playing == 1 ? "" : "s", true);
-	}
-
-	@Override
-	public String getName() {
-		return "about";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "info", "botinfo", "stats" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Displays information about the bot.";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return LIBOT;
+		b.addFieldf("Statistics", """
+			Guild count: **%d**,
+			Total of **%d** commands launched,
+			Currently playing music on **%d** guild%s.""", c.getShredder().getGuildCount(), ProcessManager.getCount(),
+					playing, playing == 1 ? "" : "s", true);
 	}
 
 }

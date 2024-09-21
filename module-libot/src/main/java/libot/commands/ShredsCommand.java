@@ -3,6 +3,7 @@ package libot.commands;
 import static de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment.CENTER;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.LIBOT;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
 
 import de.vandermeer.asciitable.AsciiTable;
 import libot.core.commands.*;
@@ -13,11 +14,12 @@ import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 
 public class ShredsCommand extends Command {
 
-	private static final String FORMAT_TABLE = """
-		```
-		Registered shreds
-		%s
-		```""";
+	public ShredsCommand() {
+		super(CommandMetadata.builder(LIBOT, "shreds").aliases("shredder").description("""
+			Displays status information on LiBot's shreds, \
+			sub-units of the bot that allow it to exceed the 100 hard-limit on guilds imposed by Discord through the \
+			bot verification and privileged intents requirements.""").build());
+	}
 
 	@Override
 	public void execute(CommandContext c) throws Exception {
@@ -27,9 +29,9 @@ public class ShredsCommand extends Command {
 		t.addRule();
 		t.addRow("Name", "ID", "Status", "Capacity").setTextAlignment(CENTER).setPaddingLeftRight(1);
 		t.addStrongRule();
-		c.shredder().getShreds().forEach(s -> {
+		c.getShredder().getShreds().forEach(s -> {
 			var name = s.name();
-			if (c.shredder().getCurrentShred() == s)
+			if (c.getShredder().getCurrentShred() == s)
 				name = "> %s <".formatted(s.name());
 			t.addRow(name, s.jda().getSelfUser().getId(), s.jda().getStatus().toString(),
 					 "%d / 100".formatted(s.jda().getGuildCache().size()))
@@ -37,40 +39,17 @@ public class ShredsCommand extends Command {
 		});
 		t.addRule();
 
-		long totalGuilds = c.shredder()
+		long totalGuilds = c.getShredder()
 			.getShreds()
 			.stream()
 			.map(Shred::jda)
 			.map(JDA::getGuildCache)
 			.mapToLong(SnowflakeCacheView::size)
 			.sum();
-		t.addRow(null, null, "", "%d / %d".formatted(totalGuilds, c.shredder().getShreds().size() * 100))
+		t.addRow(null, null, "", "%d / %d".formatted(totalGuilds, c.getShredder().getShreds().size() * 100))
 			.setPaddingLeftRight(1);
 		t.addRule();
-		c.replyf(FORMAT_TABLE, t.render());
-	}
-
-	@Override
-	public String getName() {
-		return "shreds";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "shredder" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Displays status information on LiBot's shreds, \
-			sub-units of the bot that allow it to exceed the 100 hard-limit on guilds imposed by Discord through the \
-			bot verification and privileged intents requirements.""";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return LIBOT;
+		c.reply(codeblock("Registered shreds" + t.render()));
 	}
 
 }

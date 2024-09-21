@@ -3,6 +3,7 @@ package libot.commands;
 import static java.util.regex.Pattern.compile;
 import static libot.commands.AboutCommand.LINKS;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.*;
 import static libot.module.ModuleLibotShared.sendUsage;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
@@ -14,34 +15,40 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
 
 public class HelpCommand extends Command {
 
-	private static final int LIST_MAX_WIDTH = 70;
+	@Nonnull private static final Parameter COMMAND =
+		Parameter.optional(POSITIONAL, "command", "The command to describe");
 
+	public HelpCommand() {
+		super(CommandMetadata.builder(LIBOT, "help")
+			.aliases("man", "manual")
+			.parameters(COMMAND)
+			.description("""
+				Direct-messages you a list of all commands. \
+				To get detailed information about a command, use help along with the command's name as a parameter.""")
+			.build());
+	}
+
+	private static final int LIST_MAX_WIDTH = 70;
 	private static final Pattern HYPERLINK_REGEX = compile("\\[(.*?)\\]\\([^\\)]+\\)");
 
-	public static final String FORMAT_TITLE_INFO = "Info about `%s`";
 	private static final String FORMAT_NONEXISTANT =
 		"`%s` does not (yet) exist! Please try again in approximately `%d` years!";
 	private static final String FORMAT_DESCRIPTION = """
 		To get detailed information about a command, use `%s [command]`.
 		You can also use %s as a command prefix!
 		%s""";
-	public static final String FORMAT_ADMINISTRATIVE = """
-
-
-		_(this command (or some of its parts) can only be used by LiBot's sysadmins)_""";
 
 	@Override
 	public void execute(CommandContext c) throws Exception {
-		if (c.params().check(0))
-			about(c);
-		else
-			list(c);
+		c.arg(COMMAND).ifPresentOrElse(arg -> about(c, arg), () -> list(c));
 	}
 
 	@SuppressWarnings("null")
@@ -59,8 +66,12 @@ public class HelpCommand extends Command {
 			b.setLength(0);
 			for (Command cmd : c.getCommands().getInCategory(category)) {
 				b.append(monospace(rightPad(cmd.getName(), maxLength)));
-				b.append(abbreviate(HYPERLINK_REGEX.matcher(cmd.getInfo().replace("\n", "")).replaceAll("$1"),
-									LIST_MAX_WIDTH - maxLength));
+
+				cmd.getDescription().map(desc -> {
+					return abbreviate(HYPERLINK_REGEX.matcher(desc.replace("\n", "")).replaceAll("$1"),
+									  LIST_MAX_WIDTH - maxLength);
+				}).ifPresent(b::append);
+
 				b.append("\n");
 			}
 			e.addField(category.toString(), b.toString(), false);
@@ -74,53 +85,15 @@ public class HelpCommand extends Command {
 		});
 	}
 
-	@SuppressFBWarnings(value = "DMI_RANDOM_USED_ONLY_ONCE",
-						justification = "Predictable (not random) output is needed")
-	private static void about(@Nonnull CommandContext c) {
-		Command cmd = c.getCommands().get(c.params().get(0));
-		if (cmd == null) {
-			int random = new Random(c.params().get(0).hashCode()).nextInt(1000) + 300;
-			throw c.errorf(FORMAT_NONEXISTANT, DISABLED, c.params().get(0).replace('`', '\''), random);
-		}
-
-		sendUsage(c, cmd);
-	}
-
-	@Override
-	public String getName() {
-		return "help";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "man", "manual" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Direct-messages you a list of all commands. \
-			To get detailed information about a command, use help along with the command's name as a parameter.""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[command]" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "command to describe" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return LIBOT;
+	@SuppressWarnings("null")
+	@SuppressFBWarnings(value = "DMI_RANDOM_USED_ONLY_ONCE", justification = "Deterministic output is needed")
+	private static void about(@Nonnull CommandContext c, Argument command) {
+		c.getCommands().get(command.value()).ifPresentOrElse(cmd -> {
+			sendUsage(c, cmd);
+		}, () -> {
+			int random = new Random(command.value().hashCode()).nextInt(1000) + 300;
+			throw c.errorf(FORMAT_NONEXISTANT, DISABLED, command.value().replace('`', '\''), random);
+		});
 	}
 
 }
