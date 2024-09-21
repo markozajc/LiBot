@@ -716,6 +716,11 @@ public class EventContext extends BotContext {
 
 	// ===============* Internal *===============
 
+	protected EventContext(@Nonnull EventContext eventContext) {
+		super(eventContext);
+		this.event = eventContext.event;
+	}
+
 	@Nonnull
 	private <T> CompletableFuture<T> permissionExceptionFuture(@Nonnull Permission permission) {
 		return exceptionFuture(new InsufficientPermissionException(getGuild(), permission));
@@ -729,11 +734,6 @@ public class EventContext extends BotContext {
 	@Nonnull
 	protected Message getReference() {
 		return getMessage();
-	}
-
-	protected EventContext(@Nonnull EventContext eventContext) {
-		super(eventContext);
-		this.event = eventContext.event;
 	}
 
 }

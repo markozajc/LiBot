@@ -2,7 +2,7 @@ package libot.core.commands.exceptions;
 
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
-import static libot.core.ratelimits.RatelimitsManager.getRatelimits;
+import static libot.core.ratelimits.CommandRatelimitManager.getRatelimits;
 import static net.dv8tion.jda.api.Permission.MESSAGE_EMBED_LINKS;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.apache.commons.lang3.exception.ExceptionUtils.*;

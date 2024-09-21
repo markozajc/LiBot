@@ -373,6 +373,14 @@ public class CommandContext extends EventContext {
 
 	// ===============* Internal *===============
 
+	protected CommandContext(@Nonnull CommandContext commandContext) {
+		super(commandContext);
+		this.command = commandContext.command;
+		this.arguments = commandContext.arguments;
+		this.reference = commandContext.reference;
+		this.waiter = commandContext.waiter;
+	}
+
 	private boolean getConfirmation(@Nonnull Message m, boolean keepPrompt) {
 		if (canReact()) {
 			m.addReaction(ACCEPT_EMOJI).queue();

@@ -7,14 +7,14 @@ import javax.annotation.Nonnull;
 
 import libot.core.commands.Command;
 
-public class RatelimitsManager {
+public class CommandRatelimitManager {
 
-	private static final Map<String, Ratelimits> RATELIMITS = new ConcurrentHashMap<>();
+	private static final Map<String, Ratelimit> RATELIMITS = new ConcurrentHashMap<>();
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public static Ratelimits getRatelimits(@Nonnull Command command) {
-		return RATELIMITS.computeIfAbsent(command.getRatelimitBucket(), k -> new Ratelimits(command.getRatelimit()));
+	public static Ratelimit getRatelimits(@Nonnull Command command) {
+		return RATELIMITS.computeIfAbsent(command.getRatelimitBucket(), k -> new Ratelimit(command.getRatelimit()));
 	}
 
 	public static long getRemaining(@Nonnull Command command, long user) {
@@ -25,6 +25,6 @@ public class RatelimitsManager {
 		return getRemaining(command, user) > 0;
 	}
 
-	private RatelimitsManager() {}
+	private CommandRatelimitManager() {}
 
 }

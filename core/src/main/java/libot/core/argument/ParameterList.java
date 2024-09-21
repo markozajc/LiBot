@@ -1,11 +1,12 @@
 package libot.core.argument;
 
 import static com.google.common.collect.Streams.concat;
-import static java.util.Arrays.stream;
+import static java.util.Arrays.*;
 import static java.util.Collections.emptyMap;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.NAMED;
 
 import java.util.*;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import javax.annotation.*;
@@ -42,12 +43,18 @@ public class ParameterList {
 	@Nonnull
 	@SuppressWarnings("null")
 	public static ParameterList of(@Nonnull Parameter... parameters) {
-		if (parameters.length == 0)
+		return of(asList(parameters));
+	}
+
+	@Nonnull
+	@SuppressWarnings("null")
+	public static ParameterList of(@Nonnull List<Parameter> parameters) {
+		if (parameters.isEmpty())
 			return EMPTY;
 
-		var named = Maps.<String, Parameter>newHashMapWithExpectedSize(parameters.length);
-		var namedRequired = new ArrayList<Parameter>(parameters.length);
-		var positional = new ArrayList<Parameter>(parameters.length);
+		var named = Maps.<String, Parameter>newHashMapWithExpectedSize(parameters.size());
+		var namedRequired = new ArrayList<Parameter>(parameters.size());
+		var positional = new ArrayList<Parameter>(parameters.size());
 		for (var param : parameters) {
 			switch (param.getType()) {
 				case NAMED -> {

@@ -3,7 +3,7 @@ package libot.core.processes;
 import static java.lang.Integer.*;
 import static java.lang.Thread.currentThread;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static libot.core.ratelimits.RatelimitsManager.*;
+import static libot.core.ratelimits.CommandRatelimitManager.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.*;
@@ -21,7 +21,7 @@ import libot.core.commands.Command;
 import libot.core.commands.exceptions.ExceptionHandler;
 import libot.core.commands.exceptions.startup.*;
 import libot.core.entities.*;
-import libot.core.ratelimits.RatelimitsManager;
+import libot.core.ratelimits.CommandRatelimitManager;
 import libot.providers.ConfigurationProvider;
 
 public class ProcessManager {
@@ -66,7 +66,7 @@ public class ProcessManager {
 					this.ctx.getCommand().execute(this.ctx);
 
 					if (this.ctx.isCommandRatelimited())
-						RatelimitsManager.getRatelimits(this.ctx.getCommand()).register(this.ctx.getUserIdLong());
+						CommandRatelimitManager.getRatelimits(this.ctx.getCommand()).register(this.ctx.getUserIdLong());
 
 				} catch (Throwable t) { // NOSONAR no
 					ExceptionHandler.handle(t, this.ctx);

@@ -31,7 +31,7 @@ public class ArgumentList {
 		return Optional.ofNullable(this.arguments.get(param));
 	}
 
-	public static record Argument(@Nonnull String value) {
+	public static record Argument(String value) {
 
 		@SuppressWarnings("null")
 		public int valueAsInt() {

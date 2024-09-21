@@ -39,9 +39,24 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		}
 
 		@Nonnull
+		public CommandCategory getCategory() {
+			return this.category;
+		}
+
+		@Nonnull
+		public String getName() {
+			return this.name;
+		}
+
+		@Nonnull
 		public Builder id(@Nonnull String id) {
 			this.id = id;
 			return this;
+		}
+
+		@Nonnull
+		public String getId() {
+			return this.id;
 		}
 
 		@Nonnull
@@ -49,6 +64,11 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		public Builder description(@Nonnull String description) {
 			this.description = Optional.of(description);
 			return this;
+		}
+
+		@Nonnull
+		public Optional<String> getDescription() {
+			return this.description;
 		}
 
 		@Nonnull
@@ -63,6 +83,11 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		public Builder aliases(@Nonnull Collection<String> aliases) {
 			this.aliases = Set.copyOf(aliases);
 			return this;
+		}
+
+		@Nonnull
+		public Set<String> getAliases() {
+			return this.aliases;
 		}
 
 		@Nonnull
@@ -92,11 +117,22 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		}
 
 		@Nonnull
+		public Set<Permission> getPermissions() {
+			return this.permissions;
+		}
+
+		@Nonnull
 		public Builder ratelimitMillis(long ratelimitMillis) {
 			if (ratelimitMillis < 0)
 				throw new IllegalArgumentException("Negative ratelimit value");
 			this.ratelimitMillis = ratelimitMillis;
 			return this;
+		}
+
+		@Nonnull
+		public Builder ratelimitMillis(long ratelimitMillis, @Nonnull String ratelimitBucket) {
+			this.ratelimitBucket = ratelimitBucket;
+			return ratelimitMillis(ratelimitMillis);
 		}
 
 		@Nonnull
@@ -106,16 +142,35 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		}
 
 		@Nonnull
-		public Builder ratelimit(long ratelimit, @Nonnull String ratelimitBucket) {
-			this.ratelimitMillis = ratelimit;
+		public Builder ratelimit(long ratelimit, TimeUnit unit, @Nonnull String ratelimitBucket) {
 			this.ratelimitBucket = ratelimitBucket;
-			return this;
+			return ratelimit(ratelimit, unit);
+		}
+
+		public long getRatelimitMillis() {
+			return this.ratelimitMillis;
+		}
+
+		@Nonnull
+		public String getRatelimitBucket() {
+			return this.ratelimitBucket;
 		}
 
 		@Nonnull
 		public Builder parameters(@Nonnull Parameter... parameters) {
 			this.parameters = ParameterList.of(parameters);
 			return this;
+		}
+
+		@Nonnull
+		public Builder parameters(@Nonnull List<Parameter> parameters) {
+			this.parameters = ParameterList.of(parameters);
+			return this;
+		}
+
+		@Nonnull
+		public ParameterList getParameters() {
+			return this.parameters;
 		}
 
 		@Nonnull
