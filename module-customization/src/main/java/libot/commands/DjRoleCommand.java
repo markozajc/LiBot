@@ -54,7 +54,7 @@ public class DjRoleCommand extends Command {
 
 	private static void set(@Nonnull CommandContext c, @Nonnull Customization cust, @Nonnull String roleName) {
 		var roles = findRoles(c, roleName);
-		if (!roles.isEmpty())
+		if (roles.isEmpty())
 			throw c.errorf("Role \"%s\" does not exist", FAILURE, escape(roleName));
 
 		var role = roles.get(0);
@@ -76,9 +76,10 @@ public class DjRoleCommand extends Command {
 				c.replyf("""
 					The DJ role for this guild is %s.
 
-					Only members with this role or with the 'Manage Server' permission will be able to use music commands.
-					_Looking for a way to disable DJ role? Run `%s disable` to disable it._""",
-						 SUCCESS, role.getAsMention());
+					Only members with this role or with the 'Manage Server' permission will be able to use music \
+					commands.
+					Run `%s disable` to disable the DJ role._""", SUCCESS, role.getAsMention(),
+						 c.getCommandWithPrefix());
 
 			} else {
 				cust.setDjRole(null);

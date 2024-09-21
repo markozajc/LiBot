@@ -49,18 +49,18 @@ public class AutoRoleCommand extends Command {
 		});
 	}
 
-	private void report(@Nonnull CommandContext c, @Nonnull AutoRoleProvider provider) {
+	private static void report(@Nonnull CommandContext c, @Nonnull AutoRoleProvider provider) {
 		String title = "AutoRole health report";
 		provider.get(c.getGuildIdLong()).ifPresentOrElse(id -> {
 			var self = c.getSelfMember();
 			Role role;
 			if ((role = c.getGuild().getRoleById(id)) == null) {
-				c.replyf(title, """
+				c.reply(title, """
 					⚠️ Role does not exist
 
 					AutoRole has been configured, but the role itself has been deleted.
 
-					AutoRole will not work properly. Please fix the configuration with `%s`!""", FAILURE, getUsage(c));
+					AutoRole will not function properly.""", FAILURE);
 
 			} else if (!self.hasPermission(MANAGE_ROLES)) {
 				c.replyf(title, """
@@ -89,7 +89,8 @@ public class AutoRoleCommand extends Command {
 					✅ Permission granted
 					✅ Hierarchy correct
 
-					AutoRole is active and set to %s.""", SUCCESS, role.getAsMention());
+					AutoRole is active and set to %s.
+					Run `%s disable` to disable AutoRole.""", SUCCESS, role.getAsMention(), c.getCommandWithPrefix());
 			}
 		}, () -> c.reply(title, "AutoRole is not enabled.", DISABLED));
 	}

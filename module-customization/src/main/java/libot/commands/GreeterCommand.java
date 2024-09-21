@@ -61,7 +61,7 @@ public class GreeterCommand extends Command {
 	public static void set(@Nonnull CommandContext c, @Nonnull EventType type, @Nonnull GreeterConfiguration conf) {
 		var e = new EmbedPrebuilder(LITHIUM);
 		e.setDescriptionf("""
-			You're setting the **%s** message for %s.
+			You're setting the **%s** message in %s.
 			Please type in your desired message.""", type.toString().toLowerCase(), c.getChannelMention());
 		e.addFieldf("Available variables", """
 			`{name}   ` Username - %s
@@ -84,8 +84,9 @@ public class GreeterCommand extends Command {
 			case GOODBYE -> conf.setGoodbyeMessage(input);
 		}
 
-		c.replyf("Successfully set the greeter for %s. You may now test it with `%sgreeter test %s`.", SUCCESS,
-				 c.getChannelMention(), c.getEffectivePrefix(), type.toString().toLowerCase());
+		c.replyf("Successfully set the **%s** message in %s. You may now test it with `%s test %s`.", SUCCESS,
+				 type.name().toLowerCase(), c.getChannelMention(), c.getCommandWithPrefix(),
+				 type.toString().toLowerCase());
 	}
 
 	public static void remove(@Nonnull CommandContext c, @Nonnull EventType type, @Nonnull GreeterConfiguration conf) {
