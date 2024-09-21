@@ -1,17 +1,26 @@
 package libot.commands;
 
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.GAMES;
 import static libot.module.money.BettableGame.GameResult.*;
 import static libot.utils.Utilities.random;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
-import libot.core.commands.CommandCategory;
+import libot.core.argument.ParameterList.*;
+import libot.core.commands.CommandMetadata;
 import libot.module.money.*;
-import net.dv8tion.jda.api.entities.Message;
 
 public class RockPaperScissorsCommand extends BettableGame {
+
+	@Nonnull private static final MandatoryParameter GESTURE =
+		Parameter.mandatory(POSITIONAL, "gesture", "rock/paper/scissors");
+
+	public RockPaperScissorsCommand() {
+		super(CommandMetadata.builder(GAMES, "rockpaperscissors").aliases("rps").parameters(GESTURE).description("""
+			Plays a game of [Rock Paper Scissors](https://en.wikipedia.org/wiki/Rock_paper_scissors) with LiBot."""));
+	}
 
 	private enum Gesture {
 		ROCK,
@@ -19,7 +28,7 @@ public class RockPaperScissorsCommand extends BettableGame {
 		SCISSORS
 	}
 
-	private static final String FORMAT_END = """
+	private static final String FORMAT_OUTCOME = """
 		_Rock.._
 		_Paper.._
 		_Scissors!_
@@ -29,63 +38,33 @@ public class RockPaperScissorsCommand extends BettableGame {
 
 	@Override
 	public GameResult play(BettableGameContext c) throws InterruptedException {
-		Gesture player = null;
-		while (player == null) {
-			var resp = c.askraw("Please pick between **ROCK**, **PAPER**, **SCISSORS**, or **EXIT**.");
-			player = selectGesture(c, resp);
-		}
+		Gesture player = switch (c.arg(GESTURE).value().toLowerCase()) {
+			case "rock", "r" -> Gesture.ROCK;
+			case "paper", "p" -> Gesture.PAPER;
+			case "scissors", "scissor", "s" -> Gesture.SCISSORS;
+			default -> {
+				c.reply("Please pick between **ROCK**, **PAPER**, **SCISSORS**");
+				throw c.grefund();
+			}
+		};
 
 		Gesture libot = random(Gesture.values());
 		int winner = (player.ordinal() - libot.ordinal() + 4) % 3 - 1;
 		return switch (winner) {
 			case 1 -> {
-				c.replyf("You win!", FORMAT_END, SUCCESS, player, libot);
+				c.replyf("You win!", FORMAT_OUTCOME, SUCCESS, player, libot);
 				yield WIN;
 			}
 			case -1 -> {
-				c.replyf("You lose", FORMAT_END, FAILURE, player, libot);
+				c.replyf("You lose", FORMAT_OUTCOME, FAILURE, player, libot);
 				yield LOSE;
 			}
 			case 0 -> {
-				c.replyf("Draw", FORMAT_END, DISABLED, player, libot);
-				yield RETURN;
+				c.replyf("Draw", FORMAT_OUTCOME, DISABLED, player, libot);
+				yield REFUND;
 			}
 			default -> throw c.continuum(winner);
 		};
-	}
-
-	@Nullable
-	private static Gesture selectGesture(BettableGameContext c, Message resp) {
-		return switch (resp.getContentDisplay().toLowerCase()) {
-			case "rock" -> Gesture.ROCK;
-			case "paper" -> Gesture.PAPER;
-			case "scissors" -> Gesture.SCISSORS;
-			case "exit" -> {
-				resp.addReaction(ACCEPT_EMOJI).queue();
-				throw c.greturn();
-			}
-			default -> null;
-		};
-	}
-
-	@Override
-	public String getName() {
-		return "rockpaperscissors";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "rps" };
-	}
-
-	@Override
-	public String getGameInfo() {
-		return "Plays a game of \"Rock Paper Scissors\" with LiBot.";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return GAMES;
 	}
 
 }

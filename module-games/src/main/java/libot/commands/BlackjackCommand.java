@@ -12,28 +12,34 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Nonnull;
 
-import libot.core.commands.CommandCategory;
+import libot.core.commands.CommandMetadata;
 import libot.core.extensions.EmbedPrebuilder;
 import libot.module.money.*;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 
 public class BlackjackCommand extends BettableGame {
 
+	@SuppressWarnings("null")
+	public BlackjackCommand() {
+		super(CommandMetadata.builder(GAMES, "blackjack").description("""
+			Plays a game of Blackjack (%d-deck) against a robot dealer. \
+			If you don't know the rules, you can read more about this game \
+			[here](https://en.wikipedia.org/wiki/Blackjack).""".formatted(DECK_COUNT)));
+	}
+
 	private static final int BLACKJACK = 21;
-	// TODO splitting maybe
 
 	private static final int DEALER_SAFE_VALUE = 16;
 	private static final int DECK_COUNT = 8;
 
-	private static final String FORMAT_CONFIRM_EXIT = "Are you sure that you want to exit this Blackjack game%s?";
-	private static final String FORMAT_CHEATSHEET =
+	private static final String CHEATSHEET =
 		"Type HIT to take another card, STAND to let the dealer play or EXIT to exit.";
 
 	private static final List<Card> DECK;
 	static {
 		DECK = new ArrayList<>(52);
 		for (Suit suit : Suit.values()) {
-			DECK.add(new Card(suit.getEmoji(), 1, "A")); // TODO let the player choose 11
+			DECK.add(new Card(suit.getEmoji(), 1, "A"));
 			for (int i = 2; i < 11; i++)
 				DECK.add(new Card(suit.getEmoji(), i, Integer.toString(i)));
 			DECK.add(new Card(suit.getEmoji(), 10, "J"));
@@ -77,8 +83,8 @@ public class BlackjackCommand extends BettableGame {
 	@Override
 	public GameResult play(BettableGameContext c) {
 		var deck = createDeck();
-		var player = new LinkedList<Card>();
-		var dealer = new LinkedList<Card>();
+		var player = new ArrayList<Card>(7);
+		var dealer = new ArrayList<Card>(7);
 
 		for (int i = 0; i < 2; i++) {
 			draw(deck, player);
@@ -107,39 +113,37 @@ public class BlackjackCommand extends BettableGame {
 
 	public static boolean doesPlayerHit(@Nonnull BettableGameContext c) {
 		while (true) {
-			var response = c.ask().toLowerCase();
-			if ("hit".equals(response))
-				return true;
-			else if ("stand".equals(response))
-				return false;
-			else if ("exit".equals(response))
-				confirmExit(c);
-			else
-				c.reply(FORMAT_CHEATSHEET, DISABLED);
+			switch (c.ask().toLowerCase()) {
+				case "hit" -> {
+					return true;
+				}
+				case "stand" -> {
+					return false;
+				}
+				case "exit" -> {
+					if (c.confirmf("Are you sure that you want to exit this Blackjack game%s?",
+								   c.hasBet() ? " **(you'll lose your full bet)**" : "")) {
+						throw c.gquit();
+					}
+				}
+				default -> c.reply(CHEATSHEET, DISABLED);
+			}
 		}
-	}
-
-	private static void confirmExit(@Nonnull BettableGameContext c) {
-		String warning = "";
-		if (c.hasBet())
-			warning = " **(you'll lose your full bet)**";
-		if (c.confirmf(FORMAT_CONFIRM_EXIT, warning))
-			throw c.gquit();
 	}
 
 	public static boolean doesDealerHit(@Nonnull List<Card> player, @Nonnull List<Card> dealer) {
 		int knownPlayerCount = player.get(0).value() + player.get(1).value() + (player.size() - 2) * 2;
 		// the dealer knows your first two cards and your amount of cards drawn (each of
 		// which can be no less than 2)
-		return count(dealer) < max(DEALER_SAFE_VALUE, knownPlayerCount);
+		return countValues(dealer) < max(DEALER_SAFE_VALUE, knownPlayerCount);
 	}
 
 	@Nonnull
 	private static GameResult finish(@Nonnull BettableGameContext c, @Nonnull List<Card> player,
 									 @Nonnull List<Card> dealer) {
 		report(c, player, dealer, false, true);
-		int playerCount = count(player);
-		int dealerCount = count(dealer);
+		int playerCount = countValues(player);
+		int dealerCount = countValues(dealer);
 		if (playerCount > dealerCount) {
 			c.reply("You win!", "You are closer to 21 than the dealer.", SUCCESS);
 			return WIN;
@@ -150,17 +154,18 @@ public class BlackjackCommand extends BettableGame {
 
 		} else {
 			c.reply("Draw", "Both hands are equal in value.", DISABLED);
-			return RETURN;
+			return REFUND;
 		}
 	}
 
 	private static void checkBusted(@Nonnull BettableGameContext c, @Nonnull List<Card> player,
 									@Nonnull List<Card> dealer) {
-		if (count(player) > BLACKJACK) {
+		if (countValues(player) > BLACKJACK) {
 			report(c, player, dealer, true, true);
 			c.replyf("Busted!", "Your hand exceeds 21. You lose.", FAILURE);
 			throw c.glose();
-		} else if (count(dealer) > BLACKJACK) {
+
+		} else if (countValues(dealer) > BLACKJACK) {
 			report(c, player, dealer, false, true);
 			c.replyf("You win!", "The dealer is busted because their hand exceeds 21. You win.", SUCCESS);
 			throw c.gwin();
@@ -173,7 +178,7 @@ public class BlackjackCommand extends BettableGame {
 		e.setTitle("Blackjack");
 		e.addField(listHand(c.getEffectiveName(), player, playerHit, false));
 		e.addField(listHand("Dealer", dealer, false, !end));
-		e.setFooter(FORMAT_CHEATSHEET);
+		e.setFooter(CHEATSHEET);
 		c.reply(e);
 	}
 
@@ -218,27 +223,8 @@ public class BlackjackCommand extends BettableGame {
 		hand.add(deck.remove());
 	}
 
-	private static int count(@Nonnull List<Card> hand) {
+	private static int countValues(@Nonnull List<Card> hand) {
 		return hand.stream().mapToInt(Card::value).sum();
-	}
-
-	@Override
-	@SuppressWarnings("null")
-	public String getGameInfo() {
-		return """
-			Plays a game of Blackjack (%d-deck) against a robot dealer. \
-			If you don't know the rules, you can read more about this game \
-			[here](https://en.wikipedia.org/wiki/Blackjack).""".formatted(DECK_COUNT);
-	}
-
-	@Override
-	public String getName() {
-		return "blackjack";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return GAMES;
 	}
 
 }

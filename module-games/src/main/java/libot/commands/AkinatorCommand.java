@@ -4,6 +4,8 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.regex.Pattern.compile;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.optional;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.GAMES;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 import static org.apache.commons.lang3.StringUtils.capitalize;
@@ -16,11 +18,13 @@ import java.util.regex.Pattern;
 
 import javax.annotation.*;
 
-import org.eu.zajc.akiwrapper.*;
 import org.eu.zajc.akiwrapper.Akiwrapper.*;
+import org.eu.zajc.akiwrapper.AkiwrapperBuilder;
 import org.eu.zajc.akiwrapper.core.entities.*;
 import org.slf4j.*;
 
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
@@ -28,18 +32,16 @@ import net.dv8tion.jda.api.EmbedBuilder;
 
 public class AkinatorCommand extends Command {
 
+	@Nonnull private static final Parameter LANGUAGE =
+		optional(POSITIONAL, "language", "language to play in, English by default");
+
+	public AkinatorCommand() {
+		super(CommandMetadata.builder(GAMES, "akinator").parameters(LANGUAGE).description("""
+			Plays a game of [Akinator](https://en.akinator.com/), the character-guessing genie.
+			Implemented using [Akiwrapper](https://github.com/markozajc/Akiwrapper)."""));
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(AkinatorCommand.class);
-
-	private static final String FORMAT_CHEAT_SHEET = """
-
-		Answer with \
-		**`Y`** (yes), \
-		**`N`** (no), \
-		**`DK`** (don't know), \
-		**`P`** (probably), \
-		**`PN`** (probably not) or \
-		**`B`** (back).""";
-	private static final String FORMAT_LANGUAGE_UNSUPPORTED = "Sorry, that language isn't supported. Try%s";
 
 	private static final String[] ANSWERS_BACK = { "b", "u", "back", "undo" };
 	private static final String ANSWER_EXIT = "exit";
@@ -50,11 +52,24 @@ public class AkinatorCommand extends Command {
 		.of("concentration_intense", "confiant", "deception", "etonnement", "inspiration_forte", "inspiration_legere",
 			"leger_decouragement", "mobile", "serein", "surprise", "tension", "triomphe", "vrai_decouragement", "defi");
 
+	private static final String CHEATSHEET = """
+
+		Answer with \
+		**`Y`** (yes), \
+		**`N`** (no), \
+		**`DK`** (don't know), \
+		**`P`** (probably), \
+		**`PN`** (probably not) or \
+		**`B`** (back).""";
+
 	@Override
 	public void execute(CommandContext c) {
 		c.typing();
 		var lang = selectLanguage(c);
-		var aw = constructAkiwrapper(c, lang);
+		var aw = new AkiwrapperBuilder().setFilterProfanity(!c.isChannelNSFW())
+			.setLanguage(lang)
+			.setTheme(Theme.CHARACTER)
+			.build();
 
 		for (var q = aw.getCurrentQuery(); q != null; q = aw.getCurrentQuery()) {
 			if (q instanceof Question qe) {
@@ -83,26 +98,15 @@ public class AkinatorCommand extends Command {
 	@SuppressWarnings("null")
 	@Nonnull
 	private static Language selectLanguage(@Nonnull CommandContext c) {
-		if (c.params().check(0)) {
+		return c.arg(LANGUAGE).map(Argument::value).map(lang -> {
 			var langs = EnumSet.allOf(Language.class);
-			return langs.stream()
-				.filter(l -> l.toString().equalsIgnoreCase(c.params().get(0)))
-				.findAny()
-				.orElseThrow(() -> c.errorf("Unsupported language", FORMAT_LANGUAGE_UNSUPPORTED, DISABLED,
-											langs.stream()
-												.map(l -> capitalize(l.toString().toLowerCase()))
-												.collect(joining("\n• ", "\n• ", ""))));
-		} else {
-			return ENGLISH;
-		}
-	}
-
-	@Nonnull
-	private static Akiwrapper constructAkiwrapper(@Nonnull CommandContext c, @Nonnull Language lang) {
-		return new AkiwrapperBuilder().setFilterProfanity(!c.isChannelNSFW())
-			.setLanguage(lang)
-			.setTheme(Theme.CHARACTER)
-			.build();
+			return langs.stream().filter(l -> l.toString().equalsIgnoreCase(lang)).findAny().orElseThrow(() -> {
+				return c.errorf("Unsupported language", "Sorry, that language isn't supported. Try%s", DISABLED,
+								langs.stream()
+									.map(l -> capitalize(l.toString().toLowerCase()))
+									.collect(joining("\n• ", "\n• ", "")));
+			});
+		}).orElse(ENGLISH);
 	}
 
 	@SuppressWarnings("null")
@@ -126,7 +130,7 @@ public class AkinatorCommand extends Command {
 				}
 
 			} else if ((answer = parseAnswer(response)) == null) {
-				c.reply(null, FORMAT_CHEAT_SHEET, EXIT_FOOTER, WARN);
+				c.reply(null, CHEATSHEET, EXIT_FOOTER, WARN);
 
 			} else {
 				c.typing();
@@ -142,7 +146,7 @@ public class AkinatorCommand extends Command {
 		e.setTitlef("Question #%02d", q.getStep() + 1);
 		e.setDescription(q.getText());
 		if (q.getStep() == 0)
-			e.appendDescription(FORMAT_CHEAT_SHEET);
+			e.appendDescription(CHEATSHEET);
 		e.setFooter(EXIT_FOOTER);
 		e.setThumbnail(getAkitudeUrl(q.getAkitude()));
 		return e;
@@ -206,38 +210,6 @@ public class AkinatorCommand extends Command {
 			LOG.warn("Unknown akitude format: {}", akitudeUrl);
 			return akitudeUrl.toString();
 		}
-	}
-
-	@Override
-	public String getName() {
-		return "akinator";
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Plays a game of [Akinator](https://en.akinator.com/), the character-guessing genie.
-			Implemented using [Akiwrapper](https://github.com/markozajc/Akiwrapper).""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[language]" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "language to play in, English by default" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return GAMES;
 	}
 
 }

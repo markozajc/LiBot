@@ -1,18 +1,18 @@
 package libot.commands;
 
 import static java.lang.Integer.parseInt;
-import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.GAMES;
 import static libot.module.money.BettableGame.GameResult.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
-import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.*;
 import static org.eu.zajc.juno.cards.UnoCardColor.*;
 import static org.eu.zajc.juno.rules.pack.impl.UnoOfficialRules.UnoHouseRule.PROGRESSIVE;
 import static org.eu.zajc.juno.rules.pack.impl.house.UnoProgressiveRulePack.getConsecutive;
 import static org.eu.zajc.juno.utils.UnoRuleUtils.combinedPlacementAnalysis;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -23,30 +23,22 @@ import org.eu.zajc.juno.players.UnoPlayer;
 import org.eu.zajc.juno.players.impl.UnoStrategicPlayer;
 import org.eu.zajc.juno.rules.pack.impl.UnoOfficialRules;
 
-import libot.core.commands.CommandCategory;
+import libot.core.commands.CommandMetadata;
 import libot.core.commands.exceptions.runtime.CanceledException;
 import libot.core.extensions.EmbedPrebuilder;
 import libot.module.money.*;
 
 public class UnoCommand extends BettableGame {
 
-	private static final String FORMAT_FALLBACK_DRAW = """
-		Both discard and draw piles were emptied, the player with least cards wins.
-		Both players has the same amount of cards.""";
-	private static final String FORMAT_COLOR_CHOOSE = """
-		1 - Yellow
-		2 - Red
-		3 - Green
-		4 - Blue""";
-	private static final String FORMAT_CONFIRM_EXIT = "Are you sure that you want to exit this UNO game%s?";
-	private static final String FORMAT_PLAYER_CONFIRM_PLACE_DRAWN = "You draw a %s. Do you want to place it?";
-	private static final String FORMAT_PLAYER_NAN = "Please input a number.";
-	private static final String FORMAT_PLAYER_INVALID_CHOICE = "Invalid choice!";
-	private static final String FORMAT_PLAYER_ACTION_DRAW = "``0 -`` %s Draw";
-	private static final String FORMAT_PLAYER_ACTION = "\n``%d -`` %s";
-	private static final String FORMAT_PLAYER_ACTION_DRAW_FORCED = "``0 -`` Draw **%d** cards from a %s";
-	private static final String FORMAT_PLAYER_STATUS_BOT = "\n%s's hand size: %d %s%s";
-	private static final String FORMAT_PLAYER_STATUS_TOP_CARD = "__Top card: %s__";
+	public UnoCommand() {
+		super(CommandMetadata.builder(GAMES, "uno").description("""
+			Plays a game of UNO with the official rules + Progressive UNO rule using the original deck of 108 cards. \
+			Read more about UNO here: https://en.wikipedia.org/wiki/Uno_(card_game).
+			Made using [JUNO](https://github.com/markozajc/JUNO)."""));
+	}
+
+	private static final String INVALID_NUMBER = "Please input a number.";
+	private static final String INVALID_CHOICE = "Invalid choice!";
 
 	private static final String UNO_LOGO_URL = "https://libot.eu.org/img/uno.png";
 
@@ -109,21 +101,21 @@ public class UnoCommand extends BettableGame {
 					boolean valid = choice > getCards().size() || choice < 0
 						|| !possible.contains(card = this.getCards().get(choice - 1));
 					if (valid)
-						this.c.reply(FORMAT_PLAYER_INVALID_CHOICE);
+						this.c.reply(INVALID_CHOICE);
 					else
 						return card;
 				} catch (NumberFormatException ex) {
-					this.c.reply(FORMAT_PLAYER_NAN);
+					this.c.reply(INVALID_NUMBER);
 				}
 			}
 		}
 
 		private static void confirmExit(@Nonnull BettableGameContext c) {
-			String warning = "";
-			if (c.hasBet())
-				warning = " **(you'll lose your full bet)**";
-			if (c.confirmf(FORMAT_CONFIRM_EXIT, warning))
+			if (c.confirmf("Are you sure that you want to exit this UNO game%s?",
+						   c.hasBet() ? " **(you'll lose your full bet)**" : "")) {
+
 				throw c.glose();
+			}
 		}
 
 		@SuppressWarnings("null")
@@ -141,24 +133,24 @@ public class UnoCommand extends BettableGame {
 			this.actions.setLength(0);
 			var drawCards = getConsecutive(game.getDiscard());
 			if (!drawCards.isEmpty()) {
-				this.actions
-					.append(FORMAT_PLAYER_ACTION_DRAW_FORCED.formatted(drawCards.size() * drawCards.get(0).getAmount(),
-																	   getEmojiWithName(this.c, game.getTopCard())));
+				this.actions.append("``0 -`` Draw **%d** cards from a %s"
+					.formatted(drawCards.size() * drawCards.get(0).getAmount(),
+							   getEmojiWithName(this.c, game.getTopCard())));
 			} else {
-				this.actions.append(FORMAT_PLAYER_ACTION_DRAW.formatted(getPileEmoji(this.c)));
+				this.actions.append("``0 -`` %s Draw".formatted(getPileEmoji(this.c)));
 			}
 
 			int i = 1;
 			for (UnoCard card : this.getCards()) {
-				this.actions.append(FORMAT_PLAYER_ACTION.formatted(i, getEmojiWithName(this.c, card)));
+				this.actions.append("\n``%d -`` %s".formatted(i, getEmojiWithName(this.c, card)));
 				i++;
 			}
 		}
 
 		private void constructStatus(@Nonnull UnoGame game, @Nonnull UnoPlayer next) {
 			this.status.setLength(0);
-			this.status.append(FORMAT_PLAYER_STATUS_TOP_CARD.formatted(getEmojiWithName(this.c, game.getTopCard())));
-			this.status.append(FORMAT_PLAYER_STATUS_BOT
+			this.status.append(underline("Top card: %s").formatted(getEmojiWithName(this.c, game.getTopCard())));
+			this.status.append("\n%s's hand size: %d %s%s"
 				.formatted(next.getName(), next.getHand().getSize(), getPileEmoji(this.c),
 						   next.getHand().getSize() == 1 ? " __**UNO!**__" : ""));
 		}
@@ -177,18 +169,21 @@ public class UnoCommand extends BettableGame {
 			var top = game.getDiscard().getTop();
 			this.e.addFieldf(true, "Top card", getEmojiWithName(this.c, top));
 
-			this.e.addField("Your cards",
-							this.getHand()
-								.getCards()
-								.stream()
-								.map(card -> getEmojiWithName(this.c, card))
-								.collect(joining(" ")),
-							true);
-			this.e.addField("Choose a color", FORMAT_COLOR_CHOOSE, false);
+			var cards = this.getHand()
+				.getCards()
+				.stream()
+				.map(card -> getEmojiWithName(this.c, card))
+				.collect(Collectors.joining(" "));
+
+			this.e.addField("Your cards", cards, true);
+			this.e.addField("Choose a color", """
+				1 - Yellow
+				2 - Red
+				3 - Green
+				4 - Blue""", false);
 			this.c.reply(this.e);
 		}
 
-		@Nonnull
 		private UnoCardColor inputColor() {
 			UnoCardColor color = null;
 			while (color == null) {
@@ -197,15 +192,18 @@ public class UnoCommand extends BettableGame {
 					confirmExit(this.c);
 
 				try {
-					switch (parseInt(response)) { // TODO 🚫BLOCKED https://bugs.eclipse.org/bugs/show_bug.cgi?id=574905
-						case 1 -> color = YELLOW;
-						case 2 -> color = RED;
-						case 3 -> color = GREEN;
-						case 4 -> color = BLUE;
-						default -> this.c.reply(FORMAT_PLAYER_INVALID_CHOICE);
-					}
+					color = switch (parseInt(response)) {
+						case 1 -> YELLOW;
+						case 2 -> RED;
+						case 3 -> GREEN;
+						case 4 -> BLUE;
+						default -> {
+							this.c.reply(INVALID_CHOICE);
+							yield null;
+						}
+					};
 				} catch (NumberFormatException ex) {
-					this.c.reply(FORMAT_PLAYER_NAN);
+					this.c.reply(INVALID_NUMBER);
 				}
 			}
 			return color;
@@ -213,7 +211,7 @@ public class UnoCommand extends BettableGame {
 
 		@Override
 		public boolean shouldPlayDrawnCard(UnoGame game, UnoCard drawnCard) {
-			return this.c.confirmf(true, FORMAT_PLAYER_CONFIRM_PLACE_DRAWN, LITHIUM,
+			return this.c.confirmf(true, "You draw a %s. Do you want to place it?", LITHIUM,
 								   getEmojiWithName(this.c, drawnCard));
 		}
 
@@ -227,7 +225,7 @@ public class UnoCommand extends BettableGame {
 		@Nonnull
 		@SuppressWarnings("null")
 		private static String getEmojiWithName(BettableGameContext c, UnoCard card) {
-			return c.shredder()
+			return c.getShredder()
 				.getEmojiResource(card.toString().toLowerCase().replace(" ", ""), MISSING_EMOJI)
 				.getFormatted() + " " +
 				card;
@@ -235,7 +233,7 @@ public class UnoCommand extends BettableGame {
 
 		@Nonnull
 		private static String getPileEmoji(BettableGameContext c) {
-			return c.shredder().getEmojiResource("pile", MISSING_EMOJI).getFormatted();
+			return c.getShredder().getEmojiResource("pile", MISSING_EMOJI).getFormatted();
 		}
 
 	}
@@ -259,30 +257,14 @@ public class UnoCommand extends BettableGame {
 				return LOSE;
 
 			} else {
-				c.reply("Draw", FORMAT_FALLBACK_DRAW, DISABLED);
-				return RETURN;
+				c.reply("Draw", """
+					Both discard and draw piles were emptied, the player with least cards wins.
+					Both players has the same amount of cards.""", DISABLED);
+				return REFUND;
 			}
 		} catch (CanceledException ce) {
 			return LOSE;
 		}
-	}
-
-	@Override
-	public String getName() {
-		return "uno";
-	}
-
-	@Override
-	public String getGameInfo() {
-		return """
-			Plays a game of UNO with the official rules + Progressive UNO rule using the original deck of 108 cards. \
-			Read more about UNO here: https://en.wikipedia.org/wiki/Uno_(card_game).
-			Made using [JUNO](https://github.com/markozajc/JUNO).""";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return GAMES;
 	}
 
 }
