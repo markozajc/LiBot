@@ -50,8 +50,8 @@ public class DisableCommand extends Command {
 	private static void disableCategory(@Nonnull CommandContext c, @Nonnull Customization cust,
 										@Nonnull CommandCategory category) {
 		var disabled = c.getCommands()
-			.getInCategory(category)
-			.stream()
+			.commands()
+			.filter(cmd -> category == cmd.getCategory())
 			.filter(cmd -> !(cmd instanceof EnableCommand))
 			.filter(cust::disable)
 			.map(Command::getName)

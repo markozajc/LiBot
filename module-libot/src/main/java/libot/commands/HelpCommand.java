@@ -52,15 +52,14 @@ public class HelpCommand extends Command {
 		var e = new EmbedPrebuilder("LiBot manual", LITHIUM);
 		e.setFooter("LiBot v" + VERSION, c.getSelfAvatar());
 
-		int maxLength =
-			c.getCommands().getAll().stream().map(Command::getName).mapToInt(String::length).max().orElse(0);
+		int maxLength = c.getCommands().commands().map(Command::getName).mapToInt(String::length).max().orElse(0);
 		var b = new StringBuilder();
 		for (var category : CommandCategory.values()) {
 			if (category == ADMINISTRATIVE && !c.isUserSysadmin())
 				continue;
 
 			b.setLength(0);
-			for (Command cmd : c.getCommands().getInCategory(category)) {
+			c.getCommands().commands().filter(cmd -> cmd.getCategory() == category).forEach(cmd -> {
 				b.append(monospace(rightPad(cmd.getName(), maxLength)));
 
 				cmd.getDescription().map(desc -> {
@@ -69,7 +68,7 @@ public class HelpCommand extends Command {
 				}).ifPresent(b::append);
 
 				b.append("\n");
-			}
+			});
 			e.addField(category.toString(), b.toString(), false);
 		}
 

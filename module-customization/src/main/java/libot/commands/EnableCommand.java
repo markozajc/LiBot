@@ -48,8 +48,12 @@ public class EnableCommand extends Command {
 	@SuppressWarnings("null")
 	private static void enableCategory(@Nonnull CommandContext c, @Nonnull Customization cust,
 									   @Nonnull CommandCategory category) {
-		var enabled =
-			c.getCommands().getInCategory(category).stream().filter(cust::enable).map(Command::getName).toList();
+		var enabled = c.getCommands()
+			.commands()
+			.filter(cmd -> category == cmd.getCategory())
+			.filter(cust::enable)
+			.map(Command::getName)
+			.toList();
 
 		c.replyf("Successfully enabled %d commands".formatted(enabled.size()), join(", ", enabled), SUCCESS);
 	}

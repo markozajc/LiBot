@@ -1,41 +1,52 @@
 package libot.core.commands;
 
-import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Stream.concat;
 import static libot.utils.ReflectionUtils.scanClasspath;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-public class CommandManager implements Iterable<Command> {
+import org.slf4j.*;
 
-	@Nonnull private final Set<Command> commands;
+public class CommandManager {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CommandManager.class);
+
+	@Nonnull private final Map<String, Command> commands;
 
 	@Nonnull
 	@SuppressWarnings("null")
 	public static CommandManager fromClasspath() {
-		return new CommandManager(scanClasspath(Command.class, libot.commands.Anchor.class)
-			.collect(toCollection(HashSet::new)));
+		var commands = new HashMap<String, Command>();
+		scanClasspath(Command.class, libot.commands.Anchor.class).forEach(c -> insertCommand(commands, c));
+		return new CommandManager(new HashMap<>(commands)); // recreate map to improve search performance
 	}
 
-	private CommandManager(@Nonnull Set<Command> commands) {
+	private static void insertCommand(@Nonnull Map<String, Command> commands, @Nonnull Command c) {
+		concat(Stream.of(c.getName()), c.getAliases().stream()).forEach(name -> {
+			var old = commands.put(name, c);
+			if (old != null)
+				LOG.warn("Commands '{}' and '{}' have a colliding name/alias", c.getClass(), old.getClass());
+		});
+	}
+
+	private CommandManager(@Nonnull Map<String, Command> commands) {
 		this.commands = commands;
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
 	public Optional<Command> get(@Nonnull String name) {
-		var namel = name.toLowerCase();
-		return this.commands.stream()
-			.filter(cmd -> cmd.getName().equals(namel) || cmd.getAliases().contains(namel))
-			.findAny();
+		return Optional.ofNullable(this.commands.get(name.toLowerCase()));
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
 	public <T extends Command> Command get(Class<T> clazz) {
-		return this.commands.stream()
+		return this.commands.values()
+			.stream()
 			.filter(c -> c.getClass() == clazz)
 			.findAny()
 			.orElseThrow(() -> new IllegalStateException(clazz.getCanonicalName() + " is not registered"));
@@ -43,24 +54,8 @@ public class CommandManager implements Iterable<Command> {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public Set<Command> getAll() {
-		return unmodifiableSet(this.commands);
-	}
-
-	@Nonnull
-	public Set<Command> getAllDirect() {
-		return this.commands;
-	}
-
-	@Nonnull
-	@SuppressWarnings("null")
-	public Set<Command> getInCategory(CommandCategory category) {
-		return this.commands.stream().filter(c -> c.getCategory() == category).collect(toUnmodifiableSet());
-	}
-
-	@Override
-	public Iterator<Command> iterator() {
-		return this.commands.iterator();
+	public Stream<Command> commands() {
+		return this.commands.values().stream().distinct();
 	}
 
 	public int size() {
