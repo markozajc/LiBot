@@ -2,7 +2,6 @@ package libot.commands;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.min;
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toCollection;
 import static libot.core.Constants.*;
@@ -38,12 +37,9 @@ class MusicCommandUtils {
 	static final String YOUTUBE_URL_PREFIX = "https://www.youtube.com/watch?v=";
 
 	static final String EMOJI_PLAYING = "\u25B6\uFE0F";
+	static final String EMOJI_PAUSE = "\u23F8\uFE0F";
 	static final String EMOJI_LOOP = "\uD83D\uDD01";
 
-	private static final String FORMAT_NOTHING_PLAYING = """
-		Play a track with `%s [track's name]` or `%s [url]`!""";
-	private static final String FORMAT_TITLE_PICKER = """
-		Search results from %s""";
 	private static final String FORMAT_FOOTER_PICKER = """
 		Please type in a track's index (the bold number) or EXIT to abort""";
 	public static final String FORMAT_PLAY_TRACK = """
@@ -133,7 +129,7 @@ class MusicCommandUtils {
 		});
 
 		var message = c
-			.reply(format(FORMAT_TITLE_PICKER, capitalize(results.get(0).getSourceManager().getSourceName())),
+			.reply("Search results from %s".formatted(capitalize(results.get(0).getSourceManager().getSourceName())),
 				   b.toString(), FORMAT_FOOTER_PICKER, LITHIUM)
 			.join();
 
@@ -159,7 +155,7 @@ class MusicCommandUtils {
 	}
 
 	static CommandException nothingIsPlaying(@Nonnull CommandContext c) {
-		return c.errorf("Nothing is playing", FORMAT_NOTHING_PLAYING, DISABLED,
+		return c.errorf("Nothing is playing", "Play a track with `%s [track's name]` or `%s [url]`!", DISABLED,
 						c.getCommandWithPrefix(YoutubePlayCommand.class), c.getCommandWithPrefix(PlayCommand.class));
 	}
 
@@ -295,6 +291,3 @@ class MusicCommandUtils {
 	private MusicCommandUtils() {}
 
 }
-
-// Play by id link: https://www.youtube.com/watch?v=ID
-// Thumbnail link: http://img.youtube.com/vi/ID/default.jpg

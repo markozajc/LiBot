@@ -1,6 +1,6 @@
 package libot.module.music;
 
-import java.nio.*;
+import java.nio.ByteBuffer;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
@@ -40,7 +40,7 @@ public class AudioPlayerSendHandler implements AudioSendHandler {
 	@Override
 	public ByteBuffer provide20MsAudio() {
 		// flip to make it a read buffer
-		((Buffer) this.buffer).flip();
+		this.buffer.flip();
 		return this.buffer;
 	}
 

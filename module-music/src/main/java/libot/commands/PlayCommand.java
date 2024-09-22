@@ -1,62 +1,46 @@
 package libot.commands;
 
 import static libot.commands.MusicCommandUtils.playUrl;
-import static libot.commands.PauseCommand.FORMAT_RESUMED;
+import static libot.commands.PauseCommand.RESUMED;
 import static libot.core.Constants.LITHIUM;
+import static libot.core.argument.ParameterList.Parameter.optional;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
 
+import javax.annotation.Nonnull;
+
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.Parameter;
+import libot.core.argument.UsageException;
 import libot.core.commands.*;
-import libot.core.commands.exceptions.startup.UsageException;
 import libot.core.entities.CommandContext;
 
 public class PlayCommand extends Command {
 
+	@Nonnull private static final Parameter URL = optional(POSITIONAL, "url");
+
+	public PlayCommand() {
+		super(CommandMetadata.builder(MUSIC, "play")
+			.requireDjRole(true)
+			.parameters(URL)
+			.description("Plays audio from a provided URL. Resumes playback if no URL is provided."));
+	}
+
 	@Override
+	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
-		if (c.params().check(0)) {
-			playUrl(c, c.params().get(0));
-		} else {
+		c.arg(URL).map(Argument::value).ifPresentOrElse(url -> {
+			playUrl(c, url);
+
+		}, () -> {
 			var manager = getMusicManager(c.getGuildIdLong());
-			if (manager != null && manager.getPlayer().isPaused()) {
-				manager.getPlayer().setPaused(false);
-				c.reply(FORMAT_RESUMED, LITHIUM);
-			} else {
-				throw new UsageException();
-			}
-		}
-	}
+			if (manager == null || !manager.getPlayer().isPaused())
+				throw new UsageException("Missing argument: url");
 
-	@Override
-	public String getName() {
-		return "play";
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Plays audio from a provided URL. Resumes playback if no URL is provided.""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[URL]" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 0;
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireDj();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return MUSIC;
+			manager.getPlayer().setPaused(false);
+			c.reply(RESUMED, LITHIUM);
+		});
 	}
 
 }

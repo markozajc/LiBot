@@ -10,6 +10,13 @@ import libot.core.entities.CommandContext;
 
 public class ClearQueueCommand extends Command {
 
+	public ClearQueueCommand() {
+		super(CommandMetadata.builder(MUSIC, "clearqueue")
+			.aliases("clear")
+			.requireDjRole(true)
+			.description("Clears the queue. The currently playing track will remain playing."));
+	}
+
 	@Override
 	public void execute(CommandContext c) {
 		var vc = c.getConnectedAChannel();
@@ -23,33 +30,6 @@ public class ClearQueueCommand extends Command {
 
 		scheduler.clear();
 		c.reply("Queue cleared successfully", SUCCESS);
-	}
-
-	@Override
-	public String getName() {
-		return "clearqueue";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "clear" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Clears the queue. The currently playing track will remain playing.""";
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireDj();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return MUSIC;
 	}
 
 }

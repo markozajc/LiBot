@@ -10,6 +10,13 @@ import libot.core.entities.CommandContext;
 
 public class ShuffleCommand extends Command {
 
+	public ShuffleCommand() {
+		super(CommandMetadata.builder(MUSIC, "shuffle")
+			.aliases("shuf")
+			.requireDjRole(true)
+			.description("Shuffles the track queue. This will not change the currently playing track."));
+	}
+
 	@Override
 	public void execute(CommandContext c) {
 		var vc = c.getConnectedAChannel();
@@ -24,33 +31,6 @@ public class ShuffleCommand extends Command {
 
 		scheduler.shuffle();
 		c.react(ACCEPT_EMOJI);
-	}
-
-	@Override
-	public String getName() {
-		return "shuffle";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "shuf" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Shuffles the track queue. This will not change the currently playing track.""";
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireDj();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return MUSIC;
 	}
 
 }

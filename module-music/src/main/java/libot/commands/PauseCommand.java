@@ -1,6 +1,6 @@
 package libot.commands;
 
-import static libot.commands.MusicCommandUtils.nothingIsPlaying;
+import static libot.commands.MusicCommandUtils.*;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
@@ -12,8 +12,14 @@ import libot.core.entities.CommandContext;
 
 public class PauseCommand extends Command {
 
-	@Nonnull public static final String FORMAT_RESUMED = "\u25B6 Playback resumed";
-	@Nonnull public static final String FORMAT_PAUSED = "\u23F8 Playback paused";
+	public PauseCommand() {
+		super(CommandMetadata.builder(MUSIC, "pause")
+			.requireDjRole(true)
+			.description("Pauses or resumes audio playback."));
+	}
+
+	@Nonnull static final String RESUMED = EMOJI_PLAYING + " Playback resumed";
+	@Nonnull static final String PAUSED = EMOJI_PAUSE + " Playback paused";
 
 	@Override
 	public void execute(CommandContext c) {
@@ -26,32 +32,10 @@ public class PauseCommand extends Command {
 			throw nothingIsPlaying(c);
 
 		if (player.isPaused())
-			c.reply(FORMAT_RESUMED, LITHIUM);
+			c.reply(RESUMED, LITHIUM);
 		else
-			c.reply(FORMAT_PAUSED, LITHIUM);
+			c.reply(PAUSED, LITHIUM);
 		player.setPaused(!player.isPaused());
-	}
-
-	@Override
-	public String getName() {
-		return "pause";
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Pauses/resumes audio playback.""";
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireDj();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return MUSIC;
 	}
 
 }

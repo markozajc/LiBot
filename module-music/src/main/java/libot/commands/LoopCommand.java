@@ -11,8 +11,11 @@ import libot.core.entities.CommandContext;
 
 public class LoopCommand extends Command {
 
-	private static final String FORMAT_LOOP_OFF = "\u25B6 No longer looping.";
-	private static final String FORMAT_LOOP = "\uD83D\uDD01 Now looping over **[%s](%s)**.";
+	public LoopCommand() {
+		super(CommandMetadata.builder(MUSIC, "loop")
+			.requireDjRole(true)
+			.description("Toggles looping state over the current track."));
+	}
 
 	@Override
 	@SuppressWarnings("null")
@@ -25,7 +28,7 @@ public class LoopCommand extends Command {
 
 		if (manager.getScheduler().isLoop()) {
 			manager.getScheduler().setLoop(false);
-			c.reply("Loop OFF", FORMAT_LOOP_OFF, SUCCESS);
+			c.reply("Loop OFF", "\u25B6 No longer looping.", SUCCESS);
 
 		} else {
 			var track = manager.getPlayingTrack();
@@ -33,31 +36,9 @@ public class LoopCommand extends Command {
 				throw nothingIsPlaying(c);
 
 			manager.getScheduler().setLoop(true);
-			c.replyf("Loop ON", FORMAT_LOOP, SUCCESS, escape(track.getInfo().title).replace("]", "\\]"),
-					 track.getInfo().uri);
+			c.replyf("Loop ON", "\uD83D\uDD01 Now looping over **[%s](%s)**.", SUCCESS,
+					 escape(track.getInfo().title).replace("]", "\\]"), track.getInfo().uri);
 		}
-	}
-
-	@Override
-	public String getName() {
-		return "loop";
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Toggles looping state over the current track.""";
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireDj();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return MUSIC;
 	}
 
 }

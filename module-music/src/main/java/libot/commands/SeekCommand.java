@@ -1,44 +1,54 @@
 package libot.commands;
 
 import static java.lang.Math.max;
-import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.*;
+import static java.util.regex.Pattern.compile;
 import static libot.commands.MusicCommandUtils.nothingIsPlaying;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
 import static libot.utils.ParseUtils.parseRelativeTime;
 
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
-import libot.core.entities.*;
+import libot.core.entities.CommandContext;
 
 public class SeekCommand extends Command {
 
+	@Nonnull private static final MandatoryParameter POSITION = mandatory(POSITIONAL, "position");
+
+	public SeekCommand() {
+		super(CommandMetadata.builder(MUSIC, "seek").requireDjRole(true).parameters(POSITION).description("""
+			Seeks the currently playing track to the specified timestamp. \
+			It is not possible to seek Ogg files due the way Ogg works.
+			""" + POSITION_CHEATSHEET));
+	}
+
+	private static final Pattern TIME_DELIMITER = compile("[^\\d]+");
 	private static final TimeUnit[] ABSOLUTE_UNITS = new TimeUnit[] { HOURS, MINUTES, SECONDS };
-	private static final String FORMAT_POSITION_FORMAT = """
+	private static final String POSITION_CHEATSHEET = """
 		The position must be specified in a relative or absolute format, for example:
 		Relative:
 		 `+1s    ` seek forward one second
-		 `+1     ` ditto
 		 `-10m   ` seek backwards ten minutes
 		 `+1h    ` seek forward one hour
 		Absolute:
 		 `1:00:00` seek to the first hour
 		 `1:00   ` seek to the first minute
-		 `1 0    ` ditto
-		 `0      ` seek to the beginning
 		 `1      ` seek to the first second
-		 (seeking to the beginning might cause certain tracks to stop playing*p)
-		""";
-	private static final String FORMAT_CANT_SEEK = """
-		It is not possible to seek the current track%s.""";
+		 `0      ` seek to the beginning
+		 (seeking to the beginning might cause certain tracks to stop playing)""";
 
+	@SuppressWarnings("null")
 	@Override
 	public void execute(CommandContext c) {
 		var vc = c.getConnectedAChannel();
@@ -54,15 +64,16 @@ public class SeekCommand extends Command {
 			if (track.getInfo().isStream)
 				reason = " because it's a stream";
 
-			throw c.errorf(FORMAT_CANT_SEEK, DISABLED, reason);
+			throw c.errorf("It is not possible to seek the current track%s.", DISABLED, reason);
 		}
 
-		long position = parseRelative(c, track);
+		var arg = c.arg(POSITION).value();
+		long position = parseRelative(c, track, arg);
 		if (position == -1)
-			position = parseAbsolute(c.params());
+			position = parseAbsolute(arg);
 
 		if (position == -1)
-			throw c.error(FORMAT_POSITION_FORMAT, FAILURE);
+			throw c.error(POSITION_CHEATSHEET, FAILURE);
 
 		if (track.getDuration() < position)
 			throw c.error("That position is out of range", FAILURE);
@@ -71,10 +82,11 @@ public class SeekCommand extends Command {
 		c.react(ACCEPT_EMOJI);
 	}
 
-	private static long parseRelative(@Nonnull CommandContext c, @Nonnull AudioTrack track) {
-		if (c.params().get(0).length() < 2)
+	private static long parseRelative(@Nonnull CommandContext c, @Nonnull AudioTrack track, @Nonnull String arg) {
+		if (arg.length() < 2)
 			return -1;
-		int multiplier = switch (c.params().get(0).charAt(0)) {
+
+		int multiplier = switch (arg.charAt(0)) {
 			case '+' -> 1;
 			case '-' -> -1;
 			case '±' -> throw c.error("?!");
@@ -82,22 +94,15 @@ public class SeekCommand extends Command {
 		};
 		if (multiplier == 0)
 			return -1;
-		long offset = parseRelativeTime(c.params().get(0).substring(1));
+		long offset = parseRelativeTime(arg.substring(1));
 		if (offset == -1)
 			return -1;
 		else
 			return max(0, track.getPosition() + offset * multiplier);
 	}
 
-	private static long parseAbsolute(@Nonnull Parameters p) {
-		String[] times;
-		if (p.get(0).contains(":")) {
-			// hh:mm:ss
-			times = p.get(0).split(":", 3);
-		} else {
-			// hh mm ss
-			times = p.getArray();
-		}
+	private static long parseAbsolute(@Nonnull String arg) {
+		String[] times = TIME_DELIMITER.split(arg);
 
 		try {
 			long position = 0;
@@ -107,46 +112,6 @@ public class SeekCommand extends Command {
 		} catch (NumberFormatException e) {
 			return -1;
 		}
-	}
-
-	@Override
-	public String getName() {
-		return "seek";
-	}
-
-	@Override
-	@SuppressWarnings("null")
-	public String getInfo() {
-		return format("""
-			Seeks the currently playing track to the specified timestamp. \
-			It is not possible to seek Ogg files due the way Ogg works.
-			%s""", FORMAT_POSITION_FORMAT);
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[position]" };
-	}
-
-	@Override
-	public int getMaxParameters() {
-		return 3;
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 1;
-	}
-
-	@Override
-	public void startupCheck(CommandContext c) {
-		super.startupCheck(c);
-		c.requireDj();
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return MUSIC;
 	}
 
 }

@@ -1,8 +1,7 @@
 package libot.commands;
 
 import static java.lang.Math.round;
-import static java.lang.String.format;
-import static libot.commands.MusicCommandUtils.*;
+import static libot.commands.MusicCommandUtils.nothingIsPlaying;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
@@ -20,15 +19,11 @@ import libot.module.music.GlobalMusicManager.MusicManager;
 
 public class PlayingCommand extends Command {
 
-	private static final String FORMAT_META = """
-		**`Title:   `** [%s](%s)
-		**`Author:  `** %s
-		**`Duration:`** %s
-		```
-		%s %s %s```
-		""";
-	public static final String FORMAT_YT_THUMBNAIL = "http://img.youtube.com/vi/%s/mqdefault.jpg";
-	public static final String DEFAULT_THUMBNAIL = "https://libot.eu.org/img/music.png";
+	protected PlayingCommand() {
+		super(CommandMetadata.builder(MUSIC, "playing")
+			.description("Displays detailed information about the currently playing track."));
+	}
+
 	public static final int PROGRESS_BAR_LENGTH = 21;
 
 	@Override
@@ -46,13 +41,16 @@ public class PlayingCommand extends Command {
 		var e = new EmbedPrebuilder(LITHIUM);
 		e.setTitle("Information about current song");
 		var i = track.getInfo();
-		e.setDescriptionf(FORMAT_META, escape(i.title, true), i.uri, escape(i.author, true), duration(track),
-						  playerState(manager), progressBar(track), time(track));
+		e.setDescriptionf("""
+			**`Title:   `** [%s](%s)
+			**`Author:  `** %s
+			**`Duration:`** %s
+			```
+			%s %s %s```""", escape(i.title, true), i.uri, escape(i.author, true), duration(track), playerState(manager),
+						  progressBar(track), time(track));
 
-		if (i.uri.startsWith(YOUTUBE_URL_PREFIX))
-			e.setThumbnail(format(FORMAT_YT_THUMBNAIL, i.identifier));
-		else
-			e.setThumbnail(DEFAULT_THUMBNAIL);
+		if (i.artworkUrl != null)
+			e.setThumbnail(i.artworkUrl);
 
 		c.reply(e);
 	}
@@ -90,27 +88,6 @@ public class PlayingCommand extends Command {
 			return "LIVE \uD83D\uDD34";
 		else
 			return formatDuration(track.getDuration(), "HH:mm:ss");
-	}
-
-	@Override
-	public String getName() {
-		return "playing";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "p" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Displays detailed information about the currently playing track.""";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return MUSIC;
 	}
 
 }
