@@ -1,7 +1,7 @@
 package libot.commands;
 
 import static java.util.concurrent.TimeUnit.DAYS;
-import static libot.core.Constants.FAILURE;
+import static libot.core.Constants.*;
 import static libot.core.FinderUtils.*;
 import static libot.core.argument.ParameterList.Parameter.*;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
@@ -122,9 +122,9 @@ final class ModerationCommandUtils {
 			.queue();
 
 		if (!target.getUser().isBot()) {
-			var message = new StringBuilder("You got ");
+			var message = new StringBuilder("You've been ");
 			message.append(action.getVerb());
-			message.append(" out of ");
+			message.append(' ');
 			message.append(bold(escape(c.getGuildName())));
 
 			reason.map(Argument::value).ifPresentOrElse(r -> {
@@ -143,6 +143,7 @@ final class ModerationCommandUtils {
 			act.run();
 		}
 
+		c.react(ACCEPT_EMOJI);
 	}
 
 	private ModerationCommandUtils() {}

@@ -8,7 +8,6 @@ import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.utils.CommandUtils.findUserOrAuthor;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static net.dv8tion.jda.api.utils.FileUpload.fromData;
-import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -25,6 +24,7 @@ import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.internal.requests.RestActionImpl;
 
 public class AvatarCommand extends Command {
 
@@ -49,11 +49,10 @@ public class AvatarCommand extends Command {
 
 				} else {
 					c.getJda().retrieveUserById(param.valueAsLong()).queue(u -> downloadAndSendAvatar(c, u), e -> {
-						if (e instanceof ErrorResponseException ere && ere.getErrorResponse() == UNKNOWN_USER) {
+						if (e instanceof ErrorResponseException ere && ere.getErrorResponse() == UNKNOWN_USER)
 							c.reply("Couldn't find a user with that ID.");
-						} else {
-							getDefaultFailure().accept(e);
-						}
+						else
+							RestActionImpl.getDefaultFailure().accept(e);
 					});
 				}
 

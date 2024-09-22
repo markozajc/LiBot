@@ -284,7 +284,7 @@ public class ExceptionHandler {
 							if (e.canTalk()) {
 								e.ctx()
 									.replyf("// ACCESS DENIED //", """
-										This action needs the following permission%s:
+										Performing this action requires the following permission%s:
 										%s""", WARN, missing.size() == 1 ? "" : "s",
 											missing.stream().collect(joining("\n", "- ", "")));
 							}
