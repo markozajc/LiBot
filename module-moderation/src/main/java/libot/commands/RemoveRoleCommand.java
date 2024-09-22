@@ -22,7 +22,7 @@ public class RemoveRoleCommand extends Command {
 	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
 		var tuple = getRoleMemberTuple(c);
-		c.getGuild().addRoleToMember(tuple.target(), tuple.role()).queue();
+		c.getGuild().removeRoleFromMember(tuple.target(), tuple.role()).queue();
 		c.react(ACCEPT_EMOJI);
 	}
 

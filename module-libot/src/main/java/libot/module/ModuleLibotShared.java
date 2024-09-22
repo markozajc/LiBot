@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 
 import libot.core.commands.Command;
 import libot.core.entities.CommandContext;
+import libot.providers.CustomizationsProvider;
 import net.dv8tion.jda.api.Permission;
 
 public class ModuleLibotShared {
@@ -71,6 +72,11 @@ public class ModuleLibotShared {
 
 		if (cmd.getCategory() == ADMINISTRATIVE)
 			b.append("\n\n_(this command (or some of its parts) can only be used by LiBot's sysadmins)_");
+
+		c.getProvider(CustomizationsProvider.class).get(c.getGuildIdLong()).getDjRoleId().ifPresent(role -> {
+			if (cmd.doesRequireDjRole())
+				b.append("\n\n_(this command can only be used by members with the DJ role - <@&%d>)_".formatted(role));
+		});
 
 		c.reply("Info about " + monospace(cmd.getName()), b.toString(), LITHIUM);
 	}

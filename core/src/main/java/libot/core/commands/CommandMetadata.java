@@ -13,8 +13,9 @@ import libot.core.argument.ParameterList.Parameter;
 import net.dv8tion.jda.api.Permission;
 
 public record CommandMetadata(CommandCategory category, String name, String id, Optional<String> description,
-							  Set<String> aliases, Set<Permission> permissions, long ratelimitMillis,
-							  String ratelimitBucket, ParameterList parameters) {
+							  Set<String> aliases, Set<Permission> permissions, boolean checkPermissionsAtStartup,
+							  boolean requireDjRole, long ratelimitMillis, String ratelimitBucket,
+							  ParameterList parameters) {
 
 	@Nonnull
 	public static CommandMetadata.Builder builder(@Nonnull CommandCategory category, @Nonnull String name) {
@@ -29,6 +30,8 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		@SuppressWarnings("null") @Nonnull private Optional<String> description = empty();
 		@SuppressWarnings("null") @Nonnull private Set<String> aliases = emptySet();
 		@SuppressWarnings("null") @Nonnull private Set<Permission> permissions = emptySet();
+		private boolean checkPermissionsAtStartup = true;
+		private boolean requireDjRole = false;
 		private long ratelimitMillis = 0;
 		@Nonnull private String ratelimitBucket;
 		@Nonnull private ParameterList parameters = ParameterList.empty();
@@ -91,8 +94,15 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		}
 
 		@Nonnull
-		@SuppressWarnings("null")
 		public Builder permissions(@Nonnull Permission... permissions) {
+			return permissions(this.checkPermissionsAtStartup, permissions);
+		}
+
+		@Nonnull
+		@SuppressWarnings("null")
+		public Builder permissions(boolean checkPermissionsAtStartup, @Nonnull Permission... permissions) {
+			this.checkPermissionsAtStartup = checkPermissionsAtStartup;
+
 			if (permissions.length == 0) {
 				this.permissions = emptySet();
 
@@ -107,8 +117,15 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		}
 
 		@Nonnull
-		@SuppressWarnings("null")
 		public Builder permissions(@Nonnull Collection<Permission> permissions) {
+			return permissions(this.checkPermissionsAtStartup, permissions);
+		}
+
+		@Nonnull
+		@SuppressWarnings("null")
+		public Builder permissions(boolean checkPermissionsAtStartup, @Nonnull Collection<Permission> permissions) {
+			this.checkPermissionsAtStartup = checkPermissionsAtStartup;
+
 			if (permissions.isEmpty())
 				this.permissions = emptySet();
 			else
@@ -119,6 +136,20 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		@Nonnull
 		public Set<Permission> getPermissions() {
 			return this.permissions;
+		}
+
+		public boolean doesCheckPermissionsAtStartup() {
+			return this.checkPermissionsAtStartup;
+		}
+
+		@Nonnull
+		public Builder requireDjRole(boolean requireDjRole) {
+			this.requireDjRole = requireDjRole;
+			return this;
+		}
+
+		public boolean doesRequireDjRole() {
+			return this.requireDjRole;
 		}
 
 		@Nonnull
@@ -176,7 +207,8 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		@Nonnull
 		public CommandMetadata build() {
 			return new CommandMetadata(this.category, this.name, this.id, this.description, this.aliases,
-									   this.permissions, this.ratelimitMillis, this.ratelimitBucket, this.parameters);
+									   this.permissions, this.checkPermissionsAtStartup, this.requireDjRole,
+									   this.ratelimitMillis, this.ratelimitBucket, this.parameters);
 		}
 
 	}

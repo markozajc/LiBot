@@ -15,7 +15,7 @@ import javax.annotation.*;
 import libot.core.commands.Command;
 import libot.core.commands.exceptions.*;
 import libot.core.commands.exceptions.runtime.CanceledException;
-import libot.core.commands.exceptions.startup.*;
+import libot.core.commands.exceptions.startup.NotSysadminException;
 import libot.providers.CustomizationsProvider;
 import libot.providers.CustomizationsProvider.Customization;
 import net.dv8tion.jda.api.*;
@@ -272,14 +272,6 @@ public class EventContext extends BotContext {
 	public void requireSysadmin() {
 		if (!isUserSysadmin())
 			throw new NotSysadminException();
-	}
-
-	public void requireDj() {
-		if (!isUserDj()) {
-			throw new NotDjException(getProvider(CustomizationsProvider.class).get(getGuildIdLong())
-				.getDjRoleId()
-				.getAsLong());
-		}
 	}
 
 	@Nonnull

@@ -402,7 +402,7 @@ public class ExceptionHandler {
 					private static void handleHierarchy(ExceptionContext<HierarchyException> e) {
 						if (e.canTalk()) {
 							e.ctx().reply("// HIERARCHY ERROR //", """
-								Looks like you tried to perform an audit action on a user that is in a role higher \
+								Looks like you tried to perform a moderative action on a user that is in a role higher \
 								than LiBot, which you can't. Please move LiBot's role up or demote that user!""", WARN);
 						}
 					}

@@ -11,12 +11,11 @@ import javax.annotation.*;
 
 import libot.core.argument.ParameterList;
 import libot.core.argument.ParameterList.Parameter;
-import libot.core.commands.exceptions.ContinuumException;
 import libot.core.commands.exceptions.startup.*;
 import libot.core.entities.*;
 import libot.core.processes.ProcessManager;
+import libot.providers.CustomizationsProvider;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.IPermissionHolder;
 
 public abstract class Command {
 
@@ -62,6 +61,10 @@ public abstract class Command {
 		return this.meta.permissions();
 	}
 
+	public final boolean doesRequireDjRole() {
+		return this.meta.requireDjRole();
+	}
+
 	public final long getRatelimit() {
 		return this.meta.ratelimitMillis();
 	}
@@ -85,20 +88,9 @@ public abstract class Command {
 	}
 
 	public void startupCheck(@Nonnull EventContext ec) throws CommandStartupException {
-		checkPermissions(ec.getMember());
-	}
-
-	public final void checkPermissions(@Nullable IPermissionHolder permissionHolder) {
-		if (permissionHolder == null)
-			throw new ContinuumException();
-
-		if (getPermissions().isEmpty())
-			return;
-
-		var missingPermissions = getPermissions().stream().filter(p -> !permissionHolder.hasPermission(p)).toList();
-
-		if (!missingPermissions.isEmpty())
-			throw new CommandPermissionsException(missingPermissions);
+		if (this.meta.checkPermissionsAtStartup())
+			checkPermissions(ec);
+		checkDjRole(ec);
 	}
 
 	@Nonnull
@@ -131,6 +123,25 @@ public abstract class Command {
 		}
 
 		return u.toString();
+	}
+
+	private void checkDjRole(EventContext ec) {
+		if (doesRequireDjRole() && !ec.isUserDj()) {
+			throw new NotDjException(ec.getProvider(CustomizationsProvider.class)
+				.get(ec.getGuildIdLong())
+				.getDjRoleId()
+				.getAsLong());
+		}
+	}
+
+	protected final void checkPermissions(@Nonnull EventContext ec) {
+		if (getPermissions().isEmpty())
+			return;
+
+		var missingPermissions = getPermissions().stream().filter(p -> !ec.getMember().hasPermission(p)).toList();
+
+		if (!missingPermissions.isEmpty())
+			throw new CommandPermissionsException(missingPermissions);
 	}
 
 }

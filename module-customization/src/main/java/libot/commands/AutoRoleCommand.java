@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 import libot.core.argument.ArgumentList.Argument;
 import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
-import libot.core.entities.*;
+import libot.core.entities.CommandContext;
 import libot.providers.AutoRoleProvider;
 import net.dv8tion.jda.api.entities.Role;
 
@@ -24,7 +24,7 @@ public class AutoRoleCommand extends Command {
 
 	public AutoRoleCommand() {
 		super(CommandMetadata.builder(CUSTOMIZATION, "autorole")
-			.permissions(MANAGE_ROLES)
+			.permissions(false, MANAGE_ROLES)
 			.parameters(ROLE_NAME)
 			.description("""
 				Once enabled, every newly joined member will assigned the chosen role.
@@ -124,12 +124,6 @@ public class AutoRoleCommand extends Command {
 			provider.remove(c.getGuildIdLong());
 			c.reply("AutoRole disabled. New members will no longer be assigned to a role.", SUCCESS);
 		}
-	}
-
-	@Override
-	public void startupCheck(EventContext c) {
-		// Do not perform the permission check - it's performed if the user actually wants to
-		// alter the configuration
 	}
 
 }

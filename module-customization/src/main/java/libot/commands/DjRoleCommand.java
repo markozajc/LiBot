@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 import libot.core.argument.ArgumentList.Argument;
 import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
-import libot.core.entities.*;
+import libot.core.entities.CommandContext;
 import libot.providers.CustomizationsProvider.Customization;
 
 public class DjRoleCommand extends Command {
@@ -24,7 +24,7 @@ public class DjRoleCommand extends Command {
 	public DjRoleCommand() {
 		super(CommandMetadata.builder(CUSTOMIZATION, "djrole")
 			.aliases("dj")
-			.permissions(VOICE_CONNECT, VOICE_SPEAK, MANAGE_SERVER)
+			.permissions(false, VOICE_CONNECT, VOICE_SPEAK, MANAGE_SERVER)
 			.parameters(ROLE_NAME)
 			.description("""
 				Manages the DJ role for your guild. DJ role allows you to manage who can use the music commands. \
@@ -40,7 +40,7 @@ public class DjRoleCommand extends Command {
 	public void execute(CommandContext c) {
 		var provider = c.getGuildCustomization();
 		c.arg(ROLE_NAME).map(Argument::value).ifPresentOrElse(roleName -> {
-			super.startupCheck(c);
+			super.checkPermissions(c);
 			switch (roleName) {
 				case "disable" -> disable(c, provider);
 				default -> set(c, provider, roleName);
@@ -96,12 +96,6 @@ public class DjRoleCommand extends Command {
 				Everyone has access to the music commands. Set a DJ role with `%s`.""", DISABLED, getUsage(c),
 					 c.getCommandWithPrefix());
 		});
-	}
-
-	@Override
-	public void startupCheck(EventContext c) {
-		// Do not perform the permission check - it's performed if the user actually wants to
-		// alter the configuration
 	}
 
 }
