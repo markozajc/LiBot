@@ -1,13 +1,16 @@
 package libot.commands;
 
+import static com.google.common.collect.Lists.reverse;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.concat;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.argument.ParameterList.Parameter.optional;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static libot.utils.CommandUtils.findMemberOrAuthor;
 
-import java.util.EnumSet;
+import java.util.*;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +20,7 @@ import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
+import net.dv8tion.jda.api.entities.Role;
 
 public class PermissionsCommand extends Command {
 
@@ -38,11 +42,13 @@ public class PermissionsCommand extends Command {
 		var member = findMemberOrAuthor(c, c.arg(USER));
 		var listed = EnumSet.noneOf(Permission.class);
 		var e = new EmbedPrebuilder(LITHIUM);
-		member.getRoles()
-			.stream()
-			.map(r -> forPermissions(r.getPermissions(), r.getName(), listed))
-			.forEach(e::addField);
-		e.addField(forPermissions(c.getPublicRole().getPermissions(), "@everyone", listed));
+
+		var roleFields = concat(member.getRoles().stream(), Stream.of(c.getPublicRole()))
+			.sorted(Comparator.comparingInt(Role::getPosition))
+			.map(r -> forRole(r.getPermissions(), r.getName(), listed))
+			.toList();
+		reverse(roleFields).forEach(e::addField);
+
 		e.setTitlef(FORMAT_TITLE, member.getEffectiveName());
 
 		if (member.isOwner())
@@ -54,8 +60,8 @@ public class PermissionsCommand extends Command {
 	}
 
 	@Nonnull
-	private static Field forPermissions(@Nonnull EnumSet<Permission> perms, @Nonnull String roleName,
-										@Nonnull EnumSet<Permission> listed) {
+	private static Field forRole(@Nonnull EnumSet<Permission> perms, @Nonnull String roleName,
+								 @Nonnull EnumSet<Permission> listed) {
 		var b = new StringBuilder();
 		var permissions = perms.clone();
 		permissions.removeAll(listed);

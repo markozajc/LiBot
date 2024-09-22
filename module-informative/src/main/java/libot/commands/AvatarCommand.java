@@ -9,6 +9,7 @@ import static libot.utils.CommandUtils.findUserOrAuthor;
 import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_USER;
 import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 import static net.dv8tion.jda.internal.requests.RestActionImpl.getDefaultFailure;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.*;
@@ -22,7 +23,6 @@ import libot.core.argument.ParameterList.Parameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
-import net.dv8tion.jda.api.entities.Message.MentionType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
@@ -42,13 +42,11 @@ public class AvatarCommand extends Command {
 	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
 		c.arg(USER).ifPresentOrElse(param -> {
-			if (MentionType.USER.getPattern().matcher(param.value()).matches()) {
-				downloadAndSendAvatar(c, findUserOrAuthor(c, param));
-
-			} else {
+			if (isNumeric(param.value())) {
 				var user = c.getShredder().getUserById(param.valueAsLong());
 				if (user != null) {
 					downloadAndSendAvatar(c, user);
+
 				} else {
 					c.getJda().retrieveUserById(param.valueAsLong()).queue(u -> downloadAndSendAvatar(c, u), e -> {
 						if (e instanceof ErrorResponseException ere && ere.getErrorResponse() == UNKNOWN_USER) {
@@ -58,6 +56,9 @@ public class AvatarCommand extends Command {
 						}
 					});
 				}
+
+			} else {
+				downloadAndSendAvatar(c, findUserOrAuthor(c, param));
 			}
 
 		}, () -> {

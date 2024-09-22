@@ -79,7 +79,7 @@ public class UserInfoCommand extends Command {
 		if (member.getRoles().isEmpty())
 			roles = "[none]";
 		else
-			roles = member.getRoles().stream().map(Role::getAsMention).collect(joining(", "));
+			roles = member.getRoles().stream().map(Role::getName).collect(joining(", @", "@", ""));
 		return codeblock(roles);
 	}
 

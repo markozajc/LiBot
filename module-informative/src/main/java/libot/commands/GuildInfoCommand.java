@@ -1,6 +1,5 @@
 package libot.commands;
 
-import static java.lang.String.format;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.INFORMATIVE;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
@@ -25,10 +24,6 @@ public class GuildInfoCommand extends Command {
 			.aliases("server", "serverinfo", "guild", "gi", "si")
 			.description("Displays some information and statistics for the current guild."));
 	}
-
-	private static final String FORMAT_MEMBERS_WITH_BOTS = " humans + %d bots";
-	private static final String FORMAT_MEMBERS = "%d%s ";
-	private static final String FORMAT_MEMBERS_ONLINE = "(%d online)";
 
 	@Nonnull
 	@SuppressWarnings("null")
@@ -69,14 +64,26 @@ public class GuildInfoCommand extends Command {
 	@SuppressWarnings("null")
 	private static CompletableFuture<Void> appendMembers(@Nonnull Guild guild, @Nonnull EmbedBuilder builder) {
 		long bots = guild.getMembers().stream().map(Member::getUser).filter(User::isBot).count();
-		long humans = guild.getMembers().size() - bots;
+		long users = guild.getMembers().size() - bots;
 
-		String members = format(FORMAT_MEMBERS, humans, bots > 0 ? format(FORMAT_MEMBERS_WITH_BOTS, bots) : "");
+		var members = new StringBuilder();
+		members.append(users);
+		members.append(" user");
+		if (users != 1)
+			members.append('s');
+
+		if (bots > 0) {
+			members.append(", ");
+			members.append(bots);
+			members.append(" bot");
+			if (bots != 1)
+				members.append('s');
+		}
 
 		return guild.retrieveMetaData()
 			.submit()
 			.thenApply(MetaData::getApproximatePresences)
-			.thenApply(online -> members + format(FORMAT_MEMBERS_ONLINE, online))
+			.thenApply(online -> members + " (%d online)".formatted(online))
 			.thenAccept(data -> builder.addField("Members", codeblock(data), false));
 	}
 
