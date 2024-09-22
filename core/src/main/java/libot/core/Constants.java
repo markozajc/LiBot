@@ -50,7 +50,7 @@ public class Constants {
 
 	// Emoji
 	@Nonnull public static final Emoji ACCEPT_EMOJI = Emoji.fromUnicode("\u2705");
-	@Nonnull public static final Emoji DENY_EMOJI = Emoji.fromUnicode("\u274E");
+	@Nonnull public static final Emoji DENY_EMOJI = Emoji.fromCustom("decline", 1287493019309834274L, false);
 	@Nonnull public static final Emoji FAILURE_EMOJI = Emoji.fromUnicode("\u274C");
 	@Nonnull public static final Emoji MISSING_EMOJI = Emoji.fromUnicode("\uD83D\uDEAB");
 
