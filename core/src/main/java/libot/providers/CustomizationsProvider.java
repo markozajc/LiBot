@@ -1,7 +1,7 @@
 package libot.providers;
 
 import static java.util.Collections.synchronizedSet;
-import static net.dv8tion.jda.api.Permission.*;
+import static net.dv8tion.jda.api.Permission.ADMINISTRATOR;
 
 import java.util.*;
 
@@ -74,7 +74,7 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 		public boolean isDj(@Nonnull Member member) {
 			var id = this.getDjRoleId();
 			if (id.isPresent()) {
-				return member.hasPermission(MANAGE_SERVER, VOICE_CONNECT, VOICE_SPEAK)
+				return member.isOwner() || member.hasPermission(ADMINISTRATOR)
 					|| member.getRoles().stream().anyMatch(r -> r.getIdLong() == id.getAsLong());
 			} else {
 				return true;
