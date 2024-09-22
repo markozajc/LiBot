@@ -12,6 +12,7 @@ import javax.annotation.Nonnull;
 
 import org.apache.commons.collections4.list.SetUniqueList;
 
+import libot.core.argument.ArgumentList.Argument;
 import libot.core.entities.CommandContext;
 import libot.core.shred.Shredder;
 import net.dv8tion.jda.api.entities.*;
@@ -114,6 +115,21 @@ public final class FinderUtils {
 	 *         mentions first (can be empty)
 	 */
 	@SuppressWarnings("null")
+	public static List<Role> findRoles(@Nonnull CommandContext c, @Nonnull Argument query) {
+		return findRoles(c, query.value());
+	}
+
+	/**
+	 * Searches all {@link Role}s in the current {@link Guild} for matching/similar name
+	 * and mention.
+	 *
+	 * @param c
+	 * @param query
+	 *
+	 * @return list of found roles, sorted by similarity to the query, with direct
+	 *         mentions first (can be empty)
+	 */
+	@SuppressWarnings("null")
 	public static List<Role> findRoles(@Nonnull CommandContext c, @Nonnull String query) {
 		String text = query.toLowerCase().strip();
 
@@ -137,6 +153,21 @@ public final class FinderUtils {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Members
 	//////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Searches all {@link Member}s in the current {@link Guild} for matching/similar
+	 * name and mention.
+	 *
+	 * @param c
+	 * @param query
+	 *
+	 * @return list of found members, sorted by similarity to the query, with direct
+	 *         mentions first (can be empty)
+	 */
+	@SuppressWarnings("null")
+	public static List<Member> findMembers(@Nonnull CommandContext c, @Nonnull Argument query) {
+		return findMembers(c, query.value());
+	}
 
 	/**
 	 * Searches all {@link Member}s in the current {@link Guild} for matching/similar
