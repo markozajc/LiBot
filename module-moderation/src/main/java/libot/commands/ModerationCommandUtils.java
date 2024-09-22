@@ -1,16 +1,20 @@
 package libot.commands;
 
-import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static libot.core.Constants.FAILURE;
 import static libot.core.FinderUtils.*;
+import static libot.core.argument.ParameterList.Parameter.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static net.dv8tion.jda.api.Permission.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.bold;
 
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.*;
 import libot.core.entities.CommandContext;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -19,46 +23,44 @@ import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 
 final class ModerationCommandUtils {
 
-	private static final String FORMAT_DIRECT_REASON = """
-		You got %s of **%s** for the following reason:
-		%s""";
-	private static final String FORMAT_DIRECT_NO_REASON = """
-		You got %s out of **%s** (no reason was specified).""";
-	private static final String FORMAT_DOES_NOT_EXIST = """
-		%s "%s" does not exist""";
-	private static final String FORMAT_MEMBER_HIERARCHY_ERROR = """
-		You can not interact with members in higher/equal roles than you""";
-	private static final String FORMAT_ROLE_HIERARCHY_ERROR = """
-		You can not set roles higher/equal than your highest role""";
+	private static final String ERROR_MEMBER_HIERARCHY =
+		"You can not interact with members in higher/equal roles than you";
+	private static final String FORMAT_DOES_NOT_EXIST = "%s \"%s\" does not exist";
 
-	static record RoleMemberTuple(@Nonnull Role role, @Nonnull Member target) {}
+	static final MandatoryParameter MEMBER = mandatory(POSITIONAL, "member");
+	static final MandatoryParameter ROLE = mandatory(POSITIONAL, "role");
+	static final Parameter REASON = optional(POSITIONAL, "reason");
+
+	static record RoleMemberTuple(Role role, Member target) {}
 
 	@Nonnull
 	static RoleMemberTuple getRoleMemberTuple(@Nonnull CommandContext c) {
 		var member = findMember(c);
 		if (!c.canMemberInteract(member))
-			throw c.error(FORMAT_MEMBER_HIERARCHY_ERROR, FAILURE);
+			throw c.error(ERROR_MEMBER_HIERARCHY, FAILURE);
+
 		var role = findRole(c);
 		if (!c.canMemberInteract(role))
-			throw c.error(FORMAT_ROLE_HIERARCHY_ERROR, FAILURE);
+			throw c.error("You can not set roles higher/equal than your highest role", FAILURE);
+
 		return new RoleMemberTuple(role, member);
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
 	private static Member findMember(@Nonnull CommandContext c) {
-		var members = findMembers(c, c.params().get(0));
+		var members = findMembers(c, c.arg(MEMBER));
 		if (members.isEmpty())
-			throw c.errorf(FORMAT_DOES_NOT_EXIST, FAILURE, "Member", escape(c.params().get(0)));
+			throw c.errorf(FORMAT_DOES_NOT_EXIST, FAILURE, "Member", escape(c.arg(MEMBER).value()));
 		return members.get(0);
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
 	private static Role findRole(@Nonnull CommandContext c) {
-		var roles = findRoles(c, c.params().get(1));
+		var roles = findRoles(c, c.arg(ROLE));
 		if (roles.isEmpty())
-			throw c.errorf(FORMAT_DOES_NOT_EXIST, FAILURE, "Role", escape(c.params().get(1)));
+			throw c.errorf(FORMAT_DOES_NOT_EXIST, FAILURE, "Role", escape(c.arg(ROLE).value()));
 		return roles.get(0);
 	}
 
@@ -103,7 +105,7 @@ final class ModerationCommandUtils {
 			throw c.errorf("I can not %s myself", FAILURE, action.name().toLowerCase());
 
 		if (!c.canMemberInteract(target))
-			throw c.error(FORMAT_MEMBER_HIERARCHY_ERROR, FAILURE);
+			throw c.error(ERROR_MEMBER_HIERARCHY, FAILURE);
 
 		c.ensureGuildPermission(action.getPermission());
 		c.ensureSelfInteract(target);
@@ -113,23 +115,30 @@ final class ModerationCommandUtils {
 		if (!confirm)
 			throw c.cancel();
 
-		var reason = c.params().getOrDefault(1, null);
+		var reason = c.arg(REASON);
 
 		Runnable act = () -> action
-			.act(target, "%s: %s".formatted(c.getUserTag(), reason == null ? "No reason specified." : reason))
+			.act(target, "%s: %s".formatted(c.getUserTag(), reason.map(Argument::value).orElse("No reason specified.")))
 			.queue();
 
 		if (!target.getUser().isBot()) {
-			String message;
-			if (reason != null)
-				message = format(FORMAT_DIRECT_REASON, action.getVerb(), escape(c.getGuildName(), true), reason);
-			else
-				message = format(FORMAT_DIRECT_NO_REASON, action.getVerb(), escape(c.getGuildName(), true));
+			var message = new StringBuilder("You got ");
+			message.append(action.getVerb());
+			message.append(" out of ");
+			message.append(bold(escape(c.getGuildName())));
+
+			reason.map(Argument::value).ifPresentOrElse(r -> {
+				message.append(" for the following reason:\n");
+				message.append(escape(r));
+			}, () -> {
+				message.append(" (no reason was specified)");
+			});
 
 			target.getUser()
 				.openPrivateChannel()
 				.flatMap(p -> p.sendMessage(message))
 				.queue(m -> act.run(), e -> act.run());
+
 		} else {
 			act.run();
 		}
