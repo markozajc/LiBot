@@ -19,8 +19,8 @@ public class EnableCommand extends Command {
 	private static final MandatoryParameter NAME = mandatory(POSITIONAL, "name", "command or category to disable");
 
 	public EnableCommand() {
-		super(CommandMetadata.builder(CUSTOMIZATION, "disable")
-			.aliases("disablecommand")
+		super(CommandMetadata.builder(CUSTOMIZATION, "enable")
+			.aliases("enablecommand")
 			.permissions(MANAGE_SERVER)
 			.parameters(NAME)
 			.description("""
