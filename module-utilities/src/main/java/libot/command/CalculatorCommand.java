@@ -295,17 +295,14 @@ public class CalculatorCommand extends Command {
 			if (p.isAlive())
 				p.destroyForcibly();
 
-			if (LOG.isWarnEnabled())
-				LOG.warn("Expression timed out: (base64) {}",
-						 Base64.getEncoder().encodeToString(expression.getBytes(UTF_8)));
-
 			throw c.error("Evaluation took too long, please use a simpler expression", DISABLED);
 		}
 
 		if (p.exitValue() != 0) {
-			if (LOG.isWarnEnabled())
+			if (LOG.isWarnEnabled()) {
 				LOG.error("Expression caused non-zero exit {}: (base64) {}", p.exitValue(),
 						  Base64.getEncoder().encodeToString(expression.getBytes(UTF_8)));
+			}
 
 			throw fatal(c);
 		}
