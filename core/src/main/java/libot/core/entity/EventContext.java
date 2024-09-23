@@ -19,9 +19,9 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static libot.util.Utilities.*;
 import static net.dv8tion.jda.api.Permission.*;
+import static net.dv8tion.jda.api.entities.Role.DEFAULT_COLOR_RAW;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
-import java.awt.Color;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
@@ -418,8 +418,10 @@ public class EventContext extends BotContext {
 	@Nonnull
 	public CompletableFuture<Message> reply(@Nullable String title, @Nonnull String message, @Nullable String footer,
 											@Nullable Color color) {
-		EmbedBuilder builder =
-			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
+		EmbedBuilder builder = new EmbedBuilder().setTitle(title)
+			.appendDescription(message)
+			.setFooter(footer, null)
+			.setColor(color == null ? DEFAULT_COLOR_RAW : color.rgb());
 
 		return reply(builder.build());
 	}
@@ -494,10 +496,7 @@ public class EventContext extends BotContext {
 	@Nonnull
 	public CompletableFuture<Message> direct(@Nullable String title, @Nonnull String message, @Nullable String footer,
 											 @Nullable Color color) {
-		EmbedBuilder builder =
-			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
-
-		return direct(builder.build());
+		return direct(createEmbedBuilder(title, message, footer, color).build());
 	}
 
 	@Nonnull
@@ -625,10 +624,7 @@ public class EventContext extends BotContext {
 	@CheckReturnValue
 	public CommandException error(boolean ratelimit, @Nullable String title, @Nonnull String message,
 								  @Nullable String footer, @Nullable Color color) {
-		EmbedBuilder builder =
-			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
-
-		return error(ratelimit, builder.build());
+		return error(ratelimit, createEmbedBuilder(title, message, footer, color).build());
 	}
 
 	@Nonnull
@@ -726,6 +722,15 @@ public class EventContext extends BotContext {
 	protected EventContext(@Nonnull EventContext eventContext) {
 		super(eventContext);
 		this.event = eventContext.event;
+	}
+
+	@Nonnull
+	protected EmbedBuilder createEmbedBuilder(@Nullable String title, @Nonnull String message, @Nullable String footer,
+											  @Nullable Color color) {
+		return new EmbedBuilder().setTitle(title)
+			.appendDescription(message)
+			.setFooter(footer, null)
+			.setColor(color == null ? DEFAULT_COLOR_RAW : color.rgb());
 	}
 
 	@Nonnull

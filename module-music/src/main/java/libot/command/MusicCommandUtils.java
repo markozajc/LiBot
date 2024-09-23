@@ -55,14 +55,7 @@ class MusicCommandUtils {
 	static final String EMOJI_PAUSE = "\u23F8\uFE0F";
 	static final String EMOJI_LOOP = "\uD83D\uDD01";
 
-	private static final String FORMAT_FOOTER_PICKER = """
-		Please type in a track's index (the bold number) or EXIT to abort""";
-	public static final String FORMAT_PLAY_TRACK = """
-		%s Now playing: **[%s](%s)** by _%s_.""";
-	static final String FORMAT_QUEUE_FULL = """
-		This track has not been added to the queue because the queue may not exceed %d elements!""";
-	private static final String FORMAT_URL_NOT_FOUND = """
-		No playable track found on `%s`. Did you mean `%s %s`?""";
+	public static final String FORMAT_PLAY_TRACK = "%s Now playing: **[%s](%s)** by _%s_.";
 
 	static void playUrl(@Nonnull CommandContext c, @Nonnull String url) {
 		var vchannel = c.getMemberVoiceState().getChannel();
@@ -145,7 +138,7 @@ class MusicCommandUtils {
 
 		var message = c
 			.reply("Search results from %s".formatted(capitalize(results.get(0).getSourceManager().getSourceName())),
-				   b.toString(), FORMAT_FOOTER_PICKER, LITHIUM)
+				   b.toString(), "Please type in a track's index (the bold number) or EXIT to abort", LITHIUM)
 			.join();
 
 		while (true) {
@@ -216,7 +209,10 @@ class MusicCommandUtils {
 							  escape(info.author, true), sched.isLoop() ? "looping" : "playing",
 							  escape(playingTitle, true), playingUri);
 			}, () -> { // NOSONAR
-				this.c.replyf("Queue is full", FORMAT_QUEUE_FULL, FAILURE, QUEUE_MAX_SIZE);
+				this.c
+					.replyf("Queue is full",
+							"This track has not been added to the queue because the queue may not exceed %d elements!",
+							FAILURE, QUEUE_MAX_SIZE);
 			});
 		}
 
@@ -249,10 +245,10 @@ class MusicCommandUtils {
 			var e = new EmbedPrebuilder();
 			if (started) {
 				e.setTitle("Started playing");
-				e.setColor(SUCCESS);
+				e.setColor(SUCCESS.rgb());
 			} else {
 				e.setTitle("Queued");
-				e.setColor(LITHIUM);
+				e.setColor(LITHIUM.rgb());
 			}
 
 			var b = new StringBuilder();
@@ -267,7 +263,7 @@ class MusicCommandUtils {
 				b.append(" and started the player");
 			b.append(".");
 			if (total - added > 0) {
-				e.setColor(WARN);
+				e.setColor(WARN.rgb());
 				b.append(" **");
 				b.append(total - added);
 				b.append("** elements were not added to the queue because the queue is capped at **");
@@ -281,7 +277,7 @@ class MusicCommandUtils {
 		@Override
 		public void noMatches() {
 			this.lock.send(null);
-			this.c.replyf(FORMAT_URL_NOT_FOUND, DISABLED, this.url,
+			this.c.replyf("No playable track found on `%s`. Did you mean `%s %s`?", DISABLED, this.url,
 						  this.c.getCommandWithPrefix(YoutubePlayCommand.class), this.url);
 		}
 

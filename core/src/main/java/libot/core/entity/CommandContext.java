@@ -20,7 +20,6 @@ import static libot.core.Constants.*;
 import static libot.util.Utilities.asUnchecked;
 import static net.dv8tion.jda.api.Permission.MESSAGE_ADD_REACTION;
 
-import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -176,10 +175,7 @@ public class CommandContext extends EventContext {
 
 	public boolean confirm(boolean keepPrompt, @Nullable String title, @Nonnull String message, @Nullable String footer,
 						   @Nullable Color color) {
-		EmbedBuilder builder =
-			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
-
-		return confirm(keepPrompt, builder.build());
+		return confirm(keepPrompt, createEmbedBuilder(title, message, footer, color).build());
 	}
 
 	public boolean confirm(@Nullable String title, @Nonnull String message, @Nullable Color color) {
@@ -276,10 +272,7 @@ public class CommandContext extends EventContext {
 	@Nonnull
 	public Message askraw(@Nullable String title, @Nonnull String message, @Nullable String footer,
 						  @Nullable Color color) {
-		EmbedBuilder builder =
-			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
-
-		return askraw(builder.build());
+		return askraw(createEmbedBuilder(title, message, footer, color).build());
 	}
 
 	@Nonnull
@@ -344,10 +337,7 @@ public class CommandContext extends EventContext {
 
 	@Nonnull
 	public String ask(@Nullable String title, @Nonnull String message, @Nullable String footer, @Nullable Color color) {
-		EmbedBuilder builder =
-			new EmbedBuilder().setTitle(title).appendDescription(message).setFooter(footer, null).setColor(color);
-
-		return ask(builder.build());
+		return ask(createEmbedBuilder(title, message, footer, color).build());
 	}
 
 	@Nonnull

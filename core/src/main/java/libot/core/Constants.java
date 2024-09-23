@@ -20,7 +20,6 @@ import static java.util.Arrays.stream;
 import static libot.util.ResourceUtils.resourceAsString;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.awt.Color;
 import java.io.*;
 import java.util.function.Consumer;
 
@@ -33,6 +32,7 @@ import com.google.gson.Gson;
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.asciithemes.TA_Grid;
 import de.vandermeer.asciithemes.u8.U8_Grids;
+import libot.core.entity.Color;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 @SuppressWarnings("null")

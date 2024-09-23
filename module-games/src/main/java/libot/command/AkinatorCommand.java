@@ -185,13 +185,13 @@ public class AkinatorCommand extends Command {
 		if (akinatorWins) {
 			e.setTitle("Great,");
 			e.setDescription("guessed right one more time.");
-			e.setColor(SUCCESS);
+			e.setColor(SUCCESS.rgb());
 			e.setThumbnail(AKITUDE_BASE_URL.formatted("triomphe"));
 
 		} else {
 			e.setTitle("Bravo,");
 			e.setDescription("you defeated me.");
-			e.setColor(DISABLED);
+			e.setColor(DISABLED.rgb());
 			e.setThumbnail(AKITUDE_BASE_URL.formatted("deception"));
 		}
 		c.reply(e);

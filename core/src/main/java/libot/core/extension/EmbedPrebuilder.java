@@ -17,10 +17,9 @@ package libot.core.extension;
 
 import static java.lang.String.format;
 
-import java.awt.Color;
-
 import javax.annotation.*;
 
+import libot.core.entity.Color;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 public final class EmbedPrebuilder extends EmbedBuilder {
@@ -30,13 +29,15 @@ public final class EmbedPrebuilder extends EmbedBuilder {
 		super.setTitle(title);
 		super.appendDescription(message);
 		super.setFooter(footer, footerIconUrl);
-		super.setColor(color);
+		if (color != null)
+			super.setColor(color.rgb());
 	}
 
 	public EmbedPrebuilder() {}
 
 	public EmbedPrebuilder(@Nullable Color color) {
-		super.setColor(color);
+		if (color != null)
+			super.setColor(color.rgb());
 	}
 
 	public EmbedPrebuilder(@Nullable String title, @Nonnull String message, @Nullable String footer,
