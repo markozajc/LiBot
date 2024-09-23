@@ -38,6 +38,12 @@
 			<artifactId>JDA</artifactId>
 		</dependency>
 
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
 		<!-- Apache Commons< -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

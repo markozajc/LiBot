@@ -24,6 +24,10 @@
 		</developer>
 	</developers>
 
+	<properties>
+		<youtubesource.version>1.8.1</youtubesource.version>
+	</properties>
+
 	<dependencies>
 
 		<!-- Core -->
@@ -46,7 +50,12 @@
 		<dependency>
 			<groupId>dev.lavalink.youtube</groupId>
 			<artifactId>common</artifactId>
-			<version>1.7.2</version>
+			<version>${youtubesource.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>dev.lavalink.youtube</groupId>
+			<artifactId>v2</artifactId>
+			<version>${youtubesource.version}</version>
 		</dependency>
 
 		<!-- Apache Commons -->
