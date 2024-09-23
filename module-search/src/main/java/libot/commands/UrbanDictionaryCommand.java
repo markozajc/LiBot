@@ -1,13 +1,14 @@
 package libot.commands;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
-import static java.lang.String.format;
+import static com.google.common.primitives.Ints.constrainToRange;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.regex.Pattern.compile;
 import static kong.unirest.Unirest.spawnInstance;
-import static libot.commands.UrbanDictionaryCommand.Definition.BLANK;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.*;
 import static libot.core.commands.CommandCategory.SEARCH;
 import static net.dv8tion.jda.api.entities.MessageEmbed.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
@@ -17,28 +18,34 @@ import java.net.URLEncoder;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
-import javax.annotation.*;
+import javax.annotation.Nonnull;
 
 import com.google.common.cache.Cache;
 
 import kong.unirest.*;
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.*;
 import libot.core.commands.*;
-import libot.core.entities.*;
+import libot.core.entities.CommandContext;
 import libot.core.extensions.EmbedPrebuilder;
 
 public class UrbanDictionaryCommand extends Command {
 
-	static record Definition(String word, String definition, String example, String author, int thumbs_up,
-							 int thumbs_down) {
+	@Nonnull private static final MandatoryParameter TERM = mandatory(POSITIONAL, "term", "term to define");
+	@Nonnull private static final Parameter INDEX = optional(NAMED, "index", "which definition to show, 1 by default");
 
-		public static final Definition BLANK = new Definition(null, null, null, null, 0, 0);
-
+	public UrbanDictionaryCommand() {
+		super(CommandMetadata.builder(SEARCH, "urbandictionary")
+			.aliases("urban", "ud")
+			.parameters(TERM, INDEX)
+			.description("Shows a definition from the [Urban Dictionary](https://www.urbandictionary.com/)."));
 	}
 
-	private static final Cache<String, Definition> DEFINITION_CACHE =
-		newBuilder().expireAfterWrite(1, DAYS).maximumSize(2048).build();
 	private static final Cache<String, String> TERMS_CACHE =
 		newBuilder().expireAfterWrite(7, DAYS).maximumSize(4096).build();
+
+	private static record Definition(String word, String definition, String example, String author, int thumbs_up,
+									 int thumbs_down, int index, int count) {}
 
 	private static final UnirestInstance NO_REDIRECT_UNIREST = spawnInstance();
 	static {
@@ -46,36 +53,34 @@ public class UrbanDictionaryCommand extends Command {
 	}
 
 	private static final Pattern REFERENCE_PATTERN = compile("\\[(.*?)\\]");
-	private static final String API_URL = "https://api.urbandictionary.com/v0/define?term=%s";
-	private static final String WEBSITE_URL = "https://www.urbandictionary.com/define.php?term=%s";
+	private static final String ENDPOINT_API = "https://api.urbandictionary.com/v0/define";
+	private static final String ENDPOINT_WEB = "https://www.urbandictionary.com/define.php?term=%s";
 
-	private static final String FORMAT_DESCRIPTION = """
-		_"%s"_""";
-	private static final String FORMAT_AUTHOR = """
-		A definition by %s""";
-	private static final String FORMAT_TITLE = """
-		Definition of "%s":""";
-	private static final String FORMAT_VOTES = """
-		\uD83D\uDC4D\uD83C\uDFFC %d
-		\uD83D\uDC4E\uD83C\uDFFC %d""";
-	private static final String FORMAT_REFERENCE = format("[%%s](%s)", WEBSITE_URL);
+	private static final String FORMAT_REFERENCE = "[%%s](%s)".formatted(ENDPOINT_WEB);
 
 	@Override
 	@SuppressWarnings("null")
 	public void execute(CommandContext c) throws Exception {
 		try {
-			var term = TERMS_CACHE.get(c.params().get(0).toLowerCase(), () -> getTerm(c.params()));
-			var def = DEFINITION_CACHE.get(term, () -> getDefinition(term));
+			var term = TERMS_CACHE.get(c.arg(TERM).value(), () -> getTerm(c.arg(TERM)));
 
-			if (def.definition() == null)
-				throw c.errorf("Looks like UrbanDictionary can't define '%s'.", DISABLED, escape(c.params().get(0)));
+			var def = getDefinition(c, term);
 
-			var b = new EmbedPrebuilder(LITHIUM).setAuthorf(FORMAT_AUTHOR, def.author())
-				.setDescriptionf(FORMAT_DESCRIPTION, def.definition())
-				.setTitle(format(FORMAT_TITLE, def.word()),
-						  format(WEBSITE_URL, URLEncoder.encode(c.params().get(0), UTF_8)))
-				.addField("Usage example", def.example(), true)
-				.addField("Votes", FORMAT_VOTES.formatted(def.thumbs_up(), def.thumbs_down()), true);
+			var b = new EmbedPrebuilder(LITHIUM);
+			b.setAuthor("A definition by " + def.author());
+			b.setTitle("Definition of \"%s\":".formatted(def.word()), ENDPOINT_WEB.formatted(term));
+
+			b.addField("Usage example", def.example(), true).addField("Votes", """
+				\uD83D\uDC4D\uD83C\uDFFC %d
+				\uD83D\uDC4E\uD83C\uDFFC %d""".formatted(def.thumbs_up(), def.thumbs_down()), true);
+
+			String hint = "";
+			if (c.arg(INDEX).isEmpty()) {
+				hint = "\nShow another definition with %s %s --index 2".formatted(c.getCommandWithPrefix(),
+																				  c.arg(TERM).value());
+			}
+
+			b.setFooterf("Definition %d out of %d" + hint, def.index(), def.count());
 
 			c.reply(b);
 		} catch (ExecutionException e) {
@@ -88,9 +93,9 @@ public class UrbanDictionaryCommand extends Command {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	private static String getTerm(@Nonnull Parameters p) {
-		String term = URLEncoder.encode(p.get(0), UTF_8);
-		var header = NO_REDIRECT_UNIREST.get(format(WEBSITE_URL, term)).asEmpty().getHeaders().getFirst("Location");
+	private static String getTerm(@Nonnull Argument arg) {
+		String term = URLEncoder.encode(arg.value(), UTF_8);
+		var header = NO_REDIRECT_UNIREST.get(ENDPOINT_WEB.formatted(term)).asEmpty().getHeaders().getFirst("Location");
 		if (!header.isEmpty())
 			return header.substring(header.indexOf('=') + 1);
 		else
@@ -101,27 +106,23 @@ public class UrbanDictionaryCommand extends Command {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	private static String parseReferences(@Nonnull String text) {
-		return REFERENCE_PATTERN.matcher(text)
-			.replaceAll(m -> format(FORMAT_REFERENCE, m.group(1), URLEncoder.encode(m.group(1), UTF_8)));
-	}
-
-	@Nullable
-	@SuppressWarnings("null")
-	private static Definition getDefinition(@Nonnull String term) {
-		var response = Unirest.get(format(API_URL, term)).asJson().getBody().getObject().getJSONArray("list");
+	private static Definition getDefinition(@Nonnull CommandContext c, @Nonnull String term) {
+		var response =
+			Unirest.get(ENDPOINT_API).queryString("term", term).asJson().getBody().getObject().getJSONArray("list");
 
 		if (response.isEmpty())
-			return BLANK;
+			throw c.errorf("Looks like UrbanDictionary can't define '%s'.", DISABLED, escape(c.arg(TERM).value()));
 
-		var json = response.getJSONObject(0);
+		// TODO Math.clamp (when java 21)
+		int index = constrainToRange(c.arg(INDEX).map(Argument::valueAsInt).orElse(1), 1, response.length());
+		var json = response.getJSONObject(index - 1);
 
 		var word = escape(json.getString("word"));
 		var definition = cleanText(escape(json.getString("definition"), true), DESCRIPTION_MAX_LENGTH - 4);
 		var example = cleanText(escape(json.getString("example")), VALUE_MAX_LENGTH);
 
 		return new Definition(word, definition, example, json.getString("author"), json.getInt("thumbs_up"),
-							  json.getInt("thumbs_down"));
+							  json.getInt("thumbs_down"), index, response.length());
 	}
 
 	@Nonnull
@@ -130,34 +131,11 @@ public class UrbanDictionaryCommand extends Command {
 		return abbreviate(parseReferences(text.replace("\r", "")), maxLength);
 	}
 
-	@Override
-	public String getName() {
-		return "urbandictionary";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "urban", "ud" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Browses definitions from the [Urban Dictionary](https://www.urbandictionary.com/).";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "term" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "term to define" };
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return SEARCH;
+	@Nonnull
+	@SuppressWarnings("null")
+	private static String parseReferences(@Nonnull String text) {
+		return REFERENCE_PATTERN.matcher(text)
+			.replaceAll(m -> FORMAT_REFERENCE.formatted(m.group(1), URLEncoder.encode(m.group(1), UTF_8)));
 	}
 
 }

@@ -1,18 +1,20 @@
 package libot.commands;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
-import static java.lang.String.format;
 import static java.lang.System.getenv;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.regex.Pattern.*;
 import static libot.commands.GoogleCommand.SearchResult.BLANK_RESULT;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.SEARCH;
 import static org.apache.commons.text.StringEscapeUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.URLDecoder;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -25,10 +27,21 @@ import com.google.common.cache.Cache;
 
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONObject;
+import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
 
 public class GoogleCommand extends Command {
+
+	@Nonnull private static final MandatoryParameter QUERY = mandatory(POSITIONAL, "query");
+
+	public GoogleCommand() {
+		super(CommandMetadata.builder(SEARCH, "google")
+			.aliases("g")
+			.ratelimit(5, SECONDS)
+			.parameters(QUERY)
+			.description("Searches the provided query on Google. SafeSearch is enabled in non-NSFW channels."));
+	}
 
 	private static final Logger LOG = getLogger(GoogleCommand.class);
 
@@ -43,24 +56,8 @@ public class GoogleCommand extends Command {
 	private static final Pattern BRACKET_STRINGS = compile("\\<[^\\>]+\\>");
 	private static final Pattern MULTIPLE_SPACES = compile("\\s+", UNICODE_CHARACTER_CLASS);
 
-	private static final String API_FORMAT = """
-		https://www.googleapis.com/customsearch/v1\
-		?cx=%s\
-		&num=1\
-		&safe=%s\
-		&key=%s\
-		&q=%s""";
+	private static final String API_ENDPOINT = "https://www.googleapis.com/customsearch/v1";
 	private static final String ID;
-	private static final String USER_AGENT = """
-		Mozilla/5.0 \
-		(Windows NT 10.0; Win64; rv:83.1) \
-		Gecko/20100101 \
-		Firefox/83.1""";
-
-	private static final String FORMAT_NOT_FOUND = """
-		Google apparently couldn't answer your question. %s""";
-	private static final String FORMAT_NOT_FOUND_NSFW_APPEND = """
-		If you're searching for a NSFW topic, please note that results in non-nsfw channels are filtered!""";
 
 	private static final String[] API_KEYS;
 	private static final Cache<SearchParameters, SearchResult> CACHE;
@@ -81,17 +78,20 @@ public class GoogleCommand extends Command {
 		}
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public void execute(CommandContext c) {
 		if (API_KEYS.length == 0)
 			throw c.error(true, "Google is currently unavailable", DISABLED);
 
-		var result = performSearch(c.params().get(0), !c.isChannelNSFW());
+		var result = performSearch(c.arg(QUERY).value(), !c.isChannelNSFW());
 		if (result == null) {
 			throw c.error(true, "Google broke. Please try again later.", FAILURE);
 
 		} else if (result.blank()) {
-			throw c.errorf(true, FORMAT_NOT_FOUND, DISABLED, !c.isChannelNSFW() ? FORMAT_NOT_FOUND_NSFW_APPEND : "");
+			throw c.errorf(true, "No results found. %s", DISABLED, !c.isChannelNSFW()
+				? "If you're searching for a NSFW topic, please note that results in non-nsfw channels are filtered!"
+				: "");
 
 		} else {
 			c.reply(result.title() + "\n" + result.url());
@@ -123,9 +123,13 @@ public class GoogleCommand extends Command {
 	@Nonnull
 	private static SearchResult performApiSearch(@Nonnull SearchParameters params,
 												 @Nonnull String apiKey) throws IOException {
-		var url = API_FORMAT.formatted(ID, params.safeSearch() ? "high" : "off", apiKey,
-									   URLEncoder.encode(params.query(), UTF_8));
-		var response = Unirest.get(url).headerReplace("User-Agent", USER_AGENT).asJson();
+		var response = Unirest.get(API_ENDPOINT)
+			.queryString("cx", ID)
+			.queryString("num", "1")
+			.queryString("safe", params.safeSearch() ? "high" : "off")
+			.queryString("key", apiKey)
+			.queryString("q", params.query())
+			.asJson();
 		var json = response.getBody().getObject();
 
 		if (response.isSuccess()) {
@@ -135,8 +139,9 @@ public class GoogleCommand extends Command {
 				return BLANK_RESULT;
 
 		} else {
-			throw new IOException(format("Got a %d searching Google: %s", response.getStatus(),
-										 json.getJSONArray("errors").getJSONObject(0).getString("message")));
+			throw new IOException("Got a %d searching Google: %s"
+				.formatted(response.getStatus(),
+						   json.getJSONObject("error").getJSONArray("errors").getJSONObject(0).getString("message")));
 		}
 	}
 
@@ -156,36 +161,6 @@ public class GoogleCommand extends Command {
 		result = unescapeHtml4(result);
 		result = unescapeJava(result);
 		return result;
-	}
-
-	@Override
-	public String getName() {
-		return "google";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "g" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Searches the provided query on Google. SafeSearch is enabled in non-NSFW channels.";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "query" };
-	}
-
-	@Override
-	public int getRatelimit() {
-		return 5;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return SEARCH;
 	}
 
 }
