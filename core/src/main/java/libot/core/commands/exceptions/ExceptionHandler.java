@@ -429,9 +429,10 @@ public class ExceptionHandler {
 	}
 
 	private static boolean shouldRatelimit(Throwable t) {
+		// TODO java 21 switch with type
 		if (t instanceof CommandException ce)
 			return ce.doesRegisterRatelimit();
-		else if (t instanceof UsageException)
+		else if (t instanceof UsageException) // NOSONAR it's a list
 			return false;
 		else
 			return true;
