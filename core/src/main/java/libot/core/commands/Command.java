@@ -111,9 +111,7 @@ public abstract class Command {
 
 			parameters.forEach(p -> {
 				u.append("\n` ");
-				if (p.getType() == NAMED)
-					u.append("--");
-				u.append(rightPad(p.getName(), maxLength) + " `");
+				u.append(rightPad((p.getType() == NAMED ? "--" : "") + p.getName(), maxLength) + " `");
 
 				p.getDescription().ifPresent(description -> {
 					u.append(" ");
