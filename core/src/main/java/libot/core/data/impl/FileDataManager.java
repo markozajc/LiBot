@@ -19,7 +19,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.*;
 import static java.nio.file.StandardOpenOption.*;
 import static libot.core.Constants.ENV_DATA_PATH;
-import static libot.utils.Utilities.getenvOrThrow;
+import static libot.util.Utilities.getenvOrThrow;
 
 import java.io.IOException;
 import java.nio.file.Path;

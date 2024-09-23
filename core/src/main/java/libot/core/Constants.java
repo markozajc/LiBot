@@ -17,7 +17,7 @@ package libot.core;
 
 import static java.lang.System.getenv;
 import static java.util.Arrays.stream;
-import static libot.utils.ResourceUtils.resourceAsString;
+import static libot.util.ResourceUtils.resourceAsString;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.awt.Color;

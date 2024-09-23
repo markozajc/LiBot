@@ -18,7 +18,7 @@ package libot.module.money;
 import static libot.core.Constants.*;
 import static libot.core.argument.ParameterList.Parameter.optional;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
-import static libot.core.processes.ProcessManager.getProcesses;
+import static libot.core.process.ProcessManager.getProcesses;
 import static libot.module.money.BettableGame.GameResult.*;
 
 import java.util.Optional;
@@ -26,13 +26,13 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import libot.commands.MoneyCommand;
+import libot.command.MoneyCommand;
 import libot.core.argument.ArgumentList.Argument;
 import libot.core.argument.ParameterList.Parameter;
-import libot.core.commands.*;
-import libot.core.entities.CommandContext;
-import libot.core.processes.ProcessManager;
-import libot.providers.MoneyProvider;
+import libot.core.command.*;
+import libot.core.entity.CommandContext;
+import libot.core.process.ProcessManager;
+import libot.provider.MoneyProvider;
 
 public abstract class BettableGame extends Command {
 

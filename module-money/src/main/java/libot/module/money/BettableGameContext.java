@@ -17,7 +17,7 @@ package libot.module.money;
 
 import javax.annotation.*;
 
-import libot.core.entities.CommandContext;
+import libot.core.entity.CommandContext;
 import libot.module.money.BettableGame.GameResult;
 
 public class BettableGameContext extends CommandContext {

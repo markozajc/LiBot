@@ -16,7 +16,7 @@
 package libot.core.data;
 
 import static libot.core.Constants.ENV_DATA_TYPE;
-import static libot.utils.Utilities.getenvOrThrow;
+import static libot.util.Utilities.getenvOrThrow;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;

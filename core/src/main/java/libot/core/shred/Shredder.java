@@ -19,8 +19,8 @@ import static com.google.common.cache.CacheBuilder.newBuilder;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static libot.core.Constants.RESOURCE_GUILDS;
-import static libot.core.processes.ProcessManager.getCurrentProcess;
-import static libot.utils.Utilities.concat;
+import static libot.core.process.ProcessManager.getCurrentProcess;
+import static libot.util.Utilities.concat;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
 import java.time.*;

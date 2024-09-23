@@ -17,7 +17,7 @@ package libot.module.money;
 
 import javax.annotation.Nonnull;
 
-import libot.core.commands.exceptions.CommandException;
+import libot.core.command.exception.CommandException;
 import libot.module.money.BettableGame.GameResult;
 
 public class GameEndedException extends CommandException {

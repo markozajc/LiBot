@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
 import org.apache.commons.collections4.list.SetUniqueList;
 
 import libot.core.argument.ArgumentList.Argument;
-import libot.core.entities.CommandContext;
+import libot.core.entity.CommandContext;
 import libot.core.shred.Shredder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.Message.MentionType;

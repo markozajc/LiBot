@@ -21,8 +21,8 @@ import static java.lang.System.getenv;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Stream.concat;
 import static libot.core.Constants.*;
-import static libot.core.processes.ProcessManager.getProcesses;
-import static libot.utils.ReflectionUtils.scanClasspath;
+import static libot.core.process.ProcessManager.getProcesses;
+import static libot.util.ReflectionUtils.scanClasspath;
 import static net.dv8tion.jda.api.OnlineStatus.*;
 import static net.dv8tion.jda.api.requests.GatewayIntent.*;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.*;
@@ -41,15 +41,15 @@ import org.slf4j.Logger;
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 
 import libot.core.BotConfiguration;
-import libot.core.commands.CommandManager;
+import libot.core.command.CommandManager;
 import libot.core.data.DataManagerFactory;
-import libot.core.data.providers.ProviderManager;
-import libot.core.entities.BotContext;
-import libot.core.listeners.*;
-import libot.core.processes.ProcessManager;
+import libot.core.data.provider.ProviderManager;
+import libot.core.entity.BotContext;
+import libot.core.listener.*;
+import libot.core.process.ProcessManager;
 import libot.core.shred.Shredder;
 import libot.core.shred.Shredder.Shred;
-import libot.listeners.BotEventListener;
+import libot.listener.BotEventListener;
 import libot.management.ManagementServer;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
@@ -140,7 +140,7 @@ public class Main {
 		}
 
 		LOG.info("Invoking post-startup listeners");
-		scanClasspath(BotEventListener.class, libot.listeners.Anchor.class).forEach(l -> l.onStartup(bot));
+		scanClasspath(BotEventListener.class, libot.listener.Anchor.class).forEach(l -> l.onStartup(bot));
 
 		LOG.info("Finished loading");
 		LOG.info("    |_|_ LiBot {}", VERSION);
@@ -192,7 +192,7 @@ public class Main {
 	@SuppressWarnings("null")
 	private static void loadEventListeners(@Nonnull Shredder shredder, @Nonnull BotContext bot) {
 		var listeners = concat(Stream.of(new MessageListener(bot), new ShredClashListener(bot), new EventLogListener()),
-							   scanClasspath(EventListener.class, libot.listeners.Anchor.class, c -> {
+							   scanClasspath(EventListener.class, libot.listener.Anchor.class, c -> {
 								   try {
 									   return c.getDeclaredConstructor(BotContext.class).newInstance(bot);
 								   } catch (NoSuchMethodException e) {

@@ -23,7 +23,7 @@ import java.util.*;
 import javax.annotation.Nonnull;
 
 import libot.core.argument.ParameterList.*;
-import libot.utils.ParseUtils;
+import libot.util.ParseUtils;
 
 public class ArgumentList {
 

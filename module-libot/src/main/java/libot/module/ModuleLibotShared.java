@@ -18,15 +18,15 @@ package libot.module;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.LITHIUM;
-import static libot.core.commands.CommandCategory.ADMINISTRATIVE;
+import static libot.core.command.CommandCategory.ADMINISTRATIVE;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
 import javax.annotation.Nonnull;
 
-import libot.core.commands.Command;
-import libot.core.entities.CommandContext;
-import libot.providers.CustomizationsProvider;
+import libot.core.command.Command;
+import libot.core.entity.CommandContext;
+import libot.provider.CustomizationsProvider;
 import net.dv8tion.jda.api.Permission;
 
 public class ModuleLibotShared {

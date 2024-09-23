@@ -18,7 +18,7 @@ package libot.core;
 import static java.lang.System.getenv;
 import static java.util.Arrays.stream;
 import static libot.core.Constants.*;
-import static libot.utils.Utilities.getenvOrThrow;
+import static libot.util.Utilities.getenvOrThrow;
 
 import javax.annotation.Nonnull;
 
