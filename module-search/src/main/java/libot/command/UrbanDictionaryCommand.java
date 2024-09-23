@@ -27,6 +27,7 @@ import static libot.core.argument.ParameterList.Parameter.ParameterType.*;
 import static libot.core.command.CommandCategory.SEARCH;
 import static net.dv8tion.jda.api.entities.MessageEmbed.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.italics;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 import java.net.URLEncoder;
@@ -84,8 +85,9 @@ public class UrbanDictionaryCommand extends Command {
 			var b = new EmbedPrebuilder(LITHIUM);
 			b.setAuthor("A definition by " + def.author());
 			b.setTitle("Definition of \"%s\":".formatted(def.word()), ENDPOINT_WEB.formatted(term));
-
-			b.addField("Usage example", def.example(), true).addField("Votes", """
+			b.setDescription(italics(def.definition()));
+			b.addField("Usage example", def.example(), true);
+			b.addField("Votes", """
 				\uD83D\uDC4D\uD83C\uDFFC %d
 				\uD83D\uDC4E\uD83C\uDFFC %d""".formatted(def.thumbs_up(), def.thumbs_down()), true);
 
