@@ -1,7 +1,7 @@
 package libot.commands;
 
 import static java.lang.Math.round;
-import static libot.commands.MusicCommandUtils.nothingIsPlaying;
+import static libot.commands.MusicCommandUtils.*;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.commands.CommandCategory.MUSIC;
 import static libot.module.music.GlobalMusicManager.getMusicManager;
@@ -19,7 +19,7 @@ import libot.module.music.GlobalMusicManager.MusicManager;
 
 public class PlayingCommand extends Command {
 
-	protected PlayingCommand() {
+	public PlayingCommand() {
 		super(CommandMetadata.builder(MUSIC, "playing")
 			.description("Displays detailed information about the currently playing track."));
 	}
@@ -57,11 +57,11 @@ public class PlayingCommand extends Command {
 
 	private static String playerState(@Nonnull MusicManager manager) {
 		if (manager.getPlayer().isPaused())
-			return "\u275A\u275A";
+			return EMOJI_PAUSE;
 		else if (manager.getScheduler().isLoop())
-			return "\uD83D\uDD01";
+			return EMOJI_LOOP;
 		else
-			return "\u25B6";
+			return EMOJI_PLAY;
 	}
 
 	@Nonnull

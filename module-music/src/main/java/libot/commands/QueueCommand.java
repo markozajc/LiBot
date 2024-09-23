@@ -63,7 +63,7 @@ public class QueueCommand extends Command {
 		var list = new ArrayList<StringBuilder>();
 		var b = new StringBuilder();
 
-		b.append(EMOJI_PLAYING + " **[%s: %s](%s)**\n".formatted(current.getInfo().author, current.getInfo().title,
+		b.append(EMOJI_PLAY + " **[%s: %s](%s)**\n".formatted(current.getInfo().author, current.getInfo().title,
 																 current.getInfo().uri));
 
 		int i = 1;

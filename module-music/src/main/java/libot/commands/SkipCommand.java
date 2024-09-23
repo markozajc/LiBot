@@ -42,7 +42,7 @@ public class SkipCommand extends Command {
 		var track = sched.skipTrack(amount);
 
 		if (track != null)
-			c.replyf(FORMAT_PLAY_TRACK, SUCCESS, sched.isLoop() ? EMOJI_LOOP : EMOJI_PLAYING,
+			c.replyf(FORMAT_PLAY_TRACK, SUCCESS, sched.isLoop() ? EMOJI_LOOP : EMOJI_PLAY,
 					 escape(track.getInfo().title, true), track.getInfo().uri, escape(track.getInfo().author, true));
 		else
 			c.react(ACCEPT_EMOJI);

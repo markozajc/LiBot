@@ -18,7 +18,7 @@ public class PauseCommand extends Command {
 			.description("Pauses or resumes audio playback."));
 	}
 
-	@Nonnull static final String RESUMED = EMOJI_PLAYING + " Playback resumed";
+	@Nonnull static final String RESUMED = EMOJI_PLAY + " Playback resumed";
 	@Nonnull static final String PAUSED = EMOJI_PAUSE + " Playback paused";
 
 	@Override

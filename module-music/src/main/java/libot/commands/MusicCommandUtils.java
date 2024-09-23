@@ -36,7 +36,7 @@ class MusicCommandUtils {
 
 	static final String YOUTUBE_URL_PREFIX = "https://www.youtube.com/watch?v=";
 
-	static final String EMOJI_PLAYING = "\u25B6\uFE0F";
+	static final String EMOJI_PLAY = "\u25B6\uFE0F";
 	static final String EMOJI_PAUSE = "\u23F8\uFE0F";
 	static final String EMOJI_LOOP = "\uD83D\uDD01";
 
@@ -183,7 +183,7 @@ class MusicCommandUtils {
 			var sched = this.manager.getScheduler();
 			sched.queueCallback(track, () -> {
 				var a = this.c.replyf("Started playing", FORMAT_PLAY_TRACK, SUCCESS,
-									  sched.isLoop() ? EMOJI_LOOP : EMOJI_PLAYING, escape(info.title, true), info.uri,
+									  sched.isLoop() ? EMOJI_LOOP : EMOJI_PLAY, escape(info.title, true), info.uri,
 									  escape(info.author, true));
 				return e -> a.thenAccept(m -> m.editMessageEmbeds(getFailureEmbed(e)).queue());
 			}, () -> { // NOSONAR
