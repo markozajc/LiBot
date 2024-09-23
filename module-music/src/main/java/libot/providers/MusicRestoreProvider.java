@@ -23,30 +23,29 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
 
 import libot.core.data.DataManager;
-import libot.core.data.providers.MapProvider;
+import libot.core.data.providers.SnowflakeProvider;
 import libot.core.shred.Shredder;
 import libot.module.music.GlobalMusicManager.MusicManager;
-import libot.providers.MusicRestoreProvider.*;
+import libot.providers.MusicRestoreProvider.MusicState;
 import libot.utils.MessageLock;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 
-public class MusicRestoreProvider extends MapProvider<MusicChannel, MusicState> {
+public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 
 	private static final Logger LOG = getLogger(MusicRestoreProvider.class);
 
-	public static record MusicState(@Nonnull String[] tracks, boolean paused, long position, boolean loop) {} // NOSONAR
-
-	public static record MusicChannel(long id, @Nonnull ChannelType type) {} // NOSONAR
+	public static record MusicState(@Nonnull String[] tracks, boolean paused, long position, boolean loop, // NOSONAR
+									@Nonnull ChannelType channelType) {}
 
 	public MusicRestoreProvider(@Nonnull Shredder shredder, @Nonnull DataManager dataManager) {
 		super(shredder, dataManager, new TypeToken<>() {}, "musicqueues");
 	}
 
 	@SuppressWarnings("null")
-	private void restorePlayback(MusicChannel channel, @Nonnull MusicState state) {
+	private void restorePlayback(long channelId, @Nonnull MusicState state) {
 		try {
-			var ac = (AudioChannelUnion) getShredder().getChannelById(channel.type(), channel.id());
+			var ac = (AudioChannelUnion) getShredder().getChannelById(state.channelType(), channelId);
 			if (ac == null || ac.getMembers().stream().noneMatch(NO_BOT))
 				return;
 			LOG.debug("Restoring playback on guild {}", ac.getGuild().getId());
@@ -61,10 +60,10 @@ public class MusicRestoreProvider extends MapProvider<MusicChannel, MusicState> 
 			if (!am.isConnected())
 				am.openAudioConnection(ac);
 
-			manager.getPlayer().setPaused(state.paused());
 			manager.getScheduler().setLoop(state.loop());
 
 			int skip = playFirst(state, manager);
+			manager.getPlayer().setPaused(state.paused());
 			if (skip != -1)
 				resolveAudioTracks(state.tracks(), skip).limit((long) QUEUE_MAX_SIZE - manager.getScheduler().size())
 					.collect(toCollection(manager.getScheduler()::getQueue));
@@ -78,7 +77,7 @@ public class MusicRestoreProvider extends MapProvider<MusicChannel, MusicState> 
 	}
 
 	@SuppressWarnings("null")
-	private static int playFirst(@Nonnull MusicState state, @Nonnull MusicManager manager) {
+	private static int playFirst(@Nonnull MusicState state, @Nonnull MusicManager manager) throws InterruptedException {
 		int i = 0;
 		if (manager.getPlayingTrack() == null) {
 			AudioTrack firstTrack = null;
@@ -87,9 +86,23 @@ public class MusicRestoreProvider extends MapProvider<MusicChannel, MusicState> 
 			i++; // plus the one we just resolved
 
 			if (firstTrack != null) {
+				manager.getPlayer().setPaused(false);
 				manager.getPlayer().playTrack(firstTrack);
-				if (firstTrack.isSeekable() && firstTrack.getInfo().uri.equals(state.tracks()[0]))
+
+				if (firstTrack.isSeekable() && firstTrack.getInfo().uri.equals(state.tracks()[0])) {
+					// wait around for the first frame (for up to 5s). fixes a race condition in ogg
+					// position restore
+					int j = 500;
+					while (manager.getPlayer().provide() == null && j-- > 0) {
+						Thread.sleep(10);
+					}
+
+					if (j == -1)
+						LOG.warn("Could not get a frame for {}", firstTrack.getInfo().uri);
+
 					firstTrack.setPosition(state.position());
+				}
+
 			} else {
 				return -1; // we can't resolve a single track
 			}
@@ -164,6 +177,7 @@ public class MusicRestoreProvider extends MapProvider<MusicChannel, MusicState> 
 		return stream(tracks).filter(Objects::nonNull);
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	protected void onShredderReady() {
 		if (!this.data.isEmpty()) {
@@ -192,9 +206,8 @@ public class MusicRestoreProvider extends MapProvider<MusicChannel, MusicState> 
 				tracks[i + 1] = queue.get(i).getInfo().uri;
 
 			var state = new MusicState(tracks, manager.getPlayer().isPaused(), playing.getPosition(),
-									   manager.getScheduler().isLoop());
-			var channel = new MusicChannel(manager.getChannelId(), manager.getChannelType());
-			this.data.put(channel, state);
+									   manager.getScheduler().isLoop(), manager.getChannelType());
+			this.data.put(manager.getChannelId(), state);
 		});
 
 		store();
