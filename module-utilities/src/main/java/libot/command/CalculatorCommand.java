@@ -256,6 +256,7 @@ public class CalculatorCommand extends Command {
 	}
 
 	@Nullable
+	@SuppressWarnings("null")
 	private static Result evaluate(@Nonnull CommandContext c, @Nonnull List<QalcMessage> messages, String expression,
 								   @Nonnull Set<Mode> modes, int base) throws IOException, InterruptedException {
 		byte[] output = runCalculatorProcess(c, expression, modes, base);
@@ -267,7 +268,8 @@ public class CalculatorCommand extends Command {
 			switch (output[i + 1]) {
 				case TYPE_RESULT -> value = new String(output, i + 2, next - i - 2, UTF_8);
 				case TYPE_MESSAGE -> messages
-					.add(new QalcMessage(output[i + 2], new String(output, i + 3, next - i - 3, UTF_8)));
+					.add(new QalcMessage(output[i + 2],
+										 new String(output, i + 3, next - i - 3, UTF_8).replace('`', '\'')));
 
 				default -> {
 					if (LOG.isErrorEnabled())
@@ -280,7 +282,7 @@ public class CalculatorCommand extends Command {
 		if (value == null)
 			return null;
 		else
-			return new Result(value);
+			return new Result(value.replace("```", "'''"));
 	}
 
 	@Nonnull
