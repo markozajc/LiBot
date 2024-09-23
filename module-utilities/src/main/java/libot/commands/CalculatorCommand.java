@@ -9,6 +9,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.regex.Pattern.*;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
+import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.*;
@@ -26,6 +28,7 @@ import javax.annotation.*;
 import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
 import libot.core.commands.exceptions.CommandException;
 import libot.core.entities.CommandContext;
@@ -35,6 +38,27 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 public class CalculatorCommand extends Command {
+
+	@Nonnull private static final MandatoryParameter EXPRESSION = mandatory(POSITIONAL, "expression");
+
+	public CalculatorCommand() {
+		super(CommandMetadata.builder(UTILITIES, "calculator")
+			.aliases("c", "calc", "calculate", "qalc")
+			.parameters(EXPRESSION)
+			.description("""
+				Evaluates an expression. Check out the lists of supported \
+				[functions](https://qalculate.github.io/manual/qalculate-definitions-functions.html), \
+				[units](https://qalculate.github.io/manual/qalculate-definitions-units.html), and \
+				[constants](https://qalculate.github.io/manual/qalculate-definitions-variables.html).
+				Add `mode [mode]` to the expression to activate a mode. You can activate multiple modes in an expression.
+				Available modes:
+				- `mode nocolor` - disables ANSI color in the output
+				- `mode precision` - sets output precision to 900 digits
+				- `mode exact` - avoids approximation in the output
+				Powered by [Qalculate!](https://qalculate.github.io/)
+				_Note: Qalculate! input is multi-line. You can specify variable assignments (x := y) on separate lines._
+				"""));
+	}
 
 	public static final boolean ENABLED;
 	private static final Path DATA_DIRECTORY;
@@ -111,7 +135,7 @@ public class CalculatorCommand extends Command {
 			throw c.errorf("%s is unavailable.", DISABLED, c.getCommandName());
 
 		c.typing();
-		String expression = c.params().get(0);
+		String expression = c.arg(EXPRESSION).value();
 		expression = REGEX_NEWLINES.matcher(expression).replaceAll(" ").replace("\\", "");
 
 		var messages = new ArrayList<QalcMessage>(5);
@@ -325,53 +349,6 @@ public class CalculatorCommand extends Command {
 	@Nonnull
 	private static CommandException fatal(@Nonnull CommandContext c) {
 		return c.error("Failed to evaluate the expression", FAILURE);
-	}
-
-	@Override
-	public String getName() {
-		return "calculator";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "calc", "c", "calculate", "qalc" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Evaluates an expression. Check out the lists of supported \
-			[functions](https://qalculate.github.io/manual/qalculate-definitions-functions.html), \
-			[units](https://qalculate.github.io/manual/qalculate-definitions-units.html), and \
-			[constants](https://qalculate.github.io/manual/qalculate-definitions-variables.html).
-			Add `mode [mode]` to the expression to activate a mode. You can activate multiple modes in an expression.
-			Available modes:
-			- `mode nocolor` - disables ANSI color in the output
-			- `mode precision` - sets output precision to 900 digits
-			- `mode exact` - avoids approximation in the output
-			Powered by [Qalculate!](https://qalculate.github.io/)
-			_Note: Qalculate! input is multi-line. You can specify variable assignments (x := y) on separate lines._
-			""";
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "expression" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "expression to evaluate" };
-	}
-
-	@Override
-	public int getMaxParameters() {
-		return 1;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return UTILITIES;
 	}
 
 	public enum Mode {

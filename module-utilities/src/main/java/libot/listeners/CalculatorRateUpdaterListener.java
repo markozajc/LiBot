@@ -28,7 +28,7 @@ public class CalculatorRateUpdaterListener implements BotEventListener {
 		if (getenv(ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH) == null)
 			LOG.warn("{} is unset. Exchange rates will not be updated", ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH);
 
-		bot.cron().scheduleAtFixedRate(handle(CalculatorRateUpdaterListener::updateRates, t -> {
+		bot.getCron().scheduleAtFixedRate(handle(CalculatorRateUpdaterListener::updateRates, t -> {
 			LOG.error("Failed to update exchange rates", t);
 		}), 0, UPDATE_INTERVAL, MILLISECONDS);
 	}

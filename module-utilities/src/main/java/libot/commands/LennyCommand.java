@@ -8,6 +8,12 @@ import libot.core.entities.CommandContext;
 
 public class LennyCommand extends Command {
 
+	public LennyCommand() {
+		super(CommandMetadata.builder(UTILITIES, "lenny")
+			.aliases("lennyface")
+			.description("Prints out a random lenny face."));
+	}
+
 	@Override
 	@SuppressWarnings("null")
 	public void execute(CommandContext c) {
@@ -21,26 +27,6 @@ public class LennyCommand extends Command {
 		lenny.append(eyes[eyes.length == 2 ? 1 : 0]);
 		lenny.append(ears[ears.length == 2 ? 1 : 0]);
 		c.reply(lenny.toString());
-	}
-
-	@Override
-	public String getName() {
-		return "lenny";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "lennyface" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Prints out a random lenny face.";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return UTILITIES;
 	}
 
 	// @formatter:off

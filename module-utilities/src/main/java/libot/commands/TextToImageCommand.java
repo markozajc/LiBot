@@ -3,13 +3,13 @@ package libot.commands;
 import static java.awt.Font.PLAIN;
 import static java.awt.RenderingHints.*;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
-import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static libot.core.Constants.FAILURE;
+import static libot.core.argument.ParameterList.Parameter.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
-import static libot.utils.ParseUtils.parseParameters;
 import static net.dv8tion.jda.api.utils.FileUpload.fromData;
-import static org.apache.commons.lang3.math.NumberUtils.isParsable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,11 +18,28 @@ import java.io.*;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 
+import libot.core.argument.ArgumentList.Argument;
+import libot.core.argument.ParameterList.*;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
-import libot.utils.ParseUtils.Prefix;
 
 public class TextToImageCommand extends Command {
+
+	private static final int DEFAULT_SIZE = 16;
+
+	@Nonnull private static final MandatoryParameter TEXT = mandatory(POSITIONAL, "text");
+	@SuppressWarnings("null") @Nonnull private static final Parameter SIZE =
+		optional(NAMED, "size", "text size (in points), %d by default".formatted(DEFAULT_SIZE));
+
+	public TextToImageCommand() {
+		super(CommandMetadata.builder(UTILITIES, "texttoimage")
+			.aliases("tti")
+			.ratelimit(10, SECONDS)
+			.parameters(TEXT, SIZE)
+			.description("""
+				Converts given text into an image. Beware that this might not render certain special characters and \
+				emoji correctly."""));
+	}
 
 	private static final String FORMAT_SIZE_TOO_LARGE = """
 		The font size may not exceed **%d**.""";
@@ -37,13 +54,11 @@ public class TextToImageCommand extends Command {
 	private static final Canvas CANVAS = new Canvas();
 	private static final int SIZE_CAP = 100;
 	private static final int LENGTH_CAP = 300;
-	private static final int DEFAULT_SIZE = 16;
 
 	@Override
 	@SuppressWarnings({ "null", "resource" })
 	public void execute(CommandContext c) throws IOException {
-		boolean hasSize = c.params().check(1) && isParsable(c.params().get(0));
-		int size = hasSize ? c.params().getInt(0) : DEFAULT_SIZE;
+		int size = c.arg(SIZE).map(Argument::valueAsInt).orElse(DEFAULT_SIZE);
 
 		if (size > SIZE_CAP)
 			throw c.errorf(FORMAT_SIZE_TOO_LARGE, FAILURE, SIZE_CAP);
@@ -51,7 +66,7 @@ public class TextToImageCommand extends Command {
 		if (size <= 0)
 			throw c.error(FORMAT_SIZE_NEGATIVE, FAILURE);
 
-		String text = getText(c, hasSize);
+		String text = c.arg(TEXT).value();
 		if (text.length() >= LENGTH_CAP)
 			throw c.errorf(FORMAT_TEXT_TOO_LONG, FAILURE, LENGTH_CAP);
 
@@ -79,16 +94,6 @@ public class TextToImageCommand extends Command {
 	}
 
 	@Nonnull
-	@SuppressWarnings("null")
-	private static String getText(@Nonnull CommandContext c, boolean hasSize) {
-		if (hasSize)
-			return c.params().get(1);
-		else
-			return parseParameters(c.getMessage().getContentDisplay(),
-								   new Prefix(c.getEffectivePrefix(), c.getSelfIdLong()), 1)[0];
-	}
-
-	@Nonnull
 	private static BufferedImage getImage(@Nonnull String[] lines, @Nonnull FontMetrics fm, int fontHeight) {
 		int width = stream(lines).mapToInt(fm::stringWidth).filter(i -> i > 0).max().orElse(1);
 		return new BufferedImage(width, fontHeight * lines.length, TYPE_INT_RGB);
@@ -100,49 +105,6 @@ public class TextToImageCommand extends Command {
 		g.setFont(font);
 		g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
 		return g;
-	}
-
-	@Override
-	public String getName() {
-		return "texttoimage";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "tti" };
-	}
-
-	@Override
-	@SuppressWarnings("null")
-	public String getInfo() {
-		return format("""
-			Converts given text into an image. If no text size is provided, %d will be used. \
-			Beware that this might not render certain special characters correctly.""", DEFAULT_SIZE);
-	}
-
-	@Override
-	public int getRatelimit() {
-		return 10;
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "[size]", "text" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "text size in pixels", "text to render" };
-	}
-
-	@Override
-	public int getMinParameters() {
-		return 1;
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return UTILITIES;
 	}
 
 }

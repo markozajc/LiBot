@@ -6,7 +6,6 @@ import static javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING;
 import static javax.xml.xpath.XPathConstants.STRING;
 import static libot.core.Constants.*;
 import static libot.core.commands.CommandCategory.UTILITIES;
-import static org.apache.commons.lang3.tuple.Pair.of;
 import static org.eu.zajc.ef.EHandle.handle;
 
 import java.io.*;
@@ -27,8 +26,14 @@ import libot.core.commands.*;
 import libot.core.commands.exceptions.ContinuumException;
 import libot.core.entities.CommandContext;
 
-@SuppressWarnings("java:S4248") // false positive spam (non-static pattern)
+@SuppressWarnings("java:S4248") // false positive spam
 public class ChatbotCommand extends Command {
+
+	public ChatbotCommand() {
+		super(CommandMetadata.builder(UTILITIES, "chatbot").aliases("chat").description("""
+			Opens a chat session with \
+			[Chomsky](http://demo.vhost.pandorabots.com/pandora/talk?botid=b0dafd24ee35a477), the online chatbot."""));
+	}
 
 	private static final String PANDORABOTS_EMOJI = "<:pandorabots:1129815071556653067>";
 	// nbsp used in place of spaces on the following line because ecj doesn't like
@@ -44,8 +49,8 @@ public class ChatbotCommand extends Command {
 	private static final DocumentBuilder DOCUMENT_BUILDER; // implementation isn't thread safe
 	private static final XPathExpression XPATH_EXTRACTOR; // explicitly not thread safe
 
-	private static final List<Pair<Pattern, String>> RESPONSE_PARSERS_RECURSIVE = new ArrayList<>();
-	private static final List<Pair<Pattern, String>> RESPONSE_PARSERS = new ArrayList<>();
+	private static final ArrayList<Pair<Pattern, String>> RESPONSE_PARSERS_RECURSIVE = new ArrayList<>();
+	private static final ArrayList<Pair<Pattern, String>> RESPONSE_PARSERS = new ArrayList<>();
 
 	static {
 		var dbf = DocumentBuilderFactory.newInstance();
@@ -63,30 +68,31 @@ public class ChatbotCommand extends Command {
 		XPATH_EXTRACTOR = handle(() -> xp.compile("//result/that/text()"), e -> null).get();
 
 		// useless data, inner data discarded
-		RESPONSE_PARSERS.add(of(compile("(?s)<object[^>]*>.*?</object>"), "")); // NOSONAR
-		RESPONSE_PARSERS.add(of(compile("(?s)<param[^>]*>.*?</param>"), ""));
-		RESPONSE_PARSERS.add(of(compile("(?s)<embed[^>]*>.*?</embed>"), ""));
-		RESPONSE_PARSERS.add(of(compile("(?s)<script[^>]*>.*?</script>"), ""));
-		RESPONSE_PARSERS.add(of(compile("(?s)<style[^>]*>.*?</style>"), ""));
+		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<object[^>]*>.*?</object>"), "")); // NOSONAR
+		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<param[^>]*>.*?</param>"), ""));
+		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<embed[^>]*>.*?</embed>"), ""));
+		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<script[^>]*>.*?</script>"), ""));
+		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<style[^>]*>.*?</style>"), ""));
 
 		// useless tags, inner data kept
-		RESPONSE_PARSERS_RECURSIVE.add(of(compile("(?s)<font[^>]*>(.*?)</font>"), "$1"));
-		RESPONSE_PARSERS_RECURSIVE.add(of(compile("(?s)<div[^>]*>(.*?)</div>"), "$1\n"));
+		RESPONSE_PARSERS_RECURSIVE.add(Pair.of(compile("(?s)<font[^>]*>(.*?)</font>"), "$1"));
+		RESPONSE_PARSERS_RECURSIVE.add(Pair.of(compile("(?s)<div[^>]*>(.*?)</div>"), "$1\n"));
 
 		// html we can't turn into markdown but we still change
-		RESPONSE_PARSERS.add(of(compile("<a href=\"([^\"]*)\"[^>]*>(.*?)<\\/a>"), "$2 (<$1>)"));
-		RESPONSE_PARSERS.add(of(compile("<br> *"), "\n"));
+		RESPONSE_PARSERS.add(Pair.of(compile("<a href=\"([^\"]*)\"[^>]*>(.*?)<\\/a>"), "$2 (<$1>)"));
+		RESPONSE_PARSERS.add(Pair.of(compile("<br> *"), "\n"));
 
 		// html we can turn into markdown
-		RESPONSE_PARSERS_RECURSIVE.add(of(compile("<b>(.*?)</b>"), "**$1**"));
-		RESPONSE_PARSERS_RECURSIVE.add(of(compile("<i>(.*?)</i>"), "*$1*"));
-		RESPONSE_PARSERS_RECURSIVE.add(of(compile("<u>(.*?)</u>"), "__$1__"));
+		RESPONSE_PARSERS_RECURSIVE.add(Pair.of(compile("<b>(.*?)</b>"), "**$1**"));
+		RESPONSE_PARSERS_RECURSIVE.add(Pair.of(compile("<i>(.*?)</i>"), "*$1*"));
+		RESPONSE_PARSERS_RECURSIVE.add(Pair.of(compile("<u>(.*?)</u>"), "__$1__"));
 
 		// botched punctuation
-		RESPONSE_PARSERS.add(of(compile(" {2,}"), " "));
-		RESPONSE_PARSERS.add(of(compile(" +(?=[\\.,!?])"), ""));
+		RESPONSE_PARSERS.add(Pair.of(compile(" {2,}"), " "));
+		RESPONSE_PARSERS.add(Pair.of(compile(" +(?=[\\.,!?])"), ""));
 
-		// STATIC_RESPONSES.put(q -> q.startsWith("web search"), )
+		RESPONSE_PARSERS.trimToSize();
+		RESPONSE_PARSERS_RECURSIVE.trimToSize();
 	}
 
 	@Override
@@ -180,28 +186,6 @@ public class ChatbotCommand extends Command {
 																							   XPathExpressionException {
 		var doc = DOCUMENT_BUILDER.parse(response);
 		return (String) XPATH_EXTRACTOR.evaluate(doc, STRING);
-	}
-
-	@Override
-	public String getName() {
-		return "chatbot";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "chat", "talk" };
-	}
-
-	@Override
-	public String getInfo() {
-		return """
-			Opens a chat session with \
-			[Chomsky](http://demo.vhost.pandorabots.com/pandora/talk?botid=b0dafd24ee35a477), the online chatbot.""";
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return UTILITIES;
 	}
 
 }

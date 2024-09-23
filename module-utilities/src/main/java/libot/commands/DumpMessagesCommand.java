@@ -4,8 +4,11 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Collections.reverse;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.FAILURE;
+import static libot.core.argument.ParameterList.Parameter.mandatory;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static net.dv8tion.jda.api.Permission.MESSAGE_HISTORY;
 import static net.dv8tion.jda.api.utils.FileUpload.fromData;
@@ -16,27 +19,39 @@ import java.util.ArrayList;
 
 import javax.annotation.Nonnull;
 
+import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.commands.*;
 import libot.core.entities.CommandContext;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.MessageEmbed.*;
 
 public class DumpMessagesCommand extends Command {
 
+	@Nonnull private static final MandatoryParameter COUNT =
+		mandatory(POSITIONAL, "count", "number of messages to dump");
+
+	public DumpMessagesCommand() {
+		super(CommandMetadata.builder(UTILITIES, "dumpmessages")
+			.aliases("dump")
+			.permissions(MESSAGE_HISTORY)
+			.ratelimit(1, MINUTES)
+			.parameters(COUNT)
+			.description("Dumps messages from the channel into a file and uploads it."));
+	}
+
 	private static final ZoneId UTC = ZoneId.of("UTC");
 	private static final DateTimeFormatter DTF = ofPattern("dd/MM/yyyy HH:mm");
 
 	private static final String L1 = "\n\t";
-	private static final String L3 = "\n\t\t\t";
 	private static final String L2 = "\n\t\t";
+	private static final String L3 = "\n\t\t\t";
 	private static final int MESSAGES_CAP = 100_000;
 
 	@SuppressWarnings({ "null", "resource" })
 	@Override
 	public void execute(CommandContext c) {
-		int limit = c.params().getInt(0);
+		int limit = c.arg(COUNT).valueAsInt();
 
 		if (limit > MESSAGES_CAP)
 			throw c.errorf("You can only dump up to %d messages", FAILURE, MESSAGES_CAP);
@@ -145,46 +160,6 @@ public class DumpMessagesCommand extends Command {
 		b.append(" (");
 		b.append(attachment.getUrl());
 		b.append(")");
-	}
-
-	@Override
-	public String getName() {
-		return "dumpmessages";
-	}
-
-	@Override
-	public String[] getAliases() {
-		return new String[] { "dump" };
-	}
-
-	@Override
-	public String getInfo() {
-		return "Dumps messages from the channel into a file and uploads it.";
-	}
-
-	@Override
-	public Permission[] getPermissions() {
-		return new Permission[] { MESSAGE_HISTORY };
-	}
-
-	@Override
-	public int getRatelimit() {
-		return 60;
-	}
-
-	@Override
-	public String[] getParameters() {
-		return new String[] { "messsages" };
-	}
-
-	@Override
-	public String[] getParameterInfo() {
-		return new String[] { "number of messages to dump" };
-	}
-
-	@Override
-	public CommandCategory getCategory() {
-		return UTILITIES;
 	}
 
 }
