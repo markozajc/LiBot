@@ -3,7 +3,7 @@ package libot.commands;
 import static java.lang.System.currentTimeMillis;
 import static libot.core.Constants.*;
 import static libot.core.argument.ParameterList.Parameter.*;
-import static libot.core.argument.ParameterList.Parameter.ParameterType.*;
+import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.commands.CommandCategory.UTILITIES;
 import static libot.utils.ParseUtils.parseTime;
 import static net.dv8tion.jda.api.utils.TimeFormat.DATE_TIME_LONG;
@@ -22,7 +22,8 @@ public class TimerCommand extends Command {
 
 	@Nonnull private static final MandatoryParameter TIME =
 		mandatory(POSITIONAL, "time", "[time](https://libot.eu.org/doc/commands/parameter-types.html) to set");
-	@Nonnull private static final Parameter TEXT = optional(NAMED, "text", "text to display when the timer runs out");
+	@Nonnull private static final Parameter TEXT =
+		optional(POSITIONAL, "text", "text to display when the timer runs out");
 
 	public TimerCommand() {
 		super(CommandMetadata.builder(UTILITIES, "timer")

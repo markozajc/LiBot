@@ -335,10 +335,10 @@ public class ExceptionHandler {
 
 					private static void handleTimeParse(ExceptionContext<TimeParseException> e) {
 						if (e.canTalk()) {
-							e.ctx().replyf("// TIME EXCEPTED //", """
+							e.ctx().reply("// TIME EXCEPTED //", """
 								LiBot was expecting a \
 								[timestamp](https://libot.eu.org/doc/commands/parameter-types.html#time), but got \
-								something else.""");
+								something else.""", WARN);
 						}
 					}
 
@@ -416,6 +416,8 @@ public class ExceptionHandler {
 	private static boolean shouldRatelimit(Throwable t) {
 		if (t instanceof CommandException ce)
 			return ce.doesRegisterRatelimit();
+		if (t instanceof UsageException)
+			return false;
 		return true;
 	}
 
