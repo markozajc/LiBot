@@ -416,9 +416,10 @@ public class ExceptionHandler {
 	private static boolean shouldRatelimit(Throwable t) {
 		if (t instanceof CommandException ce)
 			return ce.doesRegisterRatelimit();
-		if (t instanceof UsageException)
+		else if (t instanceof UsageException)
 			return false;
-		return true;
+		else
+			return true;
 	}
 
 	private ExceptionHandler() {}

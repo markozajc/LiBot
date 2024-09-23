@@ -64,7 +64,7 @@ public class QueueCommand extends Command {
 		var b = new StringBuilder();
 
 		b.append(EMOJI_PLAY + " **[%s: %s](%s)**\n".formatted(current.getInfo().author, current.getInfo().title,
-																 current.getInfo().uri));
+															  current.getInfo().uri));
 
 		int i = 1;
 		for (var track : gmm.getScheduler().getQueue()) {
