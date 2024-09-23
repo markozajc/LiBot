@@ -45,7 +45,7 @@ public class GlobalDisableCommand extends Command {
 				c.replyf("`%s` is already disabled.", DISABLED, cmd.getName());
 
 			} else if (cmd instanceof GlobalEnableCommand) {
-				c.react(DENY_EMOJI);
+				c.react(DECLINE_EMOJI);
 
 			} else {
 				conf.disable(cmd);

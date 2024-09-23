@@ -37,7 +37,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed.Footer;
 
 public class CommandContext extends EventContext {
 
-	private static final String FORMAT_FALLBACK_ASK = format("React with %s or %s", ACCEPT_EMOJI, DENY_EMOJI);
+	private static final String FORMAT_FALLBACK_ASK = format("React with %s or %s", ACCEPT_EMOJI, DECLINE_EMOJI);
 
 	@Nonnull private final Command command;
 	@Nonnull private final ArgumentList arguments;
@@ -399,7 +399,7 @@ public class CommandContext extends EventContext {
 	private boolean getConfirmation(@Nonnull Message m, boolean keepPrompt) {
 		if (canReact()) {
 			m.addReaction(ACCEPT_EMOJI).queue();
-			m.addReaction(DENY_EMOJI).queue();
+			m.addReaction(DECLINE_EMOJI).queue();
 		}
 		try {
 			return getWaiter().awaitBoolean(m, keepPrompt);

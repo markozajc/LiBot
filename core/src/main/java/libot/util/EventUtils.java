@@ -95,7 +95,7 @@ public class EventUtils {
 			var emoji = e.getReaction().getEmoji();
 
 			return e.getUserIdLong() == this.user.getIdLong() && e.getMessageIdLong() == question.getIdLong()
-				&& (ACCEPT_EMOJI.equals(emoji) || DENY_EMOJI.equals(emoji));
+				&& (ACCEPT_EMOJI.equals(emoji) || DECLINE_EMOJI.equals(emoji));
 
 		}, p -> {
 			try {
