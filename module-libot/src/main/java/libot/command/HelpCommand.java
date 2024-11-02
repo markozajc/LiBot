@@ -21,6 +21,7 @@ import static libot.core.Constants.*;
 import static libot.core.argument.ParameterList.Parameter.optional;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.command.CommandCategory.*;
+import static libot.core.listener.DeletionRequestListener.DELETION_REACTION;
 import static libot.module.ModuleLibotShared.sendUsage;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -53,9 +54,10 @@ public class HelpCommand extends Command {
 	private static final String FORMAT_NONEXISTANT =
 		"`%s` does not (yet) exist! Please try again in approximately `%d` years!";
 	private static final String FORMAT_DESCRIPTION = """
-		To get detailed information about a command, use `%s [command]`.
-		You can also use %s as a command prefix!
-		%s""";
+		To get detailed information about a command, use `%%s [command]`.
+		You can also use %%s as a command prefix.
+		LiBot's messages can be deleted by adding a %s reaction.
+		%s""".formatted(DELETION_REACTION, LINKS);
 
 	@Override
 	public void execute(CommandContext c) throws Exception {
@@ -87,7 +89,7 @@ public class HelpCommand extends Command {
 			e.addField(category.toString(), b.toString(), false);
 		}
 
-		e.setDescriptionf(FORMAT_DESCRIPTION, c.getCommandWithPrefix(), c.getSelfMention(), LINKS);
+		e.setDescriptionf(FORMAT_DESCRIPTION, c.getCommandWithPrefix(), c.getSelfMention());
 
 		c.direct(e).thenAcceptAsync(m -> c.react(ACCEPT_EMOJI)).exceptionally(t -> {
 			c.reply(e);
