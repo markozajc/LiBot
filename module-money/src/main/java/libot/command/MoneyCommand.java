@@ -57,7 +57,7 @@ public class MoneyCommand extends Command {
 			time = REWARD_SPACING;
 		}
 
-		b.appendDescriptionf("You can claim your next hourly reward %s.",
+		b.appendDescriptionf("\nYou can claim your next hourly reward %s.",
 							 TimeFormat.RELATIVE.format(currentTimeMillis() + time));
 		c.reply(b);
 	}
