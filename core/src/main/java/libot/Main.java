@@ -191,14 +191,18 @@ public class Main {
 
 	@SuppressWarnings("null")
 	private static void loadEventListeners(@Nonnull Shredder shredder, @Nonnull BotContext bot) {
-		var listeners = concat(Stream.of(new MessageListener(bot), new ShredClashListener(bot), new EventLogListener()),
-							   scanClasspath(EventListener.class, libot.listener.Anchor.class, c -> {
-								   try {
-									   return c.getDeclaredConstructor(BotContext.class).newInstance(bot);
-								   } catch (NoSuchMethodException e) {
-									   return c.getDeclaredConstructor().newInstance();
-								   }
-							   })).toArray();
+		var builtIn = Stream.of(new MessageListener(bot), new ShredClashListener(bot), new EventLogListener(),
+								new DeletionRequestListener());
+
+		var classpath = scanClasspath(EventListener.class, libot.listener.Anchor.class, c -> {
+			try {
+				return c.getDeclaredConstructor(BotContext.class).newInstance(bot);
+			} catch (NoSuchMethodException e) {
+				return c.getDeclaredConstructor().newInstance();
+			}
+		});
+
+		var listeners = concat(builtIn, classpath).toArray();
 		shredder.getShreds().stream().map(Shred::jda).forEach(j -> j.addEventListener(listeners));
 	}
 
