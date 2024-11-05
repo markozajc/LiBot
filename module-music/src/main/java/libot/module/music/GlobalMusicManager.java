@@ -33,7 +33,7 @@ import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import dev.lavalink.youtube.clients.*;
+import dev.lavalink.youtube.clients.IosWithThumbnail;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 
@@ -95,9 +95,7 @@ public class GlobalMusicManager {
 	public static final AudioPlayerManager APM;
 	static {
 		APM = new DefaultAudioPlayerManager();
-		APM.registerSourceManager(new YoutubeAudioSourceManager(true, new MusicWithThumbnail(), new WebWithThumbnail(),
-																new AndroidTestsuiteWithThumbnail(),
-																new TvHtml5EmbeddedWithThumbnail()));
+		APM.registerSourceManager(new YoutubeAudioSourceManager(true, new IosWithThumbnail()));
 		APM.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		APM.registerSourceManager(new BandcampAudioSourceManager());
 		APM.registerSourceManager(new VimeoAudioSourceManager());
