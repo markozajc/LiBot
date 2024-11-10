@@ -17,7 +17,7 @@ Building LiBot --------------
     Building:
        Building LiBot should be rather easy:
        
-          $ git clone git://git.zajc.tel/libot/authoritative.git libot
+          $ git clone git://git.zajc.tel/libot/libot.git
           $ cd libot
           $ mvn clean package -DoutputLocation=/output/path
 
