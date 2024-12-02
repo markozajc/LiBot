@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toMap;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collector;
 
 import javax.annotation.*;
@@ -49,8 +50,13 @@ public final class Utilities {
 		return (int) (log10(n) + 1);
 	}
 
-	public static <T> T random(T[] elements) {
-		return elements[ThreadLocalRandom.current().nextInt(elements.length)];
+	@SuppressWarnings("null")
+	public static <T> T random(@Nonnull T[] elements) {
+		return random(elements, ThreadLocalRandom.current());
+	}
+
+	public static <T> T random(@Nonnull T[] elements, @Nonnull RandomGenerator random) {
+		return elements[random.nextInt(elements.length)];
 	}
 
 	@Nonnull

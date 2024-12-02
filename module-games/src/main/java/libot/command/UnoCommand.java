@@ -24,19 +24,22 @@ import static net.dv8tion.jda.api.utils.MarkdownUtil.*;
 import static org.eu.zajc.juno.cards.UnoCardColor.*;
 import static org.eu.zajc.juno.rules.pack.impl.UnoOfficialRules.UnoHouseRule.PROGRESSIVE;
 import static org.eu.zajc.juno.rules.pack.impl.house.UnoProgressiveRulePack.getConsecutive;
-import static org.eu.zajc.juno.utils.UnoRuleUtils.combinedPlacementAnalysis;
+import static org.eu.zajc.juno.utils.UnoRuleUtils.getProhibitingRule;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
 import org.eu.zajc.juno.cards.*;
+import org.eu.zajc.juno.cards.impl.UnoDrawCard;
 import org.eu.zajc.juno.decks.impl.UnoStandardDeck;
 import org.eu.zajc.juno.game.*;
 import org.eu.zajc.juno.players.UnoPlayer;
 import org.eu.zajc.juno.players.impl.UnoStrategicPlayer;
+import org.eu.zajc.juno.rules.impl.placement.DrawPlacementRules.DrawFourHitchPlacementRule;
 import org.eu.zajc.juno.rules.pack.impl.UnoOfficialRules;
+import org.eu.zajc.juno.rules.pack.impl.house.UnoProgressiveRulePack;
+import org.eu.zajc.juno.utils.UnoGameUtils;
 
 import libot.core.command.CommandMetadata;
 import libot.core.command.exception.runtime.CanceledException;
@@ -53,7 +56,6 @@ public class UnoCommand extends BettableGame {
 	}
 
 	private static final String INVALID_NUMBER = "Please input a number.";
-	private static final String INVALID_CHOICE = "Invalid choice!";
 
 	private static final String UNO_LOGO_URL = "https://libot.eu.org/img/uno.png";
 
@@ -62,8 +64,8 @@ public class UnoCommand extends BettableGame {
 		@Nonnull private final StringBuilder feed;
 
 		public DiscordUnoGame(@Nonnull BettableGameContext c, @Nonnull StringBuilder feed) {
-			super(UnoStandardDeck.getDeck(), 7, UnoOfficialRules.getPack(PROGRESSIVE), new DiscordPlayer(c, feed),
-				  new UnoStrategicPlayer("LiBot"));
+			super(UnoStandardDeck.getDeck(), 7, UnoOfficialRules.getPack(PROGRESSIVE), RANDOM,
+				  new DiscordPlayer(c, feed), new UnoStrategicPlayer("LiBot"));
 			this.feed = feed;
 		}
 
@@ -93,35 +95,57 @@ public class UnoCommand extends BettableGame {
 		}
 
 		@Override
-		@SuppressWarnings("null")
 		public UnoCard playCard(UnoGame game) {
-			var possible = combinedPlacementAnalysis(game.getTopCard(), this.getHand().getCards(), game.getRules(),
-													 this.getHand());
 			reportChooseAction(game, game.getNextPlayer());
-			return inputAction(possible);
+			return inputAction(game);
 		}
 
-		private UnoCard inputAction(@Nonnull List<UnoCard> possible) {
+		@SuppressWarnings("null")
+		private UnoCard inputAction(@Nonnull UnoGame game) {
 			while (true) {
 				String response = this.c.ask().toLowerCase();
 				if ("exit".equals(response))
 					confirmExit(this.c);
 
+				int choice;
 				try {
-					int choice = parseInt(response);
+					choice = parseInt(response);
 					if (choice == 0)
 						return null;
-
-					UnoCard card = null;
-					boolean valid = choice > getCards().size() || choice < 0
-						|| !possible.contains(card = this.getCards().get(choice - 1));
-					if (valid)
-						this.c.reply(INVALID_CHOICE);
-					else
-						return card;
 				} catch (NumberFormatException ex) {
 					this.c.reply(INVALID_NUMBER);
+					continue;
 				}
+
+				if (choice > getCards().size() || choice < 0) {
+					this.c.reply("Invalid choice!");
+					continue;
+				}
+
+				UnoCard card = this.getCards().get(choice - 1);
+				if (UnoGameUtils.canPlaceCard(this, game, card)) {
+					return card;
+
+				} else {
+					var rule = getProhibitingRule(game.getTopCard(), card, game.getRules(), getHand());
+
+					if (rule instanceof DrawFourHitchPlacementRule) {
+						this.c.replyf("""
+							Invalid choice! You can only place a **%s** when you hold no cards the same color as \
+							the top card (%s).""", getEmojiWithName(this.c, card),
+									  getEmojiWithName(this.c, game.getTopCard()));
+
+					} else if (card instanceof UnoDrawCard d && rule instanceof UnoProgressiveRulePack.PlacementRule) {
+						this.c.replyf("""
+							Invalid choice! You can only place a **%s** on Draw %d cards.""",
+									  getEmojiWithName(this.c, card), d.getAmount());
+
+					} else {
+						this.c.reply("Invalid choice!");
+					}
+
+				}
+
 			}
 		}
 
@@ -213,7 +237,7 @@ public class UnoCommand extends BettableGame {
 						case 3 -> GREEN;
 						case 4 -> BLUE;
 						default -> {
-							this.c.reply(INVALID_CHOICE);
+							this.c.reply("Invalid choice!");
 							yield null;
 						}
 					};

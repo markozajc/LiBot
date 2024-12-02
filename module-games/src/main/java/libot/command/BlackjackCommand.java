@@ -23,7 +23,6 @@ import static libot.module.money.BettableGame.GameResult.*;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.*;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Nonnull;
 
@@ -89,7 +88,7 @@ public class BlackjackCommand extends BettableGame {
 	private static synchronized Queue<Card> createDeck() {
 		var deck = new ArrayDeque<Card>(DECK.size());
 		for (int i = 0; i < DECK_COUNT; i++) {
-			shuffle(DECK, ThreadLocalRandom.current());
+			shuffle(DECK, RANDOM);
 			deck.addAll(DECK);
 		}
 		return deck;

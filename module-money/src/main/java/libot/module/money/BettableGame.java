@@ -15,12 +15,15 @@
  */
 package libot.module.money;
 
+import static java.util.Objects.requireNonNull;
 import static libot.core.Constants.*;
 import static libot.core.argument.ParameterList.Parameter.optional;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.POSITIONAL;
 import static libot.core.process.ProcessManager.getProcesses;
 import static libot.module.money.BettableGame.GameResult.*;
+import static libot.util.Utilities.asUnchecked;
 
+import java.security.*;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -35,6 +38,15 @@ import libot.core.process.ProcessManager;
 import libot.provider.MoneyProvider;
 
 public abstract class BettableGame extends Command {
+
+	@Nonnull public static final SecureRandom RANDOM;
+	static {
+		try {
+			RANDOM = requireNonNull(SecureRandom.getInstanceStrong());
+		} catch (NoSuchAlgorithmException e) {
+			throw asUnchecked(e);
+		}
+	}
 
 	@Nonnull private static final Parameter BET =
 		optional(POSITIONAL, "bet", "amount of Ł to bet (leave empty to play without betting)");

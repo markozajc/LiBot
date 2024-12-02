@@ -63,7 +63,7 @@ public class RockPaperScissorsCommand extends BettableGame {
 			}
 		};
 
-		Gesture libot = random(Gesture.values());
+		Gesture libot = random(Gesture.values(), RANDOM);
 		int winner = (player.ordinal() - libot.ordinal() + 4) % 3 - 1;
 		return switch (winner) {
 			case 1 -> {
