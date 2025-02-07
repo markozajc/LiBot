@@ -50,16 +50,21 @@ public class TransferCommand extends Command {
 	public void execute(CommandContext c) {
 		var recipient = getRecipient(c);
 		var provider = c.getProvider(MoneyProvider.class);
-		int amount = getBalance(c, provider);
+		long amount = c.arg(BALANCE).valueAsLong();
+
+		ensureBalance(c, provider, amount);
 
 		if (c.confirmf("Are you sure you want to transfer **%dŁ** to %s?", LITHIUM, amount,
 					   escape(recipient.getAsMention()))) {
 
-			provider.takeMoney(c.getUserIdLong(), amount);
-			provider.addMoney(recipient.getIdLong(), amount);
+			synchronized (provider) {
+				ensureBalance(c, provider, amount);
+				provider.takeMoney(c.getUserIdLong(), amount);
+				provider.addMoney(recipient.getIdLong(), amount);
 
-			c.replyf("Transfer successful", "%dŁ has been transferred to %s's wallet", SUCCESS, amount,
-					 escape(recipient.getAsMention()));
+				c.replyf("Transfer successful", "%dŁ has been transferred to %s's wallet", SUCCESS, amount,
+						 escape(recipient.getAsMention()));
+			}
 		}
 	}
 
@@ -81,8 +86,7 @@ public class TransferCommand extends Command {
 		return recipient;
 	}
 
-	private static int getBalance(@Nonnull CommandContext c, @Nonnull MoneyProvider provider) {
-		int amount = c.arg(BALANCE).valueAsInt();
+	private static void ensureBalance(@Nonnull CommandContext c, @Nonnull MoneyProvider provider, long amount) {
 		if (amount < 1)
 			throw c.error("The amount must be positive", FAILURE);
 
@@ -97,8 +101,6 @@ public class TransferCommand extends Command {
 						   maxTransfer <= 0 ? "can't transfer any Ł"
 							   : format("can transfer at most **%dŁ**", maxTransfer));
 		}
-
-		return amount;
 	}
 
 }
