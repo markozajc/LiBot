@@ -28,9 +28,8 @@ import libot.core.argument.ParameterList.Parameter;
 import net.dv8tion.jda.api.Permission;
 
 public record CommandMetadata(CommandCategory category, String name, String id, Optional<String> description,
-							  Set<String> aliases, Set<Permission> permissions, boolean checkPermissionsAtStartup,
-							  boolean requireDjRole, long ratelimitMillis, String ratelimitBucket,
-							  ParameterList parameters) {
+	Set<String> aliases, Set<Permission> permissions, boolean checkPermissionsAtStartup, boolean requireDjRole,
+	long ratelimitMillis, String ratelimitBucket, ParameterList parameters) {
 
 	@Nonnull
 	public static CommandMetadata.Builder builder(@Nonnull CommandCategory category, @Nonnull String name) {

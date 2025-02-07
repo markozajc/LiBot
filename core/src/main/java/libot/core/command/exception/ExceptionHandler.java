@@ -82,7 +82,7 @@ public class ExceptionHandler {
 	}
 
 	private static record ExceptionContext<T extends Throwable>(@Nonnull T ex, @Nonnull Command command,
-																@Nonnull EventContext ctx) {
+		@Nonnull EventContext ctx) {
 
 		@Nonnull
 		public String commandName() {

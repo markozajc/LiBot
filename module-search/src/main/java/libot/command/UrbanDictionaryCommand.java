@@ -61,7 +61,7 @@ public class UrbanDictionaryCommand extends Command {
 		newBuilder().expireAfterWrite(7, DAYS).maximumSize(4096).build();
 
 	private static record Definition(String word, String definition, String example, String author, int thumbs_up,
-									 int thumbs_down, int index, int count) {}
+		int thumbs_down, int index, int count) {}
 
 	private static final UnirestInstance NO_REDIRECT_UNIREST = spawnInstance();
 	static {

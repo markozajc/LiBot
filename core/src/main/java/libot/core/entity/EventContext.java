@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.*;
 
 import libot.core.command.Command;
-import libot.core.command.exception.*;
+import libot.core.command.exception.CommandException;
 import libot.core.command.exception.runtime.CanceledException;
 import libot.core.command.exception.startup.NotSysadminException;
 import libot.provider.CustomizationsProvider;
@@ -298,12 +298,6 @@ public class EventContext extends BotContext {
 	@Nonnull
 	public CanceledException exit() {
 		return new CanceledException();
-	}
-
-	@CheckReturnValue
-	@Nonnull
-	public ContinuumException continuum(@Nonnull Object... realityAnchor) {
-		return new ContinuumException(realityAnchor);
 	}
 
 	public boolean hasChannelPermission(@Nonnull Permission... permissions) {
