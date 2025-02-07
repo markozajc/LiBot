@@ -22,16 +22,16 @@ import libot.module.money.BettableGame.GameResult;
 
 public class BettableGameContext extends CommandContext {
 
-	private final int bet;
+	private final long bet;
 
-	public BettableGameContext(@Nonnull CommandContext c, int bet) {
+	public BettableGameContext(@Nonnull CommandContext c, long bet) {
 		super(c);
 		this.bet = bet;
 	}
 
 	// ===============* Getters *===============
 
-	public int getBet() {
+	public long getBet() {
 		return this.bet;
 	}
 

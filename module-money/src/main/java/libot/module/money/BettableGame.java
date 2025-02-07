@@ -81,17 +81,17 @@ public abstract class BettableGame extends Command {
 
 	public static class BettableProcessData {
 
-		private final int bet;
+		private final long bet;
 		private boolean killed;
 		private boolean returned;
 
-		public BettableProcessData(int bet) {
+		public BettableProcessData(long bet) {
 			this.bet = bet;
 			this.killed = false;
 			this.returned = false;
 		}
 
-		public int getBet() {
+		public long getBet() {
 			return this.bet;
 		}
 
@@ -119,7 +119,7 @@ public abstract class BettableGame extends Command {
 	@Override
 	@SuppressWarnings("null")
 	public final void execute(CommandContext c) throws Exception {
-		int bet = c.arg(BET).map(Argument::valueAsInt).orElse(0);
+		long bet = c.arg(BET).map(Argument::valueAsLong).orElse(0L);
 
 		if (bet < 0) {
 			throw c.error("The bet must not be a negative number.", FAILURE);
