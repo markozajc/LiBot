@@ -15,16 +15,14 @@
  */
 package libot.command;
 
-import static java.lang.Math.*;
 import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.HOURS;
 import static libot.core.Constants.LITHIUM;
 import static libot.core.command.CommandCategory.MONEY;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
 
 import libot.core.command.*;
 import libot.core.entity.CommandContext;
 import libot.core.extension.EmbedPrebuilder;
-import libot.core.ratelimit.Ratelimit;
 import libot.provider.MoneyProvider;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
@@ -32,13 +30,9 @@ public class MoneyCommand extends Command {
 
 	public MoneyCommand() {
 		super(CommandMetadata.builder(MONEY, "money")
-			.aliases("balance", "work", "reward")
-			.description("Displays your current balance and claims your hourly reward."));
+			.aliases("balance")
+			.description("Displays your current LiBot cash (Ł) balance."));
 	}
-
-	private static final long REWARD_SPACING = HOURS.toMillis(1);
-	private static final Ratelimit REWARD_RATELIMIT = new Ratelimit(REWARD_SPACING);
-	private static final int MIN_REWARD = 5;
 
 	@Override
 	public void execute(CommandContext c) {
@@ -46,24 +40,18 @@ public class MoneyCommand extends Command {
 		long balance = provider.getBalance(c.getUserIdLong());
 
 		var b = new EmbedPrebuilder(LITHIUM);
-		b.setDescriptionf("Your current balance is: **%dŁ**", balance);
+		b.setDescriptionf("Your current balance is: **%dŁ**\n\n", balance);
 
-		long time = REWARD_RATELIMIT.check(c.getUserIdLong());
-		if (time == -1) {
-			long earned = computeReward(balance);
-			provider.addMoney(c.getUserIdLong(), earned);
-			REWARD_RATELIMIT.register(c.getUserIdLong());
-			b.appendDescriptionf(" + %d (hourly reward)", earned);
-			time = REWARD_SPACING;
+		long rewardRemainingTime = RewardCommand.getRewardRemainingTime(c.getUserIdLong());
+		if (rewardRemainingTime < 0) {
+			b.appendDescriptionf("You can claim your hourly reward with %s.",
+								 monospace(c.getCommandWithPrefix(RewardCommand.class)));
+
+		} else {
+			b.appendDescriptionf("You can claim your next hourly reward %s.",
+								 TimeFormat.RELATIVE.format(currentTimeMillis() + rewardRemainingTime));
 		}
-
-		b.appendDescriptionf("\nYou can claim your next hourly reward %s.",
-							 TimeFormat.RELATIVE.format(currentTimeMillis() + time));
 		c.reply(b);
-	}
-
-	private static long computeReward(long balance) {
-		return max(round(pow(log(max(1, balance)), 2) * 2), MIN_REWARD);
 	}
 
 }
