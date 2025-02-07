@@ -120,7 +120,7 @@ public class ChatbotCommand extends Command {
 
 		while (true) {
 			var m = c.askraw();
-			if ("exit".equalsIgnoreCase(m.getContentStripped())) {
+			if (m.getContentStripped().toLowerCase().endsWith("exit")) {
 				m.addReaction(ACCEPT_EMOJI).queue();
 				break;
 

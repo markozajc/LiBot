@@ -86,7 +86,7 @@ public class GreeterCommand extends Command {
 		e.setFooter(EXIT_FOOTER);
 
 		var input = c.askraw(e).getContentRaw();
-		if ("exit".equalsIgnoreCase(input))
+		if (input.toLowerCase().endsWith("exit"))
 			return;
 		if (input.length() > MAX_GREETER_MESSAGE_LENGTH)
 			throw c.errorf("Message length may not exceed %d characters.", FAILURE, MAX_GREETER_MESSAGE_LENGTH);

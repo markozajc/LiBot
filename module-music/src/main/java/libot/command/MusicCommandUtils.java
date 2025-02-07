@@ -142,10 +142,10 @@ class MusicCommandUtils {
 			.join();
 
 		while (true) {
-			String indexString = c.ask();
+			String indexString = c.ask().toLowerCase();
 
 			int index = 0;
-			if ("exit".equalsIgnoreCase(indexString)) {
+			if (indexString.equals("exit")) {
 				message.delete().queue();
 				throw c.cancel();
 

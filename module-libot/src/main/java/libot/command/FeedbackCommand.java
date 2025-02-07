@@ -78,16 +78,15 @@ public class FeedbackCommand extends Command {
 	@Nonnull
 	private static String ask(@Nonnull CommandContext c, int lengthCap, @Nonnull String tooLongFormat) {
 		while (true) {
-			var resp = c.askraw();
-			if ("exit".equalsIgnoreCase(resp.getContentStripped())) {
-				resp.addReaction(ACCEPT_EMOJI).queue();
+			var resp = c.ask();
+			if (resp.equalsIgnoreCase("exit")) {
 				throw c.cancel();
 
-			} else if (resp.getContentDisplay().length() > lengthCap) {
+			} else if (resp.length() > lengthCap) {
 				c.replyf(tooLongFormat, WARN, lengthCap);
 
 			} else {
-				return resp.getContentDisplay();
+				return resp;
 			}
 		}
 	}

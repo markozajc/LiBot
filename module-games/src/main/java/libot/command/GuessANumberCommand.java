@@ -78,13 +78,11 @@ public class GuessANumberCommand extends Command {
 		int count = 0; // can't just use history since it's capped to MAX_HISTORY
 		boolean won = false;
 		do {
-			var resp = c.askraw();
-			var input = resp.getContentDisplay();
-			if ("exit".equals(input)) {
-				if (c.confirm("Are you sure you want to quit the game?", WARN)) {
-					resp.addReaction(ACCEPT_EMOJI).queue();
+			var input = c.ask().toLowerCase();
+			if (input.endsWith("exit")) {
+				if (c.confirm("Are you sure you want to quit the game?", WARN))
 					throw c.cancel();
-				}
+
 			} else {
 				count++;
 				won = guess(c, input, history, answer, bound, count);

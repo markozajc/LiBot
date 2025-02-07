@@ -53,7 +53,7 @@ public class BlackjackCommand extends BettableGame {
 	static {
 		DECK = new ArrayList<>(52);
 		for (Suit suit : Suit.values()) {
-			DECK.add(new Card(suit.getEmoji(), 1, "A"));
+			DECK.add(new Card(suit.getEmoji(), 1, "A (counts as 1)"));
 			for (int i = 2; i < 11; i++)
 				DECK.add(new Card(suit.getEmoji(), i, Integer.toString(i)));
 			DECK.add(new Card(suit.getEmoji(), 10, "J"));
@@ -127,20 +127,21 @@ public class BlackjackCommand extends BettableGame {
 
 	public static boolean doesPlayerHit(@Nonnull BettableGameContext c) {
 		while (true) {
-			switch (c.ask().toLowerCase()) {
-				case "hit" -> {
-					return true;
+			var input = c.ask().toLowerCase();
+			if (input.endsWith("exit")) {
+				if (c.confirmf("Are you sure that you want to exit this Blackjack game%s?",
+							   c.hasBet() ? " **(you'll lose your full bet)**" : "")) {
+					throw c.gquit();
 				}
-				case "stand" -> {
-					return false;
-				}
-				case "exit" -> {
-					if (c.confirmf("Are you sure that you want to exit this Blackjack game%s?",
-								   c.hasBet() ? " **(you'll lose your full bet)**" : "")) {
-						throw c.gquit();
-					}
-				}
-				default -> c.reply(CHEATSHEET, DISABLED);
+
+			} else if (input.equals("hit")) {
+				return true;
+
+			} else if (input.equals("stand")) {
+				return false;
+
+			} else {
+				c.reply(CHEATSHEET, DISABLED);
 			}
 		}
 	}

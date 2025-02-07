@@ -104,7 +104,7 @@ public class UnoCommand extends BettableGame {
 		private UnoCard inputAction(@Nonnull UnoGame game) {
 			while (true) {
 				String response = this.c.ask().toLowerCase();
-				if ("exit".equals(response))
+				if (response.endsWith("exit"))
 					confirmExit(this.c);
 
 				int choice;
@@ -227,7 +227,7 @@ public class UnoCommand extends BettableGame {
 			UnoCardColor color = null;
 			while (color == null) {
 				String response = this.c.ask().toLowerCase();
-				if ("exit".equals(response))
+				if (response.endsWith("exit"))
 					confirmExit(this.c);
 
 				try {

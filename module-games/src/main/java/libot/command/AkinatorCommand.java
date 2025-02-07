@@ -59,7 +59,6 @@ public class AkinatorCommand extends Command {
 	private static final Logger LOG = LoggerFactory.getLogger(AkinatorCommand.class);
 
 	private static final String[] ANSWERS_BACK = { "b", "u", "back", "undo" };
-	private static final String ANSWER_EXIT = "exit";
 
 	private static final String AKITUDE_BASE_URL = "https://libot.eu.org/img/akitudes/%s.png";
 	private static final Pattern AKITUDE_PATTERN = compile("/([^/]+)\\.png$");
@@ -124,14 +123,13 @@ public class AkinatorCommand extends Command {
 		}).orElse(ENGLISH);
 	}
 
-	@SuppressWarnings("null")
 	private static void askQuestion(@Nonnull CommandContext c, @Nonnull Question q) {
 		c.reply(createQuestionEmbed(q));
 		boolean answered = false;
 		while (!answered) {
 			String response = c.ask().toLowerCase();
 			Answer answer;
-			if (ANSWER_EXIT.equals(response)) {
+			if (response.endsWith("exit")) {
 				if (c.confirm("Are you sure you want to exit?"))
 					throw c.exit();
 
