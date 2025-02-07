@@ -38,8 +38,7 @@ public class TimerProvider extends TimedTaskProvider<UserTimer> {
 	private static final Logger LOG = LoggerFactory.getLogger(TimerProvider.class);
 
 	public static record UserTimer(long userId, @Nullable String text, long endTime, long guildId, long channelId,
-								   long messageId)
-		implements TimedTaskProvider.TimedTask {
+		long messageId) implements TimedTaskProvider.TimedTask {
 
 		public UserTimer(@Nullable String text, long endTime, @Nonnull CommandContext c) {
 			this(c.getUserIdLong(), text, endTime, c.getGuildIdLong(), c.getChannelIdLong(), c.getMessageIdLong());

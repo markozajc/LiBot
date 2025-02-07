@@ -61,6 +61,7 @@ public class ConfigurationProvider extends Provider<BotConfiguration> {
 		if (isDisabled(command))
 			return false;
 		this.data.getDisabledCommands().add(command.getId());
+		markDirty();
 		return true;
 	}
 
@@ -68,6 +69,7 @@ public class ConfigurationProvider extends Provider<BotConfiguration> {
 		if (!isDisabled(command))
 			return false;
 		this.data.getDisabledCommands().remove(command.getId());
+		markDirty();
 		return true;
 	}
 

@@ -91,6 +91,7 @@ public abstract class TimedTaskProvider<T extends TimedTask> extends Provider<Se
 				boolean expired = now > t.endTime();
 				if (now > t.endTime()) {
 					this.data.remove(t);
+					markDirty();
 					this.expiryNotifier.submit(() -> onExpiry(t));
 				}
 				return expired;
@@ -106,6 +107,7 @@ public abstract class TimedTaskProvider<T extends TimedTask> extends Provider<Se
 				throw new IllegalStateException(FORMAT_SHUTDOWN);
 
 			this.data.add(task);
+			markDirty();
 			restartService();
 		}
 	}
@@ -116,7 +118,10 @@ public abstract class TimedTaskProvider<T extends TimedTask> extends Provider<Se
 				throw new IllegalStateException(FORMAT_SHUTDOWN);
 
 			boolean removed = this.data.remove(task);
-			restartService();
+			if (removed) {
+				markDirty();
+				restartService();
+			}
 			return removed;
 		}
 	}

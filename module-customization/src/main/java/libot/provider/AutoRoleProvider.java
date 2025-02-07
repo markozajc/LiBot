@@ -33,10 +33,12 @@ public class AutoRoleProvider extends SnowflakeProvider<Long> {
 
 	public void set(long guildId, long roleId) {
 		this.data.put(guildId, roleId);
+		markDirty();
 	}
 
 	public void remove(long guildId) {
-		this.data.remove(guildId);
+		if (this.data.remove(guildId) != null)
+			markDirty();
 	}
 
 	@Nonnull

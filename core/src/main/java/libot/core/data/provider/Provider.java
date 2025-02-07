@@ -19,6 +19,7 @@ import static libot.core.Constants.GSON;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.lang.reflect.Type;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.*;
 
@@ -34,6 +35,7 @@ public abstract class Provider<T> {
 	private static final Logger LOG = getLogger(Provider.class);
 
 	protected T data;
+	private AtomicBoolean dirty = new AtomicBoolean(false);
 	@Nonnull private final Type type;
 	@Nonnull private final DataManager dataManager;
 	@Nonnull private final Shredder shredder;
@@ -95,6 +97,10 @@ public abstract class Provider<T> {
 		return this.shredder;
 	}
 
+	public final void markDirty() {
+		this.dirty.set(true);
+	}
+
 	public final void load() {
 		try {
 			var json = getDataManager().get(this.dataKey);
@@ -110,7 +116,9 @@ public abstract class Provider<T> {
 
 	public final void store() {
 		try {
-			getDataManager().set(this.dataKey, constructJson());
+			if (this.dirty.getAndSet(false)) {
+				getDataManager().set(this.dataKey, constructJson());
+			}
 		} catch (Exception e) {
 			onStoreFail(e);
 		}

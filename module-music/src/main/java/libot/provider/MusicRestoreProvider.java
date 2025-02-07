@@ -51,7 +51,7 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 	private static final Logger LOG = getLogger(MusicRestoreProvider.class);
 
 	public static record MusicState(@Nonnull String[] tracks, boolean paused, long position, boolean loop, // NOSONAR
-									@Nonnull ChannelType channelType) {}
+		@Nonnull ChannelType channelType) {}
 
 	public MusicRestoreProvider(@Nonnull Shredder shredder, @Nonnull DataManager dataManager) {
 		super(shredder, dataManager, new TypeToken<>() {}, "musicqueues");
@@ -199,6 +199,8 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 			new Thread(() -> {
 				this.data.forEach(this::restorePlayback);
 				this.data.clear();
+				markDirty();
+				store();
 			}, "music-playback-restore").start();
 		}
 	}
@@ -223,6 +225,7 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 			var state = new MusicState(tracks, manager.getPlayer().isPaused(), playing.getPosition(),
 									   manager.getScheduler().isLoop(), manager.getChannelType());
 			this.data.put(manager.getChannelId(), state);
+			markDirty();
 		});
 
 		store();

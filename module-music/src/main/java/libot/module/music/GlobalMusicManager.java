@@ -95,7 +95,7 @@ public class GlobalMusicManager {
 	public static final AudioPlayerManager APM;
 	static {
 		APM = new DefaultAudioPlayerManager();
-		APM.registerSourceManager(new YoutubeAudioSourceManager(true, new WebWithThumbnail(), new IosWithThumbnail()));
+		APM.registerSourceManager(new YoutubeAudioSourceManager(true));
 		APM.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		APM.registerSourceManager(new BandcampAudioSourceManager());
 		APM.registerSourceManager(new VimeoAudioSourceManager());

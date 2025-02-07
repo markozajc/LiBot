@@ -31,6 +31,7 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 
 	public static class GreeterConfiguration {
 
+		private GreeterProvider provider;
 		@Nullable private String welcomeMessage;
 		@Nullable private String goodbyeMessage;
 		@Nonnull private ChannelType channelType = TEXT;
@@ -45,9 +46,12 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 			return this.channelType;
 		}
 
-		public void setChannel(long channelId, @Nonnull ChannelType type) {
+		@Nonnull
+		public GreeterConfiguration setChannel(long channelId, @Nonnull ChannelType type) {
 			this.channelId = channelId;
 			this.channelType = type;
+			this.provider.markDirty();
+			return this;
 		}
 
 		@Nullable
@@ -55,8 +59,11 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 			return this.welcomeMessage;
 		}
 
-		public void setWelcomeMessage(@Nullable String welcomeMessage) {
+		@Nonnull
+		public GreeterConfiguration setWelcomeMessage(@Nullable String welcomeMessage) {
 			this.welcomeMessage = welcomeMessage;
+			this.provider.markDirty();
+			return this;
 		}
 
 		@Nullable
@@ -64,8 +71,17 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 			return this.goodbyeMessage;
 		}
 
-		public void setGoodbyeMessage(@Nullable String goodbyeMessage) {
+		@Nonnull
+		public GreeterConfiguration setGoodbyeMessage(@Nullable String goodbyeMessage) {
 			this.goodbyeMessage = goodbyeMessage;
+			this.provider.markDirty();
+			return this;
+		}
+
+		@Nonnull
+		private GreeterConfiguration setProvider(@Nonnull GreeterProvider provider) {
+			this.provider = provider;
+			return this;
 		}
 
 	}
@@ -75,9 +91,8 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 	}
 
 	@Nonnull
-	@SuppressWarnings("null")
 	public GreeterConfiguration get(long guildId) {
-		return this.data.computeIfAbsent(guildId, id -> new GreeterConfiguration());
+		return this.data.computeIfAbsent(guildId, id -> new GreeterConfiguration()).setProvider(this);
 	}
 
 	public void remove(long guildId) {

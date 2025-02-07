@@ -36,6 +36,7 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 
 	public static class Customization {
 
+		private CustomizationsProvider provider;
 		private Set<String> disabledCommands;
 		private String commandPrefix;
 		private long djRoleId;
@@ -46,19 +47,17 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 		}
 
 		public boolean disable(@Nonnull Command command) {
-			if (isDisabled(command))
-				return false;
-
-			this.disabledCommands.add(command.getId());
-			return true;
+			boolean added = this.disabledCommands.add(command.getId());
+			if (added)
+				this.provider.markDirty();
+			return added;
 		}
 
 		public boolean enable(@Nonnull Command command) {
-			if (!isDisabled(command))
-				return false;
-
-			this.disabledCommands.remove(command.getId());
-			return true;
+			boolean removed = this.disabledCommands.remove(command.getId());
+			if (removed)
+				this.provider.markDirty();
+			return removed;
 		}
 
 		public boolean isDisabled(@Nonnull Command command) {
@@ -74,6 +73,7 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 		@Nonnull
 		public Customization setCommandPrefix(@Nullable String commandPrefix) {
 			this.commandPrefix = commandPrefix;
+			this.provider.markDirty();
 			return this;
 		}
 
@@ -96,11 +96,20 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 			}
 		}
 
-		public void setDjRole(@Nullable Role djRole) {
+		@Nonnull
+		public Customization setDjRole(@Nullable Role djRole) {
 			if (djRole == null)
 				this.djRoleId = -1;
 			else
 				this.djRoleId = djRole.getIdLong();
+			this.provider.markDirty();
+			return this;
+		}
+
+		@Nonnull
+		private Customization setProvider(@Nonnull CustomizationsProvider provider) {
+			this.provider = provider;
+			return this;
 		}
 
 	}
@@ -110,9 +119,8 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 	}
 
 	@Nonnull
-	@SuppressWarnings("null")
 	public Customization get(long guildId) {
-		return this.data.computeIfAbsent(guildId, i -> new Customization());
+		return this.data.computeIfAbsent(guildId, i -> new Customization()).setProvider(this);
 	}
 
 	@Nonnull

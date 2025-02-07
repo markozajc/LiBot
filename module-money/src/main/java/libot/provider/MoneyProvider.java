@@ -35,23 +35,26 @@ public class MoneyProvider extends SnowflakeProvider<Long> {
 		super(shredder, dataManager, new TypeToken<>() {}, "money");
 	}
 
-	public long getBalance(long userId) {
+	public synchronized long getBalance(long userId) {
 		return this.data.getOrDefault(userId, DEFAULT_BALANCE);
 	}
 
-	public void setBalance(long userId, long balance) {
+	public synchronized void setBalance(long userId, long balance) {
 		this.data.put(userId, max(0, balance));
+		markDirty();
 	}
 
-	public long addMoney(long userId, long amount) {
+	public synchronized long addMoney(long userId, long amount) {
 		long newBalance = getBalance(userId) + amount;
 		setBalance(userId, newBalance);
+		markDirty();
 		return newBalance;
 	}
 
-	public long takeMoney(long userId, long amount) {
+	public synchronized long takeMoney(long userId, long amount) {
 		long newBalance = getBalance(userId) - amount;
 		setBalance(userId, newBalance);
+		markDirty();
 		return newBalance;
 	}
 
