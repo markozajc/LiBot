@@ -78,7 +78,7 @@ public class RockPaperScissorsCommand extends BettableGame {
 				c.replyf("Draw", FORMAT_OUTCOME, DISABLED, player, libot);
 				yield REFUND;
 			}
-			default -> throw c.continuum(winner);
+			default -> throw new IllegalStateException("Invalid winner index: " + winner);
 		};
 	}
 

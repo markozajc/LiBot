@@ -38,7 +38,6 @@ import org.xml.sax.SAXException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import kong.unirest.Unirest;
 import libot.core.command.*;
-import libot.core.command.exception.ContinuumException;
 import libot.core.entity.CommandContext;
 
 @SuppressWarnings("java:S4248") // false positive spam
@@ -75,7 +74,7 @@ public class ChatbotCommand extends Command {
 			// From the #setFeature javadoc:
 			// All implementations are required to support the
 			// javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING feature.
-			throw new ContinuumException(e);
+			throw new IllegalStateException(e);
 		}
 		DOCUMENT_BUILDER = handle(dbf::newDocumentBuilder, e -> null).get();
 
