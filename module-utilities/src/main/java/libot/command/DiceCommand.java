@@ -27,11 +27,12 @@ import javax.annotation.Nonnull;
 import libot.core.argument.ArgumentList.Argument;
 import libot.core.argument.ParameterList.Parameter;
 import libot.core.command.*;
+import libot.core.command.exception.runtime.NumberOverflowException;
 import libot.core.entity.CommandContext;
 
 public class DiceCommand extends Command {
 
-	private static final int DEFAULT_SIDES = 6;
+	private static final long DEFAULT_SIDES = 6;
 
 	@SuppressWarnings("null") @Nonnull private static final Parameter SIDES =
 		optional(POSITIONAL, "sides", "number of sides, %d by default".formatted(DEFAULT_SIDES));
@@ -46,13 +47,15 @@ public class DiceCommand extends Command {
 
 	@Override
 	public void execute(CommandContext c) {
-		int sides = c.arg(SIDES).map(Argument::valueAsInt).orElse(DEFAULT_SIDES);
+		long sides = c.arg(SIDES).map(Argument::valueAsLong).orElse(DEFAULT_SIDES);
 
 		if (sides < 1)
 			throw c.error("The number of sides must be larger than 1", FAILURE);
+		else if (sides == Long.MAX_VALUE)
+			throw new NumberOverflowException();
 
-		int rolled = ThreadLocalRandom.current().nextInt(1, sides + 1);
-		var emoji = rolled > 6 ? GENERIC_EMOJI : Character.toString(BASE_EMOJI + rolled);
+		long rolled = ThreadLocalRandom.current().nextLong(1, sides + 1);
+		var emoji = rolled > 6 ? GENERIC_EMOJI : Character.toString(BASE_EMOJI + (int) rolled);
 		c.replyf("%s The dice has rolled on number **%d**.", emoji, rolled);
 	}
 
