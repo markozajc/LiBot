@@ -20,7 +20,6 @@ import static com.google.common.primitives.Ints.constrainToRange;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.regex.Pattern.compile;
-import static kong.unirest.Unirest.spawnInstance;
 import static libot.core.Constants.*;
 import static libot.core.argument.ParameterList.Parameter.*;
 import static libot.core.argument.ParameterList.Parameter.ParameterType.*;
@@ -38,7 +37,7 @@ import javax.annotation.Nonnull;
 
 import com.google.common.cache.Cache;
 
-import kong.unirest.*;
+import kong.unirest.core.*;
 import libot.core.argument.ArgumentList.Argument;
 import libot.core.argument.ParameterList.*;
 import libot.core.command.*;
@@ -63,7 +62,7 @@ public class UrbanDictionaryCommand extends Command {
 	private static record Definition(String word, String definition, String example, String author, int thumbs_up,
 		int thumbs_down, int index, int count) {}
 
-	private static final UnirestInstance NO_REDIRECT_UNIREST = spawnInstance();
+	private static final UnirestInstance NO_REDIRECT_UNIREST = Unirest.spawnInstance();
 	static {
 		NO_REDIRECT_UNIREST.config().followRedirects(false);
 	}

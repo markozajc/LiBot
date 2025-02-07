@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 
-import kong.unirest.Unirest;
+import kong.unirest.core.Unirest;
 import libot.core.argument.ParameterList.Parameter;
 import libot.core.command.*;
 import libot.core.entity.CommandContext;

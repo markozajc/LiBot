@@ -40,8 +40,8 @@ import org.slf4j.Logger;
 
 import com.google.common.cache.Cache;
 
-import kong.unirest.Unirest;
-import kong.unirest.json.JSONObject;
+import kong.unirest.core.Unirest;
+import kong.unirest.core.json.JSONObject;
 import libot.core.argument.ParameterList.MandatoryParameter;
 import libot.core.command.*;
 import libot.core.entity.CommandContext;

@@ -34,7 +34,9 @@ public class DeletionRequestListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionAdd(MessageReactionAddEvent event) {
-		if ((event.getMessageAuthorIdLong() != event.getJDA().getSelfUser().getIdLong()) || !(event.getReaction().getEmoji() instanceof UnicodeEmoji r) || !r.getName().equals(DELETION_REACTION))
+		if (event.getMessageAuthorIdLong() != event.getJDA().getSelfUser().getIdLong()
+			|| !(event.getReaction().getEmoji() instanceof UnicodeEmoji r) || !r.getName().equals(DELETION_REACTION))
+
 			return;
 
 		if (event.getChannel() instanceof PrivateChannel) {

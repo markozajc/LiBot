@@ -36,7 +36,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.xml.sax.SAXException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import kong.unirest.Unirest;
+import kong.unirest.core.Unirest;
 import libot.core.command.*;
 import libot.core.entity.CommandContext;
 
