@@ -18,6 +18,8 @@ package libot.util;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static libot.core.Constants.*;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Nonnull;
 
 import libot.core.listener.EventWaiterListener;
@@ -27,22 +29,24 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.*;
 
-public class EventUtils {
+public class EventWaiter {
 
-	private int timeout = 0;
+	private long timeout;
+	@Nonnull private TimeUnit timeoutUnit;
 	@Nonnull private final EventWaiterListener ewl;
 	@Nonnull private final User user;
 	@Nonnull private final MessageChannelUnion channel;
 
-	public EventUtils(@Nonnull EventWaiterListener ewl, @Nonnull User user, @Nonnull MessageChannelUnion channel) {
-		this(ewl, user, channel, 0);
+	public EventWaiter(@Nonnull EventWaiterListener ewl, @Nonnull User user, @Nonnull MessageChannelUnion channel) {
+		this(ewl, user, channel, SECONDS, 0);
 	}
 
-	public EventUtils(@Nonnull EventWaiterListener ewl, @Nonnull User user, @Nonnull MessageChannelUnion channel,
-					  int timeout) {
+	public EventWaiter(@Nonnull EventWaiterListener ewl, @Nonnull User user, @Nonnull MessageChannelUnion channel,
+					   @Nonnull TimeUnit timeoutUnit, long timeout) {
 		this.user = user;
 		this.channel = channel;
 		this.ewl = ewl;
+		this.timeoutUnit = timeoutUnit;
 		this.timeout = timeout;
 	}
 
@@ -58,7 +62,7 @@ public class EventUtils {
 			} catch (RuntimeException e) {
 				return true;
 			}
-		}, this.timeout, SECONDS, GenericMessageReactionEvent.class).getReaction();
+		}, this.timeout, this.timeoutUnit, GenericMessageReactionEvent.class).getReaction();
 	}
 
 	@Nonnull
@@ -71,7 +75,7 @@ public class EventUtils {
 			return e.getUserIdLong() == this.user.getIdLong() && e.getChannel().getIdLong() == this.channel.getIdLong()
 				&& e.getReaction().getEmoji().equals(emoji);
 
-		}, null, this.timeout, SECONDS, GenericMessageReactionEvent.class);
+		}, null, this.timeout, this.timeoutUnit, GenericMessageReactionEvent.class);
 
 		return event.getChannel().retrieveMessageById(event.getMessageIdLong()).complete();
 	}
@@ -86,7 +90,7 @@ public class EventUtils {
 				&& e.getChannel().getIdLong() == this.channel.getIdLong()
 				&& (!ignoreBlank || !e.getMessage().getContentRaw().isBlank());
 
-		}, null, this.timeout, SECONDS, MessageReceivedEvent.class).getMessage();
+		}, null, this.timeout, this.timeoutUnit, MessageReceivedEvent.class).getMessage();
 	}
 
 	public boolean awaitBoolean(@Nonnull Message question, boolean keepPrompt) throws InterruptedException {
@@ -105,7 +109,7 @@ public class EventUtils {
 				return true;
 			}
 
-		}, this.timeout, SECONDS, MessageReactionAddEvent.class);
+		}, this.timeout, this.timeoutUnit, MessageReactionAddEvent.class);
 
 		boolean result = ACCEPT_EMOJI.equals(event.getReaction().getEmoji());
 
@@ -114,11 +118,17 @@ public class EventUtils {
 		return result;
 	}
 
-	public int getTimeout() {
+	public long getTimeout() {
 		return this.timeout;
 	}
 
-	public void setTimeout(int timeout) {
+	@Nonnull
+	public TimeUnit getTimeoutUnit() {
+		return this.timeoutUnit;
+	}
+
+	public void setTimeout(@Nonnull TimeUnit unit, long timeout) {
+		this.timeoutUnit = unit;
 		this.timeout = timeout;
 	}
 

@@ -21,7 +21,7 @@ import static libot.util.Utilities.asUnchecked;
 import static net.dv8tion.jda.api.Permission.MESSAGE_ADD_REACTION;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 import javax.annotation.*;
 
@@ -29,7 +29,7 @@ import libot.core.argument.ArgumentList;
 import libot.core.argument.ArgumentList.Argument;
 import libot.core.argument.ParameterList.*;
 import libot.core.command.Command;
-import libot.util.EventUtils;
+import libot.util.EventWaiter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.MessageEmbed.Footer;
@@ -42,7 +42,8 @@ public class CommandContext extends EventContext {
 	@Nonnull private final ArgumentList arguments;
 
 	@Nullable private Message reference;
-	@Nullable private EventUtils waiter;
+	@Nullable private EventWaiter waiter;
+	private final Object waiterMutex = new Object();
 
 	public CommandContext(@Nonnull EventContext eventContext, @Nonnull Command command,
 						  @Nonnull ArgumentList arguments) {
@@ -102,14 +103,23 @@ public class CommandContext extends EventContext {
 
 	// ===============* EventWaiter *===============
 
-	public boolean isWaiterInited() {
-		return this.waiter != null;
+	@Nonnull
+	public EventWaiter getWaiter() {
+		synchronized (this.waiterMutex) {
+			if (this.waiter != null)
+				return this.waiter;
+			else
+				return this.waiter = new EventWaiter(getEventWaiterListener(), getUser(), getChannel());
+		}
 	}
 
-	public EventUtils getWaiter() {
-		if (!isWaiterInited())
-			this.waiter = new EventUtils(getEventWaiterListener(), getUser(), getChannel());
-		return this.waiter;
+	public void setWaiterTimeout(@Nonnull TimeUnit unit, long timeout) {
+		synchronized (this.waiterMutex) {
+			if (this.waiter != null)
+				this.waiter.setTimeout(unit, timeout);
+			else
+				this.waiter = new EventWaiter(getEventWaiterListener(), getUser(), getChannel(), unit, timeout);
+		}
 	}
 
 	// ===============* confirm *===============

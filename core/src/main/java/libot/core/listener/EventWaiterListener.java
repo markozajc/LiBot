@@ -80,7 +80,7 @@ public class EventWaiterListener implements EventListener {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends GenericEvent> T awaitEvent(@Nonnull Predicate<GenericEvent> predicate,
-												 @Nullable Predicate<Void> nullableCleanupPredicate, int timeout,
+												 @Nullable Predicate<Void> nullableCleanupPredicate, long timeout,
 												 @Nullable TimeUnit timeoutUnit,
 												 @Nonnull Class<T> eventClass) throws TimeoutException,
 																			   InterruptedException {

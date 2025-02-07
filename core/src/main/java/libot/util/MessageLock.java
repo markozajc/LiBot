@@ -92,7 +92,7 @@ public class MessageLock<M> {
 	 * @throws IllegalArgumentException
 	 *             if timeout is less than 0
 	 */
-	public M receive(int timeout, TimeUnit unit) throws TimeoutException { // NOSONAR
+	public M receive(long timeout, TimeUnit unit) throws TimeoutException { // NOSONAR
 		if (timeout < 0)
 			throw new IllegalArgumentException("Timeout can't be less than 0!");
 
