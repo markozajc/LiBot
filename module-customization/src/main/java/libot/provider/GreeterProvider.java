@@ -31,7 +31,7 @@ public class GreeterProvider extends SnowflakeProvider<GreeterConfiguration> {
 
 	public static class GreeterConfiguration {
 
-		private GreeterProvider provider;
+		private transient GreeterProvider provider;
 		@Nullable private String welcomeMessage;
 		@Nullable private String goodbyeMessage;
 		@Nonnull private ChannelType channelType = TEXT;

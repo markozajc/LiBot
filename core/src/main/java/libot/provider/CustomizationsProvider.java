@@ -36,7 +36,7 @@ public class CustomizationsProvider extends SnowflakeProvider<Customization> {
 
 	public static class Customization {
 
-		private CustomizationsProvider provider;
+		private transient CustomizationsProvider provider;
 		private Set<String> disabledCommands;
 		private String commandPrefix;
 		private long djRoleId;
