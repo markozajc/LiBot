@@ -35,8 +35,12 @@ public class MoneyProvider extends SnowflakeProvider<Long> {
 		super(shredder, dataManager, new TypeToken<>() {}, "money");
 	}
 
-	public synchronized long getBalance(long userId) {
+	public long getBalance(long userId) {
 		return this.data.getOrDefault(userId, DEFAULT_BALANCE);
+	}
+
+	public boolean hasBalance(long userId) {
+		return this.data.containsKey(userId);
 	}
 
 	public synchronized void setBalance(long userId, long balance) {
