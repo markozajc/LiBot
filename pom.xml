@@ -318,6 +318,12 @@
 				<artifactId>unirest-java-core</artifactId>
 				<version>4.4.5</version>
 			</dependency>
+			<dependency>
+				<groupId>com.konghq</groupId>
+				<artifactId>unirest-object-mappers-gson</artifactId>
+				<version>4.2.9</version>
+				<scope>runtime</scope>
+			</dependency>
 
 			<!-- Apache Commons -->
 			<dependency>

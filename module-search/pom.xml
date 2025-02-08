@@ -43,6 +43,10 @@
 			<groupId>com.konghq</groupId>
 			<artifactId>unirest-java-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.konghq</groupId>
+			<artifactId>unirest-object-mappers-gson</artifactId>
+		</dependency>
 
 		<!-- Apache Commons -->
 		<dependency>
