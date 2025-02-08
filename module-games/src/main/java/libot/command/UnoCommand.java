@@ -16,17 +16,16 @@
 package libot.command;
 
 import static java.lang.Integer.parseInt;
+import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.*;
 import static libot.core.command.CommandCategory.GAMES;
 import static libot.module.money.BettableGame.GameResult.*;
 import static net.dv8tion.jda.api.utils.MarkdownSanitizer.escape;
-import static net.dv8tion.jda.api.utils.MarkdownUtil.*;
+import static net.dv8tion.jda.api.utils.MarkdownUtil.codeblock;
 import static org.eu.zajc.juno.cards.UnoCardColor.*;
 import static org.eu.zajc.juno.rules.pack.impl.UnoOfficialRules.UnoHouseRule.PROGRESSIVE;
 import static org.eu.zajc.juno.rules.pack.impl.house.UnoProgressiveRulePack.getConsecutive;
 import static org.eu.zajc.juno.utils.UnoRuleUtils.getProhibitingRule;
-
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -45,6 +44,7 @@ import libot.core.command.CommandMetadata;
 import libot.core.command.exception.runtime.CanceledException;
 import libot.core.extension.EmbedPrebuilder;
 import libot.module.money.*;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public class UnoCommand extends BettableGame {
 
@@ -56,7 +56,7 @@ public class UnoCommand extends BettableGame {
 	}
 
 	private static final String INVALID_NUMBER = "Please input a number.";
-
+	private static final String PLACEHOLDER_EMOJI = "\uD83D\uDFE6";
 	private static final String UNO_LOGO_URL = "https://libot.eu.org/img/uno.png";
 
 	private static class DiscordUnoGame extends UnoControlledGame {
@@ -81,8 +81,6 @@ public class UnoCommand extends BettableGame {
 		@Nonnull private final BettableGameContext c;
 		@Nonnull private final EmbedPrebuilder e;
 		@Nonnull private final StringBuilder feed;
-		@Nonnull private final StringBuilder status = new StringBuilder();
-		@Nonnull private final StringBuilder actions = new StringBuilder();
 
 		public DiscordPlayer(@Nonnull BettableGameContext c, @Nonnull StringBuilder feed) {
 			super(c.getEffectiveName());
@@ -131,13 +129,13 @@ public class UnoCommand extends BettableGame {
 
 					if (rule instanceof DrawFourHitchPlacementRule) {
 						this.c.replyf("""
-							Invalid choice! You can only place a **%s** when you hold no cards the same color as \
+							Invalid choice! You may only place a **%s** when you hold no cards the same color as \
 							the top card (%s).""", getEmojiWithName(this.c, card),
 									  getEmojiWithName(this.c, game.getTopCard()));
 
 					} else if (card instanceof UnoDrawCard d && rule instanceof UnoProgressiveRulePack.PlacementRule) {
 						this.c.replyf("""
-							Invalid choice! You can only place a **%s** on Draw %d cards.""",
+							Invalid choice! You may only place a **%s** on Draw %d cards.""",
 									  getEmojiWithName(this.c, card), d.getAmount());
 
 					} else {
@@ -161,37 +159,53 @@ public class UnoCommand extends BettableGame {
 		private void reportChooseAction(@Nonnull UnoGame game, @Nonnull UnoPlayer next) {
 			this.e.clearFields();
 			appendFeed();
-			constructStatus(game, next);
-			this.e.addField("Game info", this.status.toString(), false);
-			constructActions(game);
-			this.e.addField("Choose your action", this.actions.toString(), false);
+			this.e.addField("Game info", constructStatus(game, next), false);
+			this.e.addField("Choose your action", constructActions(game, false), false);
 			this.c.reply(this.e);
 		}
 
-		private void constructActions(@Nonnull UnoGame game) {
-			this.actions.setLength(0);
+		private String constructActions(@Nonnull UnoGame game, boolean placeholderEmoji) {
+			var actions = new StringBuilder();
 			var drawCards = getConsecutive(game.getDiscard());
 			if (!drawCards.isEmpty()) {
-				this.actions.append("``0 -`` Draw **%d** cards from a %s"
-					.formatted(drawCards.size() * drawCards.get(0).getAmount(),
-							   getEmojiWithName(this.c, game.getTopCard())));
+				actions.append("``0 -`` Draw **");
+				actions.append(drawCards.size() * drawCards.get(0).getAmount());
+				actions.append("** cards from a ");
+				actions.append(getEmojiWithName(this.c, game.getTopCard(), placeholderEmoji));
+
 			} else {
-				this.actions.append("``0 -`` %s Draw".formatted(getPileEmoji(this.c)));
+				actions.append("``0 -`` ");
+				actions.append(getPileEmoji(this.c, placeholderEmoji));
+				actions.append(" Draw");
 			}
 
-			int i = 1;
-			for (UnoCard card : this.getCards()) {
-				this.actions.append("\n``%d -`` %s".formatted(i, getEmojiWithName(this.c, card)));
-				i++;
+			var cards = this.getCards();
+			for (int i = 0; i < cards.size(); i++) {
+				actions.append("\n``");
+				actions.append(i + 1);
+				actions.append(" -`` ");
+				actions.append(getEmojiWithName(this.c, cards.get(i), placeholderEmoji));
 			}
+
+			if (!placeholderEmoji && actions.length() > MessageEmbed.VALUE_MAX_LENGTH)
+				return constructActions(game, true);
+			else
+				return actions.toString();
 		}
 
-		private void constructStatus(@Nonnull UnoGame game, @Nonnull UnoPlayer next) {
-			this.status.setLength(0);
-			this.status.append(underline("Top card: %s").formatted(getEmojiWithName(this.c, game.getTopCard())));
-			this.status.append("\n%s's hand size: %d %s%s"
-				.formatted(next.getName(), next.getHand().getSize(), getPileEmoji(this.c),
-						   next.getHand().getSize() == 1 ? " __**UNO!**__" : ""));
+		private String constructStatus(@Nonnull UnoGame game, @Nonnull UnoPlayer next) {
+			var status = new StringBuilder();
+			status.append("__Top card: ");
+			status.append(getEmojiWithName(this.c, game.getTopCard()));
+			status.append("__\n");
+			status.append(next.getName());
+			status.append("'s hand size: ");
+			status.append(next.getHand().getSize());
+			status.append(' ');
+			status.append(getPileEmoji(this.c, false));
+			if (next.getHand().getSize() == 1)
+				status.append(" __**UNO!**__");
+			return status.toString();
 		}
 
 		@Override
@@ -208,19 +222,25 @@ public class UnoCommand extends BettableGame {
 			var top = game.getDiscard().getTop();
 			this.e.addFieldf(true, "Top card", getEmojiWithName(this.c, top));
 
-			var cards = this.getHand()
-				.getCards()
-				.stream()
-				.map(card -> getEmojiWithName(this.c, card))
-				.collect(Collectors.joining(" "));
-
-			this.e.addField("Your cards", cards, true);
+			this.e.addField("Your cards", createCardList(false), true);
 			this.e.addField("Choose a color", """
 				1 - Yellow
 				2 - Red
 				3 - Green
 				4 - Blue""", false);
 			this.c.reply(this.e);
+		}
+
+		private String createCardList(boolean placeholderEmoji) {
+			var cards = this.getHand()
+				.getCards()
+				.stream()
+				.map(card -> getEmojiWithName(this.c, card, placeholderEmoji))
+				.collect(joining(" "));
+			if (!placeholderEmoji && cards.length() > MessageEmbed.VALUE_MAX_LENGTH)
+				return createCardList(true);
+			else
+				return cards;
 		}
 
 		private UnoCardColor inputColor() {
@@ -250,7 +270,7 @@ public class UnoCommand extends BettableGame {
 
 		@Override
 		public boolean shouldPlayDrawnCard(UnoGame game, UnoCard drawnCard) {
-			return this.c.confirmf(true, "You draw a %s. Do you want to place it?", LITHIUM,
+			return this.c.confirmf(true, "You draw a %s. Would you like to place it?", LITHIUM,
 								   getEmojiWithName(this.c, drawnCard));
 		}
 
@@ -262,17 +282,24 @@ public class UnoCommand extends BettableGame {
 		}
 
 		@Nonnull
-		@SuppressWarnings("null")
 		private static String getEmojiWithName(BettableGameContext c, UnoCard card) {
-			return c.getShredder()
-				.getEmojiResource(card.toString().toLowerCase().replace(" ", ""), MISSING_EMOJI)
-				.getFormatted() + " " +
-				card;
+			return getEmojiWithName(c, card, false);
 		}
 
 		@Nonnull
-		private static String getPileEmoji(BettableGameContext c) {
-			return c.getShredder().getEmojiResource("pile", MISSING_EMOJI).getFormatted();
+		@SuppressWarnings("null")
+		private static String getEmojiWithName(BettableGameContext c, UnoCard card, boolean placeholderEmoji) {
+			var emoji = placeholderEmoji ? PLACEHOLDER_EMOJI
+				: c.getShredder()
+					.getEmojiResource(card.toString().toLowerCase().replace(" ", ""), MISSING_EMOJI)
+					.getFormatted();
+			return emoji + " " + card;
+		}
+
+		@Nonnull
+		private static String getPileEmoji(BettableGameContext c, boolean placeholderEmoji) {
+			return placeholderEmoji ? PLACEHOLDER_EMOJI
+				: c.getShredder().getEmojiResource("pile", MISSING_EMOJI).getFormatted();
 		}
 
 	}
