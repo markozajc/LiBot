@@ -45,7 +45,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.konghq</groupId>
-			<artifactId>unirest-object-mappers-gson</artifactId>
+			<artifactId>unirest-modules-gson</artifactId>
 		</dependency>
 
 		<!-- Apache Commons -->

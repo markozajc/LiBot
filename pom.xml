@@ -42,6 +42,7 @@
 		<logback.version>1.5.16</logback.version>
 		<eclipsecollections.version>11.1.0</eclipsecollections.version>
 		<junit.version>5.11.4</junit.version>
+		<unirest.version>4.4.5</unirest.version>
 	</properties>
 
 	<modules>
@@ -316,12 +317,12 @@
 			<dependency>
 				<groupId>com.konghq</groupId>
 				<artifactId>unirest-java-core</artifactId>
-				<version>4.4.5</version>
+				<version>${unirest.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.konghq</groupId>
-				<artifactId>unirest-object-mappers-gson</artifactId>
-				<version>4.2.9</version>
+				<artifactId>unirest-modules-gson</artifactId>
+				<version>${unirest.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 
