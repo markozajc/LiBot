@@ -20,6 +20,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.*;
 import static libot.core.Constants.*;
 import static libot.core.command.CommandCategory.MONEY;
+import static libot.util.Utilities.random;
 import static net.dv8tion.jda.api.utils.MarkdownUtil.monospace;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,7 +33,7 @@ import libot.core.entity.CommandContext;
 import libot.core.extension.EmbedPrebuilder;
 import libot.core.ratelimit.Ratelimit;
 import libot.provider.MoneyProvider;
-import libot.util.*;
+import libot.util.ParseUtils;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
 public class RewardCommand extends Command {
@@ -78,18 +79,14 @@ public class RewardCommand extends Command {
 		if (time < 0) {
 			int left = ThreadLocalRandom.current().nextInt(1, 50);
 			int right = ThreadLocalRandom.current().nextInt(1, 50);
-			var operator = Utilities.random(MathOperator.values());
+			var operator = random(MathOperator.values());
 
 			c.setWaiterTimeout(MINUTES, 1);
 			var solution = ParseUtils.parseInt(c.askf("Menial labor", "Solve the following:\n> *%s %s %s =*", LITHIUM,
 													  left, operator.getCharacter(), right));
 
 			if (solution == operator.getResult(left, right)) {
-				var provider = c.getProvider(MoneyProvider.class);
-				long earned = computeReward(provider.getBalance(c.getUserIdLong()));
-				provider.addMoney(c.getUserIdLong(), earned);
-				REWARD_RATELIMIT.register(c.getUserIdLong());
-				b.appendDescriptionf("You have earned **%dŁ**\n\n", earned);
+				claimReward(c, b);
 				time = REWARD_SPACING;
 
 			} else {
@@ -100,6 +97,17 @@ public class RewardCommand extends Command {
 		b.appendDescriptionf("You can claim your next hourly reward %s.",
 							 TimeFormat.RELATIVE.format(currentTimeMillis() + time));
 		c.reply(b);
+	}
+
+	private synchronized static void claimReward(CommandContext c, EmbedPrebuilder b) {
+		if (getRewardRemainingTime(c.getUserIdLong()) >= 0)
+			throw c.errorf("You have already claimed your hourly reward!", FAILURE);
+
+		var provider = c.getProvider(MoneyProvider.class);
+		long earned = computeReward(provider.getBalance(c.getUserIdLong()));
+		provider.addMoney(c.getUserIdLong(), earned);
+		REWARD_RATELIMIT.register(c.getUserIdLong());
+		b.appendDescriptionf("You have earned **%dŁ**\n\n", earned);
 	}
 
 	public static long getRewardRemainingTime(long userId) {
