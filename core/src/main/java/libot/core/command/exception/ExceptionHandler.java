@@ -93,11 +93,13 @@ public class ExceptionHandler {
 			return this.ctx.canTalk();
 		}
 
+		@SuppressWarnings("overloads") // TODO figure out if this is a problem
 		public <E extends T> boolean runSpecialized(@Nonnull E specialized,
 													@Nonnull Predicate<ExceptionContext<E>> action) {
 			return action.test(specialize(specialized));
 		}
 
+		@SuppressWarnings("overloads")
 		public <E extends T> boolean runSpecialized(@Nonnull E specialized,
 													@Nonnull Consumer<ExceptionContext<E>> action) {
 			action.accept(specialize(specialized));

@@ -38,6 +38,12 @@
 			<artifactId>JDA</artifactId>
 		</dependency>
 
+		<!-- Apache Commons -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
 		<!-- JSON Support -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

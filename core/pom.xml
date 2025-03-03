@@ -27,6 +27,7 @@
 	<properties>
 		<maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
 		<buildVersion>${project.version} (${maven.build.timestamp})</buildVersion>
+		<udpqueue.version>0.2.9</udpqueue.version>
 	</properties>
 
 	<dependencies>
@@ -85,7 +86,12 @@
 		<dependency>
 			<groupId>club.minnced</groupId>
 			<artifactId>udpqueue-native-linux-x86-64</artifactId>
-			<version>0.2.9</version>
+			<version>${udpqueue.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>club.minnced</groupId>
+			<artifactId>udpqueue-api</artifactId>
+			<version>${udpqueue.version}</version>
 		</dependency>
 
 		<!-- JSON Support -->

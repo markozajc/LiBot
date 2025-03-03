@@ -25,7 +25,7 @@
 	</developers>
 
 	<properties>
-		<youtubesource.version>1.11.4</youtubesource.version>
+		<youtubesource.version>1.11.5</youtubesource.version>
 	</properties>
 
 	<dependencies>
