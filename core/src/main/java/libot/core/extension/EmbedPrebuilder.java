@@ -15,8 +15,6 @@
  */
 package libot.core.extension;
 
-import static java.lang.String.format;
-
 import javax.annotation.*;
 
 import libot.core.entity.Color;
@@ -59,28 +57,28 @@ public final class EmbedPrebuilder extends EmbedBuilder {
 
 	@Nonnull
 	public EmbedPrebuilder setDescriptionf(@Nonnull String description, @Nonnull Object... args) {
-		super.setDescription(format(description, args));
+		super.setDescription(description.formatted(args));
 		return this;
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
 	public EmbedPrebuilder appendDescriptionf(@Nonnull String description, @Nonnull Object... args) {
-		super.appendDescription(format(description, args));
+		super.appendDescription(description.formatted(args));
 		return this;
 	}
 
-	@SuppressWarnings("null")
 	@Nonnull
+	@SuppressWarnings("null")
 	public EmbedPrebuilder addFieldf(@Nonnull String title, @Nonnull String value, @Nonnull Object... args) {
-		return addField(title, format(value, args));
+		return addField(title, value.formatted(args));
 	}
 
 	@Nonnull
 	@SuppressWarnings("null")
 	public EmbedPrebuilder addFieldf(boolean inline, @Nonnull String title, @Nonnull String value,
 									 @Nonnull Object... args) {
-		super.addField(title, format(value, args), inline);
+		super.addField(title, value.formatted(args), inline);
 		return this;
 	}
 
@@ -92,25 +90,37 @@ public final class EmbedPrebuilder extends EmbedBuilder {
 
 	@Nonnull
 	public EmbedPrebuilder setTitlef(@Nonnull String title, @Nonnull Object... args) {
-		super.setTitle(format(title, args));
+		super.setTitle(title.formatted(args));
 		return this;
 	}
 
 	@Nonnull
 	public EmbedPrebuilder setAuthorf(@Nonnull String author, @Nonnull Object... args) {
-		super.setAuthor(format(author, args));
+		super.setAuthor(author.formatted(args));
 		return this;
 	}
 
 	@Nonnull
 	public EmbedPrebuilder setFooterf(@Nonnull String footer, @Nonnull Object... args) {
-		super.setFooter(format(footer, args));
+		super.setFooter(footer.formatted(args));
+		return this;
+	}
+
+	@Nonnull
+	public EmbedPrebuilder setThumbnailf(@Nonnull String url, @Nonnull Object... args) {
+		super.setThumbnail(url.formatted(args));
 		return this;
 	}
 
 	@Nonnull
 	public EmbedPrebuilder setDescription(@Nonnull Object description) {
 		super.setDescription(description.toString());
+		return this;
+	}
+
+	@Nonnull
+	public EmbedPrebuilder setColor(@Nonnull Color color) { // NOSONAR java:S2177 this is intentional
+		super.setColor(color.rgb());
 		return this;
 	}
 

@@ -245,10 +245,10 @@ class MusicCommandUtils {
 			var e = new EmbedPrebuilder();
 			if (started) {
 				e.setTitle("Started playing");
-				e.setColor(SUCCESS.rgb());
+				e.setColor(SUCCESS);
 			} else {
 				e.setTitle("Queued");
-				e.setColor(LITHIUM.rgb());
+				e.setColor(LITHIUM);
 			}
 
 			var b = new StringBuilder();
@@ -263,7 +263,7 @@ class MusicCommandUtils {
 				b.append(" and started the player");
 			b.append(".");
 			if (total - added > 0) {
-				e.setColor(WARN.rgb());
+				e.setColor(WARN);
 				b.append(" **");
 				b.append(total - added);
 				b.append("** elements were not added to the queue because the queue is capped at **");

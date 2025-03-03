@@ -43,7 +43,6 @@ import libot.core.argument.ParameterList.Parameter;
 import libot.core.command.*;
 import libot.core.entity.CommandContext;
 import libot.core.extension.EmbedPrebuilder;
-import net.dv8tion.jda.api.EmbedBuilder;
 
 public class AkinatorCommand extends Command {
 
@@ -179,18 +178,18 @@ public class AkinatorCommand extends Command {
 	}
 
 	private static void finish(@Nonnull CommandContext c, boolean akinatorWins) {
-		var e = new EmbedBuilder();
+		var e = new EmbedPrebuilder();
 		if (akinatorWins) {
 			e.setTitle("Great,");
 			e.setDescription("guessed right one more time.");
-			e.setColor(SUCCESS.rgb());
-			e.setThumbnail(AKITUDE_BASE_URL.formatted("triomphe"));
+			e.setColor(SUCCESS);
+			e.setThumbnailf(AKITUDE_BASE_URL, "triomphe");
 
 		} else {
 			e.setTitle("Bravo,");
 			e.setDescription("you defeated me.");
-			e.setColor(DISABLED.rgb());
-			e.setThumbnail(AKITUDE_BASE_URL.formatted("deception"));
+			e.setColor(DISABLED);
+			e.setThumbnailf(AKITUDE_BASE_URL, "deception");
 		}
 		c.reply(e);
 	}

@@ -412,7 +412,7 @@ public class EventContext extends BotContext {
 	@Nonnull
 	public CompletableFuture<Message> reply(@Nullable String title, @Nonnull String message, @Nullable String footer,
 											@Nullable Color color) {
-		EmbedBuilder builder = new EmbedBuilder().setTitle(title)
+		var builder = new EmbedBuilder().setTitle(title)
 			.appendDescription(message)
 			.setFooter(footer, null)
 			.setColor(color == null ? DEFAULT_COLOR_RAW : color.rgb());

@@ -57,11 +57,11 @@ public class Constants {
 	public static final String ENV_QALCULATE_HOME = "QALCULATE_HOME_PATH";
 
 	// Colors
-	public static final Color LITHIUM = new Color(11, 92, 147);
-	public static final Color SUCCESS = new Color(59, 165, 93);
-	public static final Color WARN = new Color(255, 204, 77);
-	public static final Color FAILURE = new Color(237, 66, 69);
-	public static final Color DISABLED = new Color(198, 198, 198);
+	@Nonnull public static final Color LITHIUM = new Color(11, 92, 147);
+	@Nonnull public static final Color SUCCESS = new Color(59, 165, 93);
+	@Nonnull public static final Color WARN = new Color(255, 204, 77);
+	@Nonnull public static final Color FAILURE = new Color(237, 66, 69);
+	@Nonnull public static final Color DISABLED = new Color(198, 198, 198);
 
 	// Emoji
 	@Nonnull public static final Emoji ACCEPT_EMOJI = Emoji.fromUnicode("\u2705");
