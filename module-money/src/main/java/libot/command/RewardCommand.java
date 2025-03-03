@@ -73,7 +73,7 @@ public class RewardCommand extends Command {
 
 	@Override
 	public void execute(CommandContext c) {
-		var b = new EmbedPrebuilder(LITHIUM);
+		var b = new EmbedPrebuilder(DISABLED);
 
 		long time = getRewardRemainingTime(c.getUserIdLong());
 		if (time < 0) {
@@ -99,7 +99,7 @@ public class RewardCommand extends Command {
 		c.reply(b);
 	}
 
-	private synchronized static void claimReward(CommandContext c, EmbedPrebuilder b) {
+	private static synchronized void claimReward(CommandContext c, EmbedPrebuilder b) {
 		if (getRewardRemainingTime(c.getUserIdLong()) >= 0)
 			throw c.errorf("You have already claimed your hourly reward!", FAILURE);
 
@@ -107,6 +107,7 @@ public class RewardCommand extends Command {
 		long earned = computeReward(provider.getBalance(c.getUserIdLong()));
 		provider.addMoney(c.getUserIdLong(), earned);
 		REWARD_RATELIMIT.register(c.getUserIdLong());
+		b.setColor(LITHIUM);
 		b.appendDescriptionf("You have earned **%dŁ**\n\n", earned);
 	}
 
