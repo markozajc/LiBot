@@ -734,6 +734,13 @@ public class EventContext extends BotContext {
 
 	@Nonnull
 	private MessageCreateAction replyMessage(MessageCreateAction message) {
+		if (Thread.interrupted()) {
+			// Check and throw an InterruptException to prevent IllegalStateException on lock
+			// acquire when calling submit(). The interrupt flag is cleared on purpose to allow
+			// ExceptionHandler to send an error message.
+			throw asUnchecked(new InterruptedException());
+		}
+
 		return message.setAllowedMentions(emptyList()).setMessageReference(getReference()).mentionRepliedUser(false);
 	}
 

@@ -127,7 +127,7 @@ public class KillProcessCommand extends Command {
 		if (process.getData() != null)
 			flags.setCharAt(2, 'D');
 
-		var thread = ProcessManager.getThread(process);
+		var thread = process.getThread();
 		if (thread != null) {
 			switch (thread.getState()) {
 				case NEW -> flags.setCharAt(3, 'N');

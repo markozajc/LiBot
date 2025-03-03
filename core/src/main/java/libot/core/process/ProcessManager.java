@@ -17,16 +17,18 @@ package libot.core.process;
 
 import static java.lang.Integer.*;
 import static java.lang.Thread.currentThread;
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static libot.core.ratelimit.CommandRatelimitManager.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.*;
 
+import org.eclipse.collections.api.factory.primitive.LongObjectMaps;
+import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eu.zajc.ef.EHandle;
 import org.slf4j.Logger;
 
@@ -48,8 +50,9 @@ public class ProcessManager {
 	public static final int MAX_COMMANDS_PER_USER = 5;
 	public static final int MAX_PID = 999;
 
-	private static final AtomicInteger COUNT = new AtomicInteger();
-	private static final Map<CommandProcess, Thread> PROCESSES = new HashMap<>();
+	private static volatile int previousPid = -1;
+	private static volatile long count = 0;
+	private static final MutableLongObjectMap<CommandProcess> PROCESSES = LongObjectMaps.mutable.empty();
 	private static final ExecutorService STARTUPS =
 		newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("startup-executor").build());
 
@@ -58,6 +61,7 @@ public class ProcessManager {
 		private final int pid;
 		@Nonnull private final CommandContext ctx;
 		private Object data = null;
+		private Thread thread;
 
 		private CommandProcess(int pid, @Nonnull CommandContext ctx) {
 			this.pid = pid;
@@ -66,13 +70,16 @@ public class ProcessManager {
 
 		@Nonnull
 		public static synchronized CommandProcess create(@Nonnull CommandContext ctx) {
-			int count = COUNT.getAndIncrement();
-			var proc = new CommandProcess(remainderUnsigned(count, MAX_PID + 1), ctx);
+			int attempt = 0;
+			do {
+				if (attempt++ == MAX_PID)
+					throw new IllegalStateException("Ran out of PIDs");
 
-			if (count > MAX_PID && PROCESSES.containsKey(proc))
-				throw new IllegalStateException("PID collision for " + proc.getPid());
-			else
-				return proc;
+				previousPid = (previousPid + 1) % (MAX_PID + 1);
+			} while (PROCESSES.containsKey(previousPid));
+
+			count++;
+			return new CommandProcess(previousPid, ctx);
 		}
 
 		void start() {
@@ -87,7 +94,7 @@ public class ProcessManager {
 					ExceptionHandler.handle(t, this.ctx);
 
 				} finally {
-					PROCESSES.remove(this);
+					PROCESSES.remove(this.getPid());
 				}
 			});
 			thread.setName(THREAD_NAME_PREFIX + toUnsignedString(this.pid));
@@ -97,8 +104,12 @@ public class ProcessManager {
 				if (defaultExHandler != null)
 					defaultExHandler.uncaughtException(t, e);
 			});
-			PROCESSES.put(this, thread);
-			thread.start();
+			this.thread = thread;
+
+			if (PROCESSES.getIfAbsentPut(this.getPid(), this) != null)
+				thread.start();
+			else
+				throw new IllegalStateException("PID collision while starting a process");
 		}
 
 		public int getPid() {
@@ -128,6 +139,10 @@ public class ProcessManager {
 
 		public void setData(Object data) {
 			this.data = data;
+		}
+
+		public Thread getThread() {
+			return this.thread;
 		}
 
 		@Override
@@ -176,7 +191,8 @@ public class ProcessManager {
 	}
 
 	private static void killSuperfluousProcesses(@Nonnull EventContext ctx) {
-		getProcesses().stream()
+		PROCESSES.values()
+			.stream()
 			.filter(p -> p.getUserId() == ctx.getUserIdLong())
 			.skip(MAX_COMMANDS_PER_USER - 1L)
 			.forEach(ProcessManager::interrupt);
@@ -197,13 +213,13 @@ public class ProcessManager {
 
 	@Nonnull
 	@SuppressWarnings("null")
-	public static Set<CommandProcess> getProcesses() {
-		return PROCESSES.keySet();
+	public static Collection<CommandProcess> getProcesses() {
+		return unmodifiableCollection(PROCESSES.values());
 	}
 
 	@Nullable
 	public static CommandProcess getProcess(int pid) {
-		return getProcesses().stream().filter(p -> p.getPid() == pid).findAny().orElse(null);
+		return PROCESSES.get(pid);
 	}
 
 	@Nonnull
@@ -224,17 +240,12 @@ public class ProcessManager {
 		return getProcess(currentThread());
 	}
 
-	@Nullable
-	public static Thread getThread(@Nonnull CommandProcess proc) {
-		return PROCESSES.get(proc);
-	}
-
 	public static long getCount() {
-		return toUnsignedLong(COUNT.get());
+		return count;
 	}
 
 	public static boolean interrupt(@Nonnull CommandProcess process) {
-		var thread = getThread(process);
+		var thread = process.getThread();
 		if (thread == null || !thread.isAlive())
 			return false;
 
