@@ -27,6 +27,7 @@ import javax.annotation.Nonnull;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import libot.core.command.*;
 import libot.core.entity.CommandContext;
 import libot.core.extension.EmbedPrebuilder;
@@ -64,8 +65,8 @@ public class PlayingCommand extends Command {
 			%s %s %s```""", escape(i.title, true), i.uri, escape(i.author, true), duration(track), playerState(manager),
 						  progressBar(track), time(track));
 
-		if (i.artworkUrl != null)
-			e.setThumbnail(i.artworkUrl);
+		if (track.getSourceManager() instanceof YoutubeAudioSourceManager)
+			e.setThumbnail("https://i.ytimg.com/vi/" + i.identifier + "/hq720.jpg");
 
 		c.reply(e);
 	}
