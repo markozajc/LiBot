@@ -24,10 +24,6 @@
 		</developer>
 	</developers>
 
-	<properties>
-		<youtubesource.version>1.12.0</youtubesource.version>
-	</properties>
-
 	<dependencies>
 
 		<!-- Core -->
@@ -50,12 +46,7 @@
 		<dependency>
 			<groupId>dev.lavalink.youtube</groupId>
 			<artifactId>common</artifactId>
-			<version>${youtubesource.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>dev.lavalink.youtube</groupId>
-			<artifactId>v2</artifactId>
-			<version>${youtubesource.version}</version>
+			<version>1.13.1</version>
 		</dependency>
 
 		<!-- Apache Commons -->
