@@ -143,7 +143,7 @@ public class ParameterList {
 			i = next;
 		}
 
-		if (name.getValue() != null)
+		if (name.get() != null)
 			throw new UsageException("Argument without value: --" + name);
 
 		if (!argumentBuffer.isEmpty() && !foldPositionalParameter(arguments, positionalIndex, argumentBuffer))
@@ -161,9 +161,9 @@ public class ParameterList {
 		} else {
 			var part = input.substring(i + 1, next);
 
-			if (name.getValue() != null) {
+			if (name.get() != null) {
 				// fold argumentBuffer into named parameter
-				var parameter = this.named.get(name.getValue());
+				var parameter = this.named.get(name.get());
 				if (parameter == null)
 					throw new UsageException("Invalid argument: --" + name);
 
@@ -181,7 +181,7 @@ public class ParameterList {
 
 				name.setValue(part.substring(2).toLowerCase());
 
-			} else if (positionalIndex.getValue() < this.positional.length - 1) {
+			} else if (positionalIndex.intValue() < this.positional.length - 1) {
 				// fold single string positional argument
 				arguments.put(this.positional[positionalIndex.getAndIncrement()], new Argument(part));
 
