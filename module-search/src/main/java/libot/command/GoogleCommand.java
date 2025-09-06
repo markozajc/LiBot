@@ -68,9 +68,6 @@ public class GoogleCommand extends Command {
 
 	private static record SearchParameters(@Nonnull String query, boolean safeSearch) {}
 
-	private static final Pattern BRACKET_STRINGS = compile("\\<[^\\>]+\\>");
-	private static final Pattern MULTIPLE_SPACES = compile("\\s+", UNICODE_CHARACTER_CLASS);
-
 	private static final String API_ENDPOINT = "https://www.googleapis.com/customsearch/v1";
 	private static final String ID;
 
@@ -162,9 +159,12 @@ public class GoogleCommand extends Command {
 
 	@Nonnull
 	private static SearchResult jsonToSearchResult(JSONObject googleResult) {
-		return new SearchResult(cleanString(googleResult.getString("title")),
-								URLDecoder.decode(cleanString(googleResult.getString("link")), UTF_8), false);
+		String url = URLDecoder.decode(cleanString(googleResult.getString("link")), UTF_8).replace(" ", "%20");
+		return new SearchResult(cleanString(googleResult.getString("title")), url, false);
 	}
+
+	private static final Pattern BRACKET_STRINGS = compile("\\<[^\\>]+\\>");
+	private static final Pattern MULTIPLE_SPACES = compile("\\s+", UNICODE_CHARACTER_CLASS);
 
 	@Nonnull
 	@SuppressWarnings("null")
