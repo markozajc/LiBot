@@ -36,7 +36,7 @@ public enum CommandCategory {
 		String categoryNameUpper = categoryName.toUpperCase();
 		for (CommandCategory category : CommandCategory.values()) {
 			if (category.name().equals(categoryNameUpper))
-				Optional.of(category);
+				return Optional.of(category);
 		}
 
 		return Optional.empty();
