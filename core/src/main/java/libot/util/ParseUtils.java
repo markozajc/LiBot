@@ -111,14 +111,14 @@ public class ParseUtils {
 			};
 			if (append)
 				continue;
-			if (unit == null || durationBuffer.length() == 0) // not a number and not a unit
+			if (unit == null || durationBuffer.isEmpty()) // not a number and not a unit
 				return -1;
 
 			duration += unit.getDuration().toMillis() * Long.parseLong(durationBuffer.toString());
 			durationBuffer.setLength(0);
 		}
 
-		if (durationBuffer.length() != 0)
+		if (!durationBuffer.isEmpty())
 			duration += TimeUnit.SECONDS.toMillis(Long.parseLong(durationBuffer.toString()));
 		// any number without unit is treated as seconds
 

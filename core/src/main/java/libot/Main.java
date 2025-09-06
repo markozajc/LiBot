@@ -111,7 +111,7 @@ public class Main {
 		var bot = new BotContext(config, commands, data, shredder, providers, ewl);
 		LOG.info("Context created, finalizing startup");
 
-		bot.getCron().scheduleWithFixedDelay(providers::storeAll, 2, 2, MINUTES);
+		bot.cron.scheduleWithFixedDelay(providers::storeAll, 2, 2, MINUTES);
 		getRuntime().addShutdownHook(new Thread(() -> stop(bot), "libot-shutdown"));
 
 		LOG.info("Loading providers");

@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 public record BotConfiguration(String defaultPrefix, @Nonnull long[] sysadminIds) { // NOSONAR [java:S6218] equals not
 																					// used
 
-	@SuppressWarnings("null")
 	public static BotConfiguration fromEnvironment() {
 		var defaultPrefix = getenvOrThrow(ENV_PREFIX);
 		long[] sysadminIds;

@@ -93,7 +93,6 @@ public class ExceptionHandler {
 			return this.ctx.canTalk();
 		}
 
-		@SuppressWarnings("overloads") // TODO figure out if this is a problem
 		public <E extends T> boolean runSpecialized(@Nonnull E specialized,
 													@Nonnull Predicate<ExceptionContext<E>> action) {
 			return action.test(specialize(specialized));
@@ -107,7 +106,6 @@ public class ExceptionHandler {
 		}
 
 		@Nonnull
-		@SuppressWarnings("null")
 		private <E extends T> ExceptionContext<E> specialize(@Nonnull E specialized) {
 			if (specialized != this.ex)
 				throw new IllegalArgumentException("Can only specialize for the same throwable object");
@@ -431,13 +429,11 @@ public class ExceptionHandler {
 	}
 
 	private static boolean shouldRatelimit(Throwable t) {
-		// TODO java 21 switch with type
-		if (t instanceof CommandException ce)
-			return ce.doesRegisterRatelimit();
-		else if (t instanceof UsageException) // NOSONAR it's a list
-			return false;
-		else
-			return true;
+		return switch (t) {
+			case CommandException ce -> ce.doesRegisterRatelimit();
+			case UsageException ue -> false;
+			default -> true;
+		};
 	}
 
 	private ExceptionHandler() {}

@@ -102,7 +102,7 @@ public class ParameterList {
 		var positionalIndex = new MutableInt(0);
 
 		Map<Parameter, Argument> arguments;
-		if (input == null || input.length() == 0)
+		if (input == null || input.isEmpty())
 			arguments = emptyMap();
 		else
 			arguments = parseArgumentMap(input, positionalIndex);

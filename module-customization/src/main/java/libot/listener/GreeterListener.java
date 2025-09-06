@@ -54,16 +54,20 @@ public class GreeterListener extends ListenerAdapter {
 
 		String message;
 		User user;
-		if (event instanceof GuildMemberJoinEvent gmje) {
-			message = config.getWelcomeMessage();
-			user = gmje.getUser();
+		switch (event) {
+			case GuildMemberJoinEvent gmje -> {
+				message = config.getWelcomeMessage();
+				user = gmje.getUser();
+			}
 
-		} else if (event instanceof GuildMemberRemoveEvent gmre) {
-			message = config.getGoodbyeMessage();
-			user = gmre.getUser();
+			case GuildMemberRemoveEvent gmre -> {
+				message = config.getGoodbyeMessage();
+				user = gmre.getUser();
+			}
 
-		} else {
-			return;
+			default -> {
+				return;
+			}
 		}
 
 		if (message != null)

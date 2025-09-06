@@ -33,7 +33,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 public class BotContext {
 
-	@Nonnull private final ScheduledExecutorService cron;
+	@Nonnull public final ScheduledExecutorService cron;
 	@Nonnull private final BotConfiguration config;
 	@Nonnull private final CommandManager commands;
 	@Nonnull private final DataManager data;
@@ -77,11 +77,6 @@ public class BotContext {
 	@Nonnull
 	public ProviderManager getProviders() {
 		return this.providers;
-	}
-
-	@Nonnull
-	public ScheduledExecutorService getCron() {
-		return this.cron;
 	}
 
 	@Nonnull

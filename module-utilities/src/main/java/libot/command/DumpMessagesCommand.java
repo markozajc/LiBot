@@ -18,7 +18,6 @@ package libot.command;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.Collections.reverse;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.joining;
 import static libot.core.Constants.FAILURE;
@@ -30,7 +29,6 @@ import static net.dv8tion.jda.api.utils.FileUpload.fromData;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 
 import javax.annotation.Nonnull;
 
@@ -73,15 +71,14 @@ public class DumpMessagesCommand extends Command {
 		c.typing();
 
 		StringBuilder b = new StringBuilder();
-		var messages = new ArrayList<>(c.getChannel()
+		var messages = c.getChannel()
 			.getIterableHistory()
 			.stream()
 			.limit(limit + 1L)
 			.filter(m -> m.getIdLong() != c.getMessage().getIdLong())
 			.map(msg -> parseMessage(b, msg))
-			.toList());
-
-		reverse(messages);
+			.toList()
+			.reversed();
 
 		c.getChannel()
 			.sendMessage(format("Dumped %d messages:", messages.size()))
@@ -118,7 +115,7 @@ public class DumpMessagesCommand extends Command {
 
 	private static void dumpContent(@Nonnull StringBuilder b, @Nonnull Message m) {
 		var content = m.getContentDisplay().strip();
-		if (content.length() > 0)
+		if (!content.isEmpty())
 			b.append(m.getContentDisplay());
 		if (m.isEdited())
 			b.append(" (edited)");

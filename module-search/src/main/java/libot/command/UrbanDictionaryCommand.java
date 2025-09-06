@@ -16,7 +16,7 @@
 package libot.command;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
-import static com.google.common.primitives.Ints.constrainToRange;
+import static java.lang.Math.clamp;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.regex.Pattern.compile;
@@ -129,8 +129,7 @@ public class UrbanDictionaryCommand extends Command {
 		if (response.isEmpty())
 			throw c.errorf("Looks like UrbanDictionary can't define '%s'.", DISABLED, escape(c.arg(TERM).value()));
 
-		// TODO Math.clamp (when java 21)
-		int index = constrainToRange(c.arg(INDEX).map(Argument::valueAsInt).orElse(1), 1, response.length());
+		int index = clamp(c.arg(INDEX).map(Argument::valueAsInt).orElse(1), 1, response.length());
 		var json = response.getJSONObject(index - 1);
 
 		var word = escape(json.getString("word"));
