@@ -16,6 +16,9 @@
 package libot.module.music;
 
 import static com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry.DEFAULT_REGISTRY;
+import static dev.lavalink.youtube.YoutubeAudioSourceManager.DEFAULT_CLIENTS;
+import static java.lang.System.getenv;
+import static libot.core.Constants.*;
 
 import javax.annotation.*;
 
@@ -32,7 +35,7 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import dev.lavalink.youtube.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 
@@ -94,7 +97,8 @@ public class GlobalMusicManager {
 	public static final AudioPlayerManager APM;
 	static {
 		APM = new DefaultAudioPlayerManager();
-		APM.registerSourceManager(new YoutubeAudioSourceManager());
+		APM.registerSourceManager(new YoutubeAudioSourceManager(new YoutubeSourceOptions()
+			.setRemoteCipherUrl(getenv(ENV_YT_CIPHER_URL), getenv(ENV_YT_CIPHER_TOKEN)), DEFAULT_CLIENTS));
 		APM.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		APM.registerSourceManager(new BandcampAudioSourceManager());
 		APM.registerSourceManager(new VimeoAudioSourceManager());

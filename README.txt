@@ -13,6 +13,8 @@ Building LiBot --------------
        - JDK 17 or up (https://adoptium.net/)
        - qalculate-helper (https://git.zajc.tel/libot/qalculate-helper.git,
          optional if you want *calculator from module-utilities to work)
+       - yt-cipher (https://github.com/kikkia/yt-cipher), optional if you want
+         improved YouTube playback support
 
     Building:
        Building LiBot should be rather easy:
@@ -56,13 +58,13 @@ Building LiBot --------------
          - QALCULATE_HOME_PATH: path to the home of the user running
                                 qalculate-helper. Required for exchange rate
                                 updating to work.
-         - GOOGLE_TOKENS: google search API tokens. Required for *google of
-                          module-search to work.
-         - YOUTUBE_EMAIL: a youtube account's email. LiBot may not play
-                          age-restricted youtube videos without this, but for
-                          some reason it works for me, so it may be geolocked.
-         - YOUTUBE_PASSWORD: a youtube account's password. Same reason as for
-                             YOUTUBE_EMAIL.
+         - GOOGLE_ID: Google custom search engine ID (cx parameter). You can get
+                      one from https://programmablesearchengine.google.com 
+         - GOOGLE_TOKENS: comma separated Google search API tokens. Required for
+                          *google of module-search to work.
+         - YT_CIPHER_URL: URL for the yt-cipher instance, optionally required
+                          by module-music
+         - YT_CIPHER_TOKEN: API token for the yt-cipher instance
          - MANAGEMENT_PORT: the port that LiBot's read-only management server
                             should run on. It has a couple of functions such
                             as choosing the best shred ID to authorize and

@@ -48,9 +48,9 @@ public class Constants {
 	public static final String ENV_SHRED_TOKEN = "SHRED_TOKEN_";
 	public static final String ENV_GOOGLE_TOKENS = "GOOGLE_TOKENS";
 	public static final String ENV_GOOGLE_ID = "GOOGLE_ID";
+	public static final String ENV_YT_CIPHER_URL = "YT_CIPHER_URL";
+	public static final String ENV_YT_CIPHER_TOKEN = "YT_CIPHER_TOKEN";
 	public static final String ENV_MANAGEMENT_PORT = "MANAGEMENT_PORT";
-	public static final String ENV_YOUTUBE_EMAIL = "YOUTUBE_EMAIL";
-	public static final String ENV_YOUTUBE_PASSWORD = "YOUTUBE_PASSWORD";
 	public static final String ENV_RESOURCE_GUILDS = "RESOURCE_GUILDS";
 	public static final String ENV_QALCULATE_PATH = "QALCULATE_HELPER_PATH";
 	public static final String ENV_QALCULATE_EXCHANGE_RATE_UPDATER_PATH = "QALCULATE_HELPER_EXCHANGE_RATE_UPDATER_PATH";
