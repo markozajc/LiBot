@@ -50,14 +50,14 @@ public class MusicRestoreProvider extends SnowflakeProvider<MusicState> {
 
 	private static final Logger LOG = getLogger(MusicRestoreProvider.class);
 
-	public static record MusicState(@Nonnull String[] tracks, boolean paused, long position, boolean loop, // NOSONAR
+	@SuppressWarnings("java:S6218")
+	public static record MusicState(@Nonnull String[] tracks, boolean paused, long position, boolean loop,
 		@Nonnull ChannelType channelType) {}
 
 	public MusicRestoreProvider(@Nonnull Shredder shredder, @Nonnull DataManager dataManager) {
 		super(shredder, dataManager, new TypeToken<>() {}, "musicqueues");
 	}
 
-	@SuppressWarnings("null")
 	private void restorePlayback(long channelId, @Nonnull MusicState state) {
 		try {
 			var ac = (AudioChannelUnion) getShredder().getChannelById(state.channelType(), channelId);

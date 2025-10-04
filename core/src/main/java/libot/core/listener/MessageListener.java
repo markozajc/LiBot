@@ -61,6 +61,7 @@ public class MessageListener extends ListenerAdapter {
 		private static final Map<Prefix, Pattern> PATTERN_CACHE = new HashMap<>();
 
 		@Nonnull
+		@SuppressWarnings("null")
 		public static Prefix resolve(@Nonnull GenericMessageEvent event, @Nonnull BotContext bot) {
 			var prefixString = bot.getProvider(CustomizationsProvider.class)
 				.get(event.getGuild().getIdLong())

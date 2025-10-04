@@ -256,6 +256,7 @@ public class CalculatorCommand extends Command {
 	}
 
 	@Nullable
+	@SuppressWarnings("null")
 	private static Result evaluate(@Nonnull CommandContext c, @Nonnull List<QalcMessage> messages, String expression,
 								   @Nonnull Set<Mode> modes, int base) throws IOException, InterruptedException {
 		byte[] output = runCalculatorProcess(c, expression, modes, base);

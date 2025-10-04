@@ -194,7 +194,7 @@ class MusicCommandUtils {
 									  sched.isLoop() ? EMOJI_LOOP : EMOJI_PLAY, escape(info.title, true), info.uri,
 									  escape(info.author, true));
 				return e -> a.thenAccept(m -> m.editMessageEmbeds(getFailureEmbed(e)).queue());
-			}, () -> { // NOSONAR
+			}, () -> {
 				var playing = this.manager.getPlayingTrack();
 				String playingTitle = "nothing";
 				String playingUri = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // :)
@@ -208,7 +208,7 @@ class MusicCommandUtils {
 					*Currently %s: **[%s](%s)**.*""", SUCCESS, escape(info.title, true), info.uri,
 							  escape(info.author, true), sched.isLoop() ? "looping" : "playing",
 							  escape(playingTitle, true), playingUri);
-			}, () -> { // NOSONAR
+			}, () -> {
 				this.c
 					.replyf("Queue is full",
 							"This track has not been added to the queue because the queue may not exceed %d elements!",

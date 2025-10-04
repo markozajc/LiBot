@@ -215,7 +215,6 @@ public class ExceptionHandler {
 						return false;
 				}
 
-				@SuppressWarnings("null")
 				private static void handleArgumentParse(ExceptionContext<UsageException> e) {
 					if (e.canTalk()) {
 						e.ctx().replyf("// USAGE INCORRECT //", """

@@ -128,7 +128,7 @@ public class CommandContext extends EventContext {
 		return confirm(false, message);
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "java:S2142" })
 	public boolean confirm(boolean keepPrompt, @Nonnull String message) {
 		String useMessage = message;
 		if (!hasChannelPermission(MESSAGE_ADD_REACTION))
@@ -138,7 +138,7 @@ public class CommandContext extends EventContext {
 
 		try {
 			return getConfirmation(reply(useMessage).get(), keepPrompt);
-		} catch (ExecutionException | InterruptedException e) { // NOSONAR
+		} catch (ExecutionException | InterruptedException e) {
 			throw asUnchecked(e);
 		}
 	}
@@ -147,7 +147,7 @@ public class CommandContext extends EventContext {
 		return confirm(false, embed);
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "java:S2142" })
 	public boolean confirm(boolean keepPrompt, @Nonnull MessageEmbed embed) {
 		MessageEmbed useEmbed;
 		if (!canReact()) { // fallback ditto
@@ -165,7 +165,7 @@ public class CommandContext extends EventContext {
 
 		try {
 			return getConfirmation(reply(useEmbed).get(), keepPrompt);
-		} catch (ExecutionException | InterruptedException e) { // NOSONAR
+		} catch (ExecutionException | InterruptedException e) {
 			throw asUnchecked(e);
 		}
 	}
@@ -251,13 +251,14 @@ public class CommandContext extends EventContext {
 	// ===============* askraw *===============
 
 	@Nonnull
+	@SuppressWarnings("java:S2142")
 	public Message askraw() {
 		try {
 			var message = getWaiter().awaitMessage(true);
 			this.reference = message;
 			return message; // ignoreBlank must be configurable if we ever need to receive files
 							// (or embeds I guess?)
-		} catch (InterruptedException e) { // NOSONAR
+		} catch (InterruptedException e) {
 			throw asUnchecked(e);
 		}
 	}
@@ -396,6 +397,7 @@ public class CommandContext extends EventContext {
 		this.waiter = commandContext.waiter;
 	}
 
+	@SuppressWarnings("java:S2142")
 	private boolean getConfirmation(@Nonnull Message m, boolean keepPrompt) {
 		if (canReact()) {
 			m.addReaction(ACCEPT_EMOJI).queue();
@@ -403,7 +405,7 @@ public class CommandContext extends EventContext {
 		}
 		try {
 			return getWaiter().awaitBoolean(m, keepPrompt);
-		} catch (InterruptedException e) { // NOSONAR
+		} catch (InterruptedException e) {
 			throw asUnchecked(e);
 		}
 	}

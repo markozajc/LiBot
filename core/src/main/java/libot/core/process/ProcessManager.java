@@ -82,6 +82,7 @@ public class ProcessManager {
 			return new CommandProcess(previousPid, ctx);
 		}
 
+		@SuppressWarnings("java:S1181")
 		void start() {
 			var thread = new Thread(() -> {
 				try {
@@ -90,7 +91,7 @@ public class ProcessManager {
 					if (this.ctx.isCommandRatelimited())
 						CommandRatelimitManager.getRatelimits(this.ctx.getCommand()).register(this.ctx.getUserIdLong());
 
-				} catch (Throwable t) { // NOSONAR no
+				} catch (Throwable t) {
 					ExceptionHandler.handle(t, this.ctx);
 
 				} finally {

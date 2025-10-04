@@ -119,7 +119,8 @@ public final class EmbedPrebuilder extends EmbedBuilder {
 	}
 
 	@Nonnull
-	public EmbedPrebuilder setColor(@Nonnull Color color) { // NOSONAR java:S2177 this is intentional
+	@SuppressWarnings("java:S2177")
+	public EmbedPrebuilder setColor(@Nonnull Color color) {
 		super.setColor(color.rgb());
 		return this;
 	}

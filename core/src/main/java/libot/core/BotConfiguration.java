@@ -22,9 +22,10 @@ import static libot.util.Utilities.getenvOrThrow;
 
 import javax.annotation.Nonnull;
 
-public record BotConfiguration(String defaultPrefix, @Nonnull long[] sysadminIds) { // NOSONAR [java:S6218] equals not
-																					// used
+@SuppressWarnings("java:S6218")
+public record BotConfiguration(String defaultPrefix, @Nonnull long[] sysadminIds) {
 
+	@SuppressWarnings("null")
 	public static BotConfiguration fromEnvironment() {
 		var defaultPrefix = getenvOrThrow(ENV_PREFIX);
 		long[] sysadminIds;

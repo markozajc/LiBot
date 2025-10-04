@@ -81,9 +81,10 @@ public class EvaluateCommand extends Command {
 				b.append(codeblock(result.stderr()));
 			}
 
-			if (result.returned() != null && !result.returned().toString().isBlank()) {
+			var value = result.value();
+			if (value != null && !value.toString().isBlank()) {
 				b.append("**return**");
-				b.append(codeblock(result.returned().toString()));
+				b.append(codeblock(value.toString()));
 			}
 
 			if (b.isEmpty())
@@ -121,6 +122,6 @@ public class EvaluateCommand extends Command {
 		ec.requireSysadmin();
 	}
 
-	public record EvalResult(@Nonnull String stdout, @Nonnull String stderr, @Nullable Object returned) {}
+	public record EvalResult(@Nonnull String stdout, @Nonnull String stderr, @Nullable Object value) {}
 
 }

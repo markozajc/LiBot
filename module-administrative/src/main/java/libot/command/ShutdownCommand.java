@@ -39,12 +39,13 @@ public class ShutdownCommand extends Command {
 	}
 
 	@Override
+	@SuppressWarnings("java:S1147")
 	@SuppressFBWarnings(value = "DM_EXIT", justification = "This is the bot's exit point")
 	public void execute(CommandContext c) throws Exception {
 		int exitCode = c.arg(EXIT_CODE).map(Argument::valueAsInt).orElse(0);
 		if (c.confirm("Are you sure you want to shut the bot down?", WARN)) {
 			c.react(ACCEPT_EMOJI);
-			System.exit(exitCode); // NOSONAR it's required
+			System.exit(exitCode);
 		}
 	}
 

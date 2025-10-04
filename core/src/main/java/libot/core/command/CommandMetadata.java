@@ -15,6 +15,7 @@
  */
 package libot.core.command;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.Optional.empty;
 
@@ -113,19 +114,11 @@ public record CommandMetadata(CommandCategory category, String name, String id, 
 		}
 
 		@Nonnull
-		@SuppressWarnings("null")
+		@SuppressWarnings({ "null" })
 		public Builder permissions(boolean checkPermissionsAtStartup, @Nonnull Permission... permissions) {
 			this.checkPermissionsAtStartup = checkPermissionsAtStartup;
-
-			if (permissions.length == 0) {
-				this.permissions = emptySet();
-
-			} else {
-				var newPermissions = EnumSet.noneOf(Permission.class);
-				for (var permission : permissions)
-					newPermissions.add(permission); // NOSONAR destination is not an array
-				this.permissions = unmodifiableSet(newPermissions);
-			}
+			this.permissions =
+				permissions.length == 0 ? emptySet() : unmodifiableSet(EnumSet.copyOf(asList(permissions)));
 
 			return this;
 		}

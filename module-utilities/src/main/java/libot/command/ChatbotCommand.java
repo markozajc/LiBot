@@ -53,7 +53,8 @@ public class ChatbotCommand extends Command {
 	// nbsp used in place of spaces on the following line because ecj doesn't like
 	// codepoints in multiline strings
 	// https://github.com/eclipse-jdt/eclipse.jdt.core/issues/1237
-	private static final String NAME = "**Chomsky [Chatbot %s]**".formatted(PANDORABOTS_EMOJI); // NOSONAR it stays
+
+	private static final String NAME = "**Chomsky [Chatbot " + PANDORABOTS_EMOJI + "]**";
 	private static final String BOT_ID = "b0dafd24ee35a477";
 
 	private static final String LEARN_TEXT = "Would you like to teach me a new question and answer?";
@@ -82,7 +83,7 @@ public class ChatbotCommand extends Command {
 		XPATH_EXTRACTOR = handle(() -> xp.compile("//result/that/text()"), e -> null).get();
 
 		// useless data, inner data discarded
-		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<object[^>]*>.*?</object>"), "")); // NOSONAR
+		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<object[^>]*>.*?</object>"), ""));
 		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<param[^>]*>.*?</param>"), ""));
 		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<embed[^>]*>.*?</embed>"), ""));
 		RESPONSE_PARSERS.add(Pair.of(compile("(?s)<script[^>]*>.*?</script>"), ""));
