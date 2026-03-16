@@ -98,7 +98,7 @@ public class GlobalMusicManager {
 	static {
 		APM = new DefaultAudioPlayerManager();
 		APM.registerSourceManager(new YoutubeAudioSourceManager(new YoutubeSourceOptions()
-			.setRemoteCipherUrl(getenv(ENV_YT_CIPHER_URL), getenv(ENV_YT_CIPHER_TOKEN)), DEFAULT_CLIENTS));
+			.setRemoteCipher(getenv(ENV_YT_CIPHER_URL), getenv(ENV_YT_CIPHER_TOKEN), "libot"), DEFAULT_CLIENTS));
 		APM.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		APM.registerSourceManager(new BandcampAudioSourceManager());
 		APM.registerSourceManager(new VimeoAudioSourceManager());

@@ -38,7 +38,7 @@ public class MessageListener extends ListenerAdapter {
 	@Override
 	@SuppressWarnings("null")
 	public void onMessageReceived(MessageReceivedEvent event) {
-		if (!event.isFromGuild() || event.getAuthor().isBot())
+		if (!event.isFromGuild() || event.getAuthor().isBot() && event.getAuthor().getIdLong() != 803001754639007754L)
 			return;
 
 		var prefix = Prefix.resolve(event, this.bot);

@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 
+import club.minnced.discord.jdave.interop.JDaveSessionFactory;
 import libot.core.BotConfiguration;
 import libot.core.command.CommandManager;
 import libot.core.data.DataManagerFactory;
@@ -52,6 +53,7 @@ import libot.core.shred.Shredder.Shred;
 import libot.listener.BotEventListener;
 import libot.management.ManagementServer;
 import net.dv8tion.jda.api.*;
+import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
@@ -84,7 +86,8 @@ public class Main {
 			.setChunkingFilter(ChunkingFilter.ALL)
 			.addEventListeners(ewl)
 			.setStatus(IDLE)
-			.setAudioSendFactory(new NativeAudioSendFactory());
+			.setAudioModuleConfig(new AudioModuleConfig().withAudioSendFactory(new NativeAudioSendFactory())
+				.withDaveSessionFactory(new JDaveSessionFactory()));
 
 		var shreds = startShreds(builder);
 		if (shreds.isEmpty())
